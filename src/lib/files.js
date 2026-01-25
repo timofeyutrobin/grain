@@ -1,4 +1,4 @@
-export function getPixelsGrayscale(file, readingPixelSize) {
+export function getPixelsGrayscale(file, readingPixelSize = 1) {
     return new Promise((resolve, reject) => {
         if (!file.type.startsWith('image/')) {
             reject(new Error('Файл не является изображением'));

@@ -1,32 +1,74 @@
-import { getPixelsGrayscale } from './files';
-
 const BYTE_MAX = 255;
 
-const grainSize = 9;
-const stepsBasis = 10;
-const minSteps = Math.floor(stepsBasis / 2);
+/**
+ * @typedef {{
+ *      grainSize: number;
+ *      stepsBasis: number;
+ *      grainOffsetMax: number;
+ *      filmResponsePower: number;
+ *      grainColorMin: number;
+ *      grainColorMax: number;
+ *      grainColorAlpha: number;
+ *      minNeighbors: number;
+ *      maxNeighbors: number;
+ * }} Layer
+ * @typedef {{ layers: Layer[]; resultGridSize: number; }} GrainOptions
+ * @typedef {{ width: number; height: number; pixels: Uint8Array<ArrayBuffer>; }} ImageData
+ */
 
-const minNeighbors = 3;
-const maxNeighbors = 3;
-
-const pixelSize = 1; // масштаб для визуализации
-
-const readingPixelSize = 1;
-const resultGridSize = 4;
-
-const grainOffsetMaxPixels = 10;
-
-const filmResponsePower = 1.8;
-
-const grainColorMin = BYTE_MAX - 25;
-const grainColorMax = BYTE_MAX;
+/**
+ * @type {GrainOptions}
+ */
+export const defaultGrainOptions = {
+    layers: [
+        {
+            grainSize: 1,
+            stepsBasis: 0,
+            grainOffsetMax: 1,
+            filmResponsePower: 1.1,
+            grainColorMin: BYTE_MAX - 25,
+            grainColorMax: BYTE_MAX,
+            grainColorAlpha: 0.3,
+            minNeighbors: 0,
+            maxNeighbors: 0,
+        },
+        {
+            grainSize: 4,
+            stepsBasis: 2,
+            grainOffsetMax: 4,
+            filmResponsePower: 1.8,
+            grainColorMin: BYTE_MAX - 25,
+            grainColorMax: BYTE_MAX,
+            grainColorAlpha: 0.3,
+            minNeighbors: 1,
+            maxNeighbors: 2,
+        },
+        {
+            grainSize: 9,
+            stepsBasis: 10,
+            grainOffsetMax: 5,
+            filmResponsePower: 5,
+            grainColorMin: BYTE_MAX - 25,
+            grainColorMax: BYTE_MAX,
+            grainColorAlpha: 0.5,
+            minNeighbors: 3,
+            maxNeighbors: 3,
+        },
+    ],
+    resultGridSize: 4,
+};
 
 /**
  * Генерирует двухмерный массив чисел.
- * Представляет собой данные для отрисовки единственного зернышка
+ * Представляет собой данные для отрисовки единственного зернышка.
+ * Отрисовка начинается с центральной клетки заданной сетки
+ * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
+ * @param {number} grainSize Размер сетки в пикселях, которую занимает одно зернышко.
+ * @param {number} stepsBasis Среднее количество пикселей в зернышке, которое будет генерироваться при пошаговой отрисовке.
  * @returns {boolean[][]}
  */
-function generateGrain() {
+function generateGrain(grainSize, stepsBasis) {
+    const minSteps = Math.floor(stepsBasis / 2);
     const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
     const grid = Array.from({ length: grainSize }, () =>
         Array(grainSize).fill(false),
@@ -53,11 +95,18 @@ function generateGrain() {
 }
 
 /**
- * Сглаживание формы зернышка
+ * Сглаживание формы зернышка. Числа в массиве меняются на месте.
  * @param {boolean[][]} grid
- * @returns Исходный массив grid, измененный in place
+ * @param {number} grainSize
+ * @param {number} minNeighbors
+ * @param {number} maxNeighbors
+ * @returns Исходный массив grid
  */
-function smoothGrain(grid) {
+function smoothGrain(grid, grainSize, minNeighbors, maxNeighbors) {
+    if (grainSize <= 1) {
+        return grid;
+    }
+
     const result = grid.map((row) => row.slice());
 
     for (let y = 0; y < grainSize; y++) {
@@ -93,9 +142,22 @@ function smoothGrain(grid) {
     return result;
 }
 
-function drawGrain(ctx, offsetX, offsetY) {
-    const grain = smoothGrain(generateGrain());
-
+/**
+ * Отрисовывает одно зернышко внутри заданного ctx
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number[][]} grain
+ * @param {number} offsetX
+ * @param {number} offsetY
+ * @param {Layer} layer
+ */
+function drawGrain(ctx, grain, offsetX, offsetY, layer, pixelSize = 1) {
+    const {
+        grainSize,
+        grainColorMax,
+        grainColorMin,
+        grainColorAlpha,
+        grainOffsetMax,
+    } = layer;
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y][x]) {
@@ -103,14 +165,12 @@ function drawGrain(ctx, offsetX, offsetY) {
                     Math.random() * (grainColorMax - grainColorMin) +
                         grainColorMin,
                 );
-                ctx.fillStyle = `rgb(${grayColor}, ${grayColor}, ${grayColor})`;
+                ctx.fillStyle = `rgba(${grayColor}, ${grayColor}, ${grayColor}, ${grainColorAlpha})`;
 
                 const randomOffsetX =
-                    Math.random() * grainOffsetMaxPixels * 2 -
-                    grainOffsetMaxPixels;
+                    Math.random() * grainOffsetMax * 2 - grainOffsetMax;
                 const randomOffsetY =
-                    Math.random() * grainOffsetMaxPixels * 2 -
-                    grainOffsetMaxPixels;
+                    Math.random() * grainOffsetMax * 2 - grainOffsetMax;
 
                 ctx.fillRect(
                     offsetX + randomOffsetX + x * pixelSize,
@@ -123,35 +183,68 @@ function drawGrain(ctx, offsetX, offsetY) {
     }
 }
 
-function filmResponse(pixel) {
+function filmResponse(pixel, filmResponsePower) {
     const normalizedPixel = pixel / BYTE_MAX;
     return Math.pow(normalizedPixel, filmResponsePower);
 }
 
-export async function getGrainImage(file) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const { width, height, pixels } = await getPixelsGrayscale(
-        file,
-        readingPixelSize,
-    );
-    canvas.width = width * Math.ceil(resultGridSize / 2);
-    canvas.height = height * Math.ceil(resultGridSize / 2);
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let i = 0; i < height; i++) {
-        for (let j = 0; j < width; j++) {
-            if (Math.random() < filmResponse(pixels[i * width + j])) {
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Layer} layer
+ * @param {ImageData} image
+ * @param {number} resultGridSize
+ */
+function drawLayer(ctx, layer, image, resultGridSize) {
+    for (let i = 0; i < image.height; i++) {
+        for (let j = 0; j < image.width; j++) {
+            if (
+                Math.random() <
+                filmResponse(
+                    image.pixels[i * image.width + j],
+                    layer.filmResponsePower,
+                )
+            ) {
+                const grain = smoothGrain(
+                    generateGrain(layer.grainSize, layer.stepsBasis),
+                    layer.grainSize,
+                    layer.minNeighbors,
+                    layer.maxNeighbors,
+                );
                 drawGrain(
                     ctx,
+                    grain,
                     j * Math.ceil(resultGridSize / 2),
                     i * Math.ceil(resultGridSize / 2),
+                    layer,
                 );
             }
         }
     }
+}
+
+/**
+ *
+ * @param { ImageData } imageData
+ * @param { GrainOptions } options
+ * @returns {{ width: number; height: number; dataUrl: string; }}
+ */
+export function getGrainImage(imageData, options) {
+    const { width, height } = imageData;
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = width * Math.ceil(options.resultGridSize / 2);
+    canvas.height = height * Math.ceil(options.resultGridSize / 2);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    options.layers.forEach((layer) => {
+        drawLayer(ctx, layer, imageData, options.resultGridSize);
+    });
+
     return {
-        data: canvas.toDataURL('image/jpeg'),
+        dataUrl: canvas.toDataURL('image/jpeg'),
         width: canvas.width,
         height: canvas.height,
     };
