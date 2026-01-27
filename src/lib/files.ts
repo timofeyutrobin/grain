@@ -45,23 +45,3 @@ export function getPixelsRGB(
         reader.readAsDataURL(file);
     });
 }
-
-export async function getPixelsGrayscale(
-    file: File,
-    readingPixelSize = 1,
-): Promise<SimpleImageData> {
-    const {
-        width,
-        height,
-        pixels: RGBAPixels,
-    } = await getPixelsRGB(file, readingPixelSize);
-    const pixels = new Uint8ClampedArray(width * height);
-    for (let i = 0, j = 0; i < RGBAPixels.length; i += 4, j++) {
-        const r = RGBAPixels[i];
-        const g = RGBAPixels[i + 1];
-        const b = RGBAPixels[i + 2];
-
-        pixels[j] = Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-    }
-    return { width, height, pixels };
-}

@@ -2,21 +2,23 @@ import { SimpleImageData } from './common';
 
 const BYTE_MAX = 255;
 
+type Channel = 'r' | 'g' | 'b' | 'grayscale';
+
 interface Layer {
     grainSize: number;
     stepsBasis: number;
     grainOffsetMax: number;
     filmResponsePower: number;
-    grainColorMin: number;
-    grainColorMax: number;
+    grainBrightnessMin: number;
+    grainBrightnessMax: number;
     grainColorAlpha: number;
     minNeighbors: number;
     maxNeighbors: number;
-}
-
-interface ColorLayer {
-    innerLayers: Layer[];
-    color: number;
+    color?: {
+        hue: number;
+        saturation: number;
+    };
+    channel: Channel;
 }
 
 interface GrainOptions {
@@ -31,36 +33,39 @@ export const defaultGrainOptions: GrainOptions = {
             stepsBasis: 0,
             grainOffsetMax: 1,
             filmResponsePower: 1.1,
-            grainColorMin: BYTE_MAX - 25,
-            grainColorMax: BYTE_MAX,
+            grainBrightnessMin: 80,
+            grainBrightnessMax: 100,
             grainColorAlpha: 0.3,
             minNeighbors: 0,
             maxNeighbors: 0,
+            channel: 'grayscale',
         },
         {
             grainSize: 4,
             stepsBasis: 2,
             grainOffsetMax: 4,
             filmResponsePower: 1.8,
-            grainColorMin: BYTE_MAX - 25,
-            grainColorMax: BYTE_MAX,
+            grainBrightnessMin: 80,
+            grainBrightnessMax: 100,
             grainColorAlpha: 0.3,
             minNeighbors: 1,
             maxNeighbors: 2,
+            channel: 'grayscale',
         },
         {
             grainSize: 9,
             stepsBasis: 10,
             grainOffsetMax: 5,
             filmResponsePower: 5,
-            grainColorMin: BYTE_MAX - 25,
-            grainColorMax: BYTE_MAX,
+            grainBrightnessMin: 80,
+            grainBrightnessMax: 100,
             grainColorAlpha: 0.5,
             minNeighbors: 3,
             maxNeighbors: 3,
+            channel: 'grayscale',
         },
     ],
-    resultGridSize: 4,
+    resultGridSize: 2,
 };
 
 /**
@@ -72,7 +77,7 @@ export const defaultGrainOptions: GrainOptions = {
 function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
     const minSteps = Math.floor(stepsBasis / 2);
     const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
-    const grid = Array.from({ length: grainSize }, () =>
+    const grid: boolean[][] = Array.from({ length: grainSize }, () =>
         Array(grainSize).fill(false),
     );
 
@@ -157,19 +162,21 @@ function drawGrain(
 ) {
     const {
         grainSize,
-        grainColorMax,
-        grainColorMin,
+        grainBrightnessMax,
+        grainBrightnessMin,
         grainColorAlpha,
         grainOffsetMax,
+        color,
     } = layer;
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y][x]) {
-                const grayColor = Math.floor(
-                    Math.random() * (grainColorMax - grainColorMin) +
-                        grainColorMin,
+                const brightness = Math.floor(
+                    Math.random() * (grainBrightnessMax - grainBrightnessMin) +
+                        grainBrightnessMin,
                 );
-                ctx.fillStyle = `rgba(${grayColor}, ${grayColor}, ${grayColor}, ${grainColorAlpha})`;
+
+                ctx.fillStyle = `hsla(${color?.hue ?? 0}, ${color?.saturation ?? 0}%, ${brightness}%, ${grainColorAlpha})`;
 
                 const randomOffsetX =
                     Math.random() * grainOffsetMax * 2 - grainOffsetMax;
@@ -192,21 +199,34 @@ function filmResponse(pixel: number, filmResponsePower: number) {
     return Math.pow(normalizedPixel, filmResponsePower);
 }
 
+function* nextPixel(rgbaPixels: Uint8ClampedArray, channel: Channel) {
+    for (let i = 0, j = 0; i < rgbaPixels.length; i += 4, j++) {
+        const r = rgbaPixels[i];
+        const g = rgbaPixels[i + 1];
+        const b = rgbaPixels[i + 2];
+
+        if (channel === 'grayscale') {
+            yield Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+        } else if (channel === 'r') {
+            yield r;
+        } else if (channel === 'g') {
+            yield g;
+        } else if (channel === 'b') {
+            yield b;
+        }
+    }
+}
+
 function drawLayer(
     ctx: CanvasRenderingContext2D,
     layer: Layer,
     image: SimpleImageData,
     resultGridSize: number,
 ) {
-    for (let i = 0; i < image.height; i++) {
-        for (let j = 0; j < image.width; j++) {
-            if (
-                Math.random() <
-                filmResponse(
-                    image.pixels[i * image.width + j],
-                    layer.filmResponsePower,
-                )
-            ) {
+    let i = 0;
+    for (let pixel of nextPixel(image.pixels, layer.channel)) {
+        {
+            if (Math.random() < filmResponse(pixel, layer.filmResponsePower)) {
                 const grain = smoothGrain(
                     generateGrain(layer.grainSize, layer.stepsBasis),
                     layer.grainSize,
@@ -216,12 +236,13 @@ function drawLayer(
                 drawGrain(
                     ctx,
                     grain,
-                    j * Math.ceil(resultGridSize / 2),
-                    i * Math.ceil(resultGridSize / 2),
+                    (i % image.width) * resultGridSize,
+                    Math.floor(i / image.width) * resultGridSize,
                     layer,
                 );
             }
         }
+        i++;
     }
 }
 
@@ -233,8 +254,8 @@ export function getGrainImage(
 
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = width * Math.ceil(options.resultGridSize / 2);
-    canvas.height = height * Math.ceil(options.resultGridSize / 2);
+    canvas.width = width * options.resultGridSize;
+    canvas.height = height * options.resultGridSize;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 

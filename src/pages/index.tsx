@@ -1,5 +1,5 @@
 import { ChangeEventHandler, useLayoutEffect, useRef, useState } from 'react';
-import { getPixelsGrayscale } from '@/lib/files';
+import { getPixelsRGB as readImageData } from '@/lib/files';
 import { defaultGrainOptions, getGrainImage } from '@/lib/grain';
 
 export default function Home() {
@@ -17,7 +17,7 @@ export default function Home() {
             return;
         }
 
-        getPixelsGrayscale(file).then((imageData) => {
+        readImageData(file).then((imageData) => {
             const grainImage = getGrainImage(imageData, defaultGrainOptions);
             imageRef.current.src = grainImage.dataUrl;
         });
