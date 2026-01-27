@@ -1,6 +1,4 @@
-import { SimpleImageData } from './common';
-
-export function getPixelsRGB(
+export function readImageData(
     file: File,
     readingPixelSize = 1,
 ): Promise<SimpleImageData> {

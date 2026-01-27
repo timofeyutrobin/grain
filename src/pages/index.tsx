@@ -1,6 +1,7 @@
 import { ChangeEventHandler, useLayoutEffect, useRef, useState } from 'react';
-import { getPixelsRGB as readImageData } from '@/lib/files';
-import { defaultGrainOptions, getGrainImage } from '@/lib/grain';
+import { readImageData } from '@/lib/files';
+import { getGrainImage } from '@/lib/grain';
+import { testColorPreset } from '@/lib/presets';
 
 export default function Home() {
     const imageRef = useRef<HTMLImageElement>(null);
@@ -18,7 +19,10 @@ export default function Home() {
         }
 
         readImageData(file).then((imageData) => {
-            const grainImage = getGrainImage(imageData, defaultGrainOptions);
+            const grainImage = getGrainImage(
+                imageData,
+                testColorPreset.getOptions(),
+            );
             imageRef.current.src = grainImage.dataUrl;
         });
     }, [file]);

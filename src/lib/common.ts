@@ -1,4 +1,4 @@
-export interface SimpleImageData {
+interface SimpleImageData {
     width: number;
     height: number;
     pixels: Uint8ClampedArray<ArrayBuffer>;
