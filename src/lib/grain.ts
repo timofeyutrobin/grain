@@ -1,25 +1,30 @@
+import { SimpleImageData } from './common';
+
 const BYTE_MAX = 255;
 
-/**
- * @typedef {{
- *      grainSize: number;
- *      stepsBasis: number;
- *      grainOffsetMax: number;
- *      filmResponsePower: number;
- *      grainColorMin: number;
- *      grainColorMax: number;
- *      grainColorAlpha: number;
- *      minNeighbors: number;
- *      maxNeighbors: number;
- * }} Layer
- * @typedef {{ layers: Layer[]; resultGridSize: number; }} GrainOptions
- * @typedef {{ width: number; height: number; pixels: Uint8Array<ArrayBuffer>; }} ImageData
- */
+interface Layer {
+    grainSize: number;
+    stepsBasis: number;
+    grainOffsetMax: number;
+    filmResponsePower: number;
+    grainColorMin: number;
+    grainColorMax: number;
+    grainColorAlpha: number;
+    minNeighbors: number;
+    maxNeighbors: number;
+}
 
-/**
- * @type {GrainOptions}
- */
-export const defaultGrainOptions = {
+interface ColorLayer {
+    innerLayers: Layer[];
+    color: number;
+}
+
+interface GrainOptions {
+    layers: Layer[];
+    resultGridSize: number;
+}
+
+export const defaultGrainOptions: GrainOptions = {
     layers: [
         {
             grainSize: 1,
@@ -63,11 +68,8 @@ export const defaultGrainOptions = {
  * Представляет собой данные для отрисовки единственного зернышка.
  * Отрисовка начинается с центральной клетки заданной сетки
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
- * @param {number} grainSize Размер сетки в пикселях, которую занимает одно зернышко.
- * @param {number} stepsBasis Среднее количество пикселей в зернышке, которое будет генерироваться при пошаговой отрисовке.
- * @returns {boolean[][]}
  */
-function generateGrain(grainSize, stepsBasis) {
+function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
     const minSteps = Math.floor(stepsBasis / 2);
     const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
     const grid = Array.from({ length: grainSize }, () =>
@@ -96,13 +98,13 @@ function generateGrain(grainSize, stepsBasis) {
 
 /**
  * Сглаживание формы зернышка. Числа в массиве меняются на месте.
- * @param {boolean[][]} grid
- * @param {number} grainSize
- * @param {number} minNeighbors
- * @param {number} maxNeighbors
- * @returns Исходный массив grid
  */
-function smoothGrain(grid, grainSize, minNeighbors, maxNeighbors) {
+function smoothGrain(
+    grid: boolean[][],
+    grainSize: number,
+    minNeighbors: number,
+    maxNeighbors: number,
+) {
     if (grainSize <= 1) {
         return grid;
     }
@@ -130,10 +132,10 @@ function smoothGrain(grid, grainSize, minNeighbors, maxNeighbors) {
                 }
             }
 
-            if (grid[y][x] === 1 && neighbors < minNeighbors) {
+            if (grid[y][x] && neighbors < minNeighbors) {
                 result[y][x] = false;
             }
-            if (grid[y][x] === 0 && neighbors >= maxNeighbors) {
+            if (!grid[y][x] && neighbors >= maxNeighbors) {
                 result[y][x] = true;
             }
         }
@@ -144,13 +146,15 @@ function smoothGrain(grid, grainSize, minNeighbors, maxNeighbors) {
 
 /**
  * Отрисовывает одно зернышко внутри заданного ctx
- * @param {CanvasRenderingContext2D} ctx
- * @param {number[][]} grain
- * @param {number} offsetX
- * @param {number} offsetY
- * @param {Layer} layer
  */
-function drawGrain(ctx, grain, offsetX, offsetY, layer, pixelSize = 1) {
+function drawGrain(
+    ctx: CanvasRenderingContext2D,
+    grain: boolean[][],
+    offsetX: number,
+    offsetY: number,
+    layer: Layer,
+    pixelSize = 1,
+) {
     const {
         grainSize,
         grainColorMax,
@@ -183,19 +187,17 @@ function drawGrain(ctx, grain, offsetX, offsetY, layer, pixelSize = 1) {
     }
 }
 
-function filmResponse(pixel, filmResponsePower) {
+function filmResponse(pixel: number, filmResponsePower: number) {
     const normalizedPixel = pixel / BYTE_MAX;
     return Math.pow(normalizedPixel, filmResponsePower);
 }
 
-/**
- *
- * @param {CanvasRenderingContext2D} ctx
- * @param {Layer} layer
- * @param {ImageData} image
- * @param {number} resultGridSize
- */
-function drawLayer(ctx, layer, image, resultGridSize) {
+function drawLayer(
+    ctx: CanvasRenderingContext2D,
+    layer: Layer,
+    image: SimpleImageData,
+    resultGridSize: number,
+) {
     for (let i = 0; i < image.height; i++) {
         for (let j = 0; j < image.width; j++) {
             if (
@@ -223,13 +225,10 @@ function drawLayer(ctx, layer, image, resultGridSize) {
     }
 }
 
-/**
- *
- * @param { ImageData } imageData
- * @param { GrainOptions } options
- * @returns {{ width: number; height: number; dataUrl: string; }}
- */
-export function getGrainImage(imageData, options) {
+export function getGrainImage(
+    imageData: SimpleImageData,
+    options: GrainOptions,
+): { width: number; height: number; dataUrl: string } {
     const { width, height } = imageData;
 
     const canvas = document.createElement('canvas');

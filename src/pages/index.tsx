@@ -1,12 +1,12 @@
-import { useLayoutEffect, useRef, useState } from 'react';
+import { ChangeEventHandler, useLayoutEffect, useRef, useState } from 'react';
 import { getPixelsGrayscale } from '@/lib/files';
 import { defaultGrainOptions, getGrainImage } from '@/lib/grain';
 
 export default function Home() {
-    const imageRef = useRef();
-    const [file, setFile] = useState(null);
+    const imageRef = useRef<HTMLImageElement>(null);
+    const [file, setFile] = useState<File>(null);
 
-    const handleFileChange = (e) => {
+    const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
             setFile(e.target.files[0]);
         }
