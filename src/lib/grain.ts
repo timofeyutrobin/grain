@@ -87,7 +87,7 @@ function smoothGrain(
  * Отрисовывает одно зернышко внутри заданного ctx
  */
 function drawGrain(
-    ctx: CanvasRenderingContext2D,
+    ctx: OffscreenCanvasRenderingContext2D,
     grain: boolean[][],
     offsetX: number,
     offsetY: number,
@@ -152,7 +152,7 @@ function* nextPixel(rgbaPixels: Uint8ClampedArray, channel: Channel) {
 }
 
 function drawLayer(
-    ctx: CanvasRenderingContext2D,
+    ctx: OffscreenCanvasRenderingContext2D,
     layer: Layer,
     image: SimpleImageData,
     resultGridSize: number,
@@ -180,26 +180,20 @@ function drawLayer(
     }
 }
 
-export function getGrainImage(
+export function drawGrainImage(
     imageData: SimpleImageData,
+    canvas: OffscreenCanvas,
+    ctx: OffscreenCanvasRenderingContext2D,
     options: GrainOptions,
-): { width: number; height: number; dataUrl: string } {
+): void {
     const { width, height } = imageData;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
     canvas.width = width * options.resultGridSize;
     canvas.height = height * options.resultGridSize;
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     options.layers.forEach((layer) => {
         drawLayer(ctx, layer, imageData, options.resultGridSize);
     });
-
-    return {
-        dataUrl: canvas.toDataURL('image/jpeg'),
-        width: canvas.width,
-        height: canvas.height,
-    };
 }
