@@ -54,7 +54,7 @@ export const testColorPreset = new ColorPreset(
         grainAlphaK: 1,
         color: {
             hue: 0,
-            saturation: 20,
+            saturation: 25,
         },
     },
     {
@@ -62,7 +62,7 @@ export const testColorPreset = new ColorPreset(
         grainAlphaK: 0.9,
         color: {
             hue: 120,
-            saturation: 20,
+            saturation: 25,
         },
     },
     {
@@ -70,7 +70,7 @@ export const testColorPreset = new ColorPreset(
         grainAlphaK: 1.05,
         color: {
             hue: 240,
-            saturation: 20,
+            saturation: 25,
         },
     },
 );
