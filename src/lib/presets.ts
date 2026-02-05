@@ -4,7 +4,7 @@ export const defaultGrainOptions: GrainOptions = {
     layers: [
         {
             grainSize: 1,
-            stepsBasis: 0,
+            stepsBasis: 1,
             grainOffsetMax: 1,
             filmResponsePower: 1.1,
             grainBrightnessMin: 80,
@@ -15,7 +15,7 @@ export const defaultGrainOptions: GrainOptions = {
             channel: 'grayscale',
         },
         {
-            grainSize: 4,
+            grainSize: 2,
             stepsBasis: 2,
             grainOffsetMax: 4,
             filmResponsePower: 1.8,
@@ -27,7 +27,7 @@ export const defaultGrainOptions: GrainOptions = {
             channel: 'grayscale',
         },
         {
-            grainSize: 9,
+            grainSize: 3,
             stepsBasis: 10,
             grainOffsetMax: 5,
             filmResponsePower: 5,
@@ -51,7 +51,7 @@ export const testColorPreset = new ColorPreset(
     baseGrayscalePreset,
     {
         filmResponsePowerK: 0.9,
-        grainAlphaK: 1,
+        grainAlphaK: 0.5,
         color: {
             hue: 0,
             saturation: 25,
@@ -59,7 +59,7 @@ export const testColorPreset = new ColorPreset(
     },
     {
         filmResponsePowerK: 1,
-        grainAlphaK: 0.9,
+        grainAlphaK: 0.3,
         color: {
             hue: 120,
             saturation: 25,
@@ -67,7 +67,7 @@ export const testColorPreset = new ColorPreset(
     },
     {
         filmResponsePowerK: 1.1,
-        grainAlphaK: 1.05,
+        grainAlphaK: 0.2,
         color: {
             hue: 240,
             saturation: 25,

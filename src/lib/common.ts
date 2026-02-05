@@ -1,5 +1,7 @@
-interface SimpleImageData {
+export interface SimpleImageData {
     width: number;
     height: number;
-    pixels: Uint8ClampedArray<ArrayBuffer>;
+    pixels: Float32Array;
 }
+
+export type Channel = 'r' | 'g' | 'b' | 'grayscale';

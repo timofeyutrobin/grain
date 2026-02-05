@@ -1,6 +1,6 @@
-import { Layer, Channel, GrainOptions } from './grainOptions';
-
-const BYTE_MAX = 255;
+import { SimpleImageData } from './common';
+import { GrainOptions, Layer } from './grainOptions';
+import { addPixelHsl, clearImage, nextPixel } from './image';
 
 /**
  * Генерирует двухмерный массив чисел.
@@ -9,7 +9,7 @@ const BYTE_MAX = 255;
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
  */
 function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
-    const minSteps = Math.floor(stepsBasis / 2);
+    const minSteps = Math.ceil(stepsBasis / 2);
     const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
     const grid: boolean[][] = Array.from({ length: grainSize }, () =>
         Array(grainSize).fill(false),
@@ -83,16 +83,12 @@ function smoothGrain(
     return result;
 }
 
-/**
- * Отрисовывает одно зернышко внутри заданного ctx
- */
 function drawGrain(
-    ctx: OffscreenCanvasRenderingContext2D,
+    dest: SimpleImageData,
     grain: boolean[][],
     offsetX: number,
     offsetY: number,
     layer: Layer,
-    pixelSize = 1,
 ) {
     const {
         grainSize,
@@ -102,6 +98,7 @@ function drawGrain(
         grainOffsetMax,
         color,
     } = layer;
+    const { width, pixels } = dest;
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y][x]) {
@@ -110,18 +107,25 @@ function drawGrain(
                         grainBrightnessMin,
                 );
 
-                ctx.fillStyle = `hsla(${color?.hue ?? 0}, ${color?.saturation ?? 0}%, ${brightness}%, ${grainColorAlpha})`;
+                const randomOffsetX = Math.round(
+                    Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+                );
+                const randomOffsetY = Math.round(
+                    Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+                );
 
-                const randomOffsetX =
-                    Math.random() * grainOffsetMax * 2 - grainOffsetMax;
-                const randomOffsetY =
-                    Math.random() * grainOffsetMax * 2 - grainOffsetMax;
+                const finalX = offsetX + randomOffsetX + x;
+                const finalY = offsetY + randomOffsetY + y;
 
-                ctx.fillRect(
-                    offsetX + randomOffsetX + x * pixelSize,
-                    offsetY + randomOffsetY + y * pixelSize,
-                    pixelSize,
-                    pixelSize,
+                addPixelHsl(
+                    pixels,
+                    width,
+                    finalX,
+                    finalY,
+                    color?.hue ?? 0,
+                    color?.saturation ?? 0,
+                    brightness,
+                    grainColorAlpha,
                 );
             }
         }
@@ -129,36 +133,17 @@ function drawGrain(
 }
 
 function filmResponse(pixel: number, filmResponsePower: number) {
-    const normalizedPixel = pixel / BYTE_MAX;
-    return Math.pow(normalizedPixel, filmResponsePower);
-}
-
-function* nextPixel(rgbaPixels: Uint8ClampedArray, channel: Channel) {
-    for (let i = 0, j = 0; i < rgbaPixels.length; i += 4, j++) {
-        const r = rgbaPixels[i];
-        const g = rgbaPixels[i + 1];
-        const b = rgbaPixels[i + 2];
-
-        if (channel === 'grayscale') {
-            yield Math.round(0.299 * r + 0.587 * g + 0.114 * b);
-        } else if (channel === 'r') {
-            yield r;
-        } else if (channel === 'g') {
-            yield g;
-        } else if (channel === 'b') {
-            yield b;
-        }
-    }
+    return Math.pow(pixel, filmResponsePower);
 }
 
 function drawLayer(
-    ctx: OffscreenCanvasRenderingContext2D,
     layer: Layer,
-    image: SimpleImageData,
+    src: SimpleImageData,
+    dest: SimpleImageData,
     resultGridSize: number,
 ) {
     let i = 0;
-    for (let pixel of nextPixel(image.pixels, layer.channel)) {
+    for (let pixel of nextPixel(src.pixels, layer.channel)) {
         {
             if (Math.random() < filmResponse(pixel, layer.filmResponsePower)) {
                 const grain = smoothGrain(
@@ -168,10 +153,10 @@ function drawLayer(
                     layer.maxNeighbors,
                 );
                 drawGrain(
-                    ctx,
+                    dest,
                     grain,
-                    (i % image.width) * resultGridSize,
-                    Math.floor(i / image.width) * resultGridSize,
+                    (i % src.width) * resultGridSize,
+                    Math.floor(i / src.width) * resultGridSize,
                     layer,
                 );
             }
@@ -180,20 +165,23 @@ function drawLayer(
     }
 }
 
-export function drawGrainImage(
-    imageData: SimpleImageData,
-    canvas: OffscreenCanvas,
-    ctx: OffscreenCanvasRenderingContext2D,
+export function getGrainImage(
+    srcImage: SimpleImageData,
     options: GrainOptions,
-): void {
-    const { width, height } = imageData;
-    canvas.width = width * options.resultGridSize;
-    canvas.height = height * options.resultGridSize;
+): SimpleImageData {
+    const destImage = {
+        width: srcImage.width * options.resultGridSize,
+        height: srcImage.height * options.resultGridSize,
+        pixels: new Float32Array(
+            srcImage.pixels.length * options.resultGridSize ** 2,
+        ),
+    };
 
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    clearImage(destImage.pixels);
 
     options.layers.forEach((layer) => {
-        drawLayer(ctx, layer, imageData, options.resultGridSize);
+        drawLayer(layer, srcImage, destImage, options.resultGridSize);
     });
+
+    return destImage;
 }

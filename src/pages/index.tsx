@@ -1,22 +1,10 @@
-import { ChangeEventHandler, useLayoutEffect, useRef, useState } from 'react';
-import { readImageData } from '@/lib/files';
-import { baseGrayscalePreset, testColorPreset } from '@/lib/presets';
+import { ChangeEventHandler, useState } from 'react';
 
 export default function Home() {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    const [offscreenCanvas, setOffscreenCanvas] = useState<OffscreenCanvas>();
     const [file, setFile] = useState<File>(null);
-    const workerRef = useRef<Worker>(null);
+    const [resultFilename, setResultFilename] = useState<string>(null);
 
     const [processing, setProcessing] = useState(false);
-
-    useLayoutEffect(() => {
-        setOffscreenCanvas(canvasRef.current.transferControlToOffscreen());
-
-        return () => {
-            workerRef.current?.terminate();
-        };
-    }, []);
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
@@ -24,49 +12,39 @@ export default function Home() {
         }
     };
 
-    const handleGenerateClick = () => {
+    const handleGenerateClick = async () => {
         if (!file) {
             return;
         }
 
+        setResultFilename(null);
         setProcessing(true);
 
-        readImageData(file).then((imageData) => {
-            if (!workerRef.current) {
-                workerRef.current = new Worker(
-                    new URL('@/lib/grainWorker.ts', import.meta.url),
-                );
+        const formData = new FormData();
+        formData.set('img', file);
 
-                workerRef.current.onmessage = (e) => {
-                    e.data && setProcessing(false);
-                };
-
-                workerRef.current.postMessage(
-                    {
-                        canvas: offscreenCanvas,
-                        imageData,
-                        options: testColorPreset.getOptions(),
-                    },
-                    [offscreenCanvas],
-                );
-            } else {
-                workerRef.current.postMessage({
-                    imageData,
-                    options: testColorPreset.getOptions(),
-                });
-            }
+        const response = await fetch('/api/getGrain', {
+            method: 'POST',
+            body: formData,
         });
+        const filename = (await response.json()).filename;
+
+        setProcessing(false);
+        setResultFilename(filename);
     };
 
     return (
         <main className="absolute w-full h-full">
             <div className="fixed top-0 left-0 flex pl-80 w-full h-full overflow-scroll bg-radial from-gray-500 to-gray-700">
-                <canvas
-                    width={0}
-                    height={0}
-                    ref={canvasRef}
-                    className="m-auto"
-                />
+                {resultFilename && (
+                    <a
+                        className="m-auto py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
+                        href={`/images/${resultFilename}`}
+                        download
+                    >
+                        Download Result
+                    </a>
+                )}
             </div>
             <aside className="fixed top-0 left-0 flex flex-col w-xs h-full bg-gray-800">
                 <input

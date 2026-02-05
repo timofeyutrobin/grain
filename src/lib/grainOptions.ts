@@ -1,4 +1,4 @@
-export type Channel = 'r' | 'g' | 'b' | 'grayscale';
+import { Channel } from './common';
 
 interface Color {
     hue: number;
@@ -6,6 +6,9 @@ interface Color {
 }
 
 export interface Layer {
+    /**
+     * Side length
+     */
     grainSize: number;
     stepsBasis: number;
     grainOffsetMax: number;
@@ -21,6 +24,9 @@ export interface Layer {
 
 export interface GrainOptions {
     layers: Layer[];
+    /**
+     * Side length
+     */
     resultGridSize: number;
 }
 
