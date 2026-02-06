@@ -46,8 +46,8 @@ export const baseGrayscalePreset = new GrayscalePreset(
     'base',
     defaultGrainOptions,
 );
-export const testColorPreset = new ColorPreset(
-    'test',
+export const baseColorPreset = new ColorPreset(
+    'baseColor',
     baseGrayscalePreset,
     {
         filmResponsePowerK: 0.9,

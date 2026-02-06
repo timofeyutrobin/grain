@@ -1,10 +1,14 @@
+import { Settings } from '@/components/Settings';
+import { baseColorPreset, baseGrayscalePreset } from '@/lib/presets';
 import { ChangeEventHandler, useState } from 'react';
 
 export default function Home() {
     const [file, setFile] = useState<File>(null);
-    const [resultFilename, setResultFilename] = useState<string>(null);
 
     const [processing, setProcessing] = useState(false);
+    const [resultFilename, setResultFilename] = useState<string>(null);
+
+    const [mode, setMode] = useState<'grayscale' | 'color'>('grayscale');
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
@@ -21,7 +25,12 @@ export default function Home() {
         setProcessing(true);
 
         const formData = new FormData();
+        const options =
+            mode === 'grayscale'
+                ? baseGrayscalePreset.getOptions()
+                : baseColorPreset.getOptions();
         formData.set('img', file);
+        formData.set('options', JSON.stringify(options));
 
         const response = await fetch('/api/getGrain', {
             method: 'POST',
@@ -55,6 +64,9 @@ export default function Home() {
                     type="file"
                     onChange={handleFileChange}
                 />
+                <section className="m-4">
+                    <Settings mode={mode} onModeChange={setMode} />
+                </section>
                 <button
                     onClick={handleGenerateClick}
                     className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-gray-600 disabled:bg-amber-300"

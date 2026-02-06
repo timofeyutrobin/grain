@@ -1,8 +1,8 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 
+import { isError } from '@/lib/common';
 import { convertFloatToUint8, convertUint8ToFloat } from '@/lib/convert';
 import { getGrainImage } from '@/lib/grain';
-import { testColorPreset } from '@/lib/presets';
 import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import sharp from 'sharp';
@@ -20,6 +20,7 @@ export default async function handler(
 ) {
     if (req.method !== 'POST') {
         res.status(405).json({ error: 'Method not allowed' });
+        return;
     }
 
     const form = formidable({
@@ -29,12 +30,21 @@ export default async function handler(
     });
 
     try {
-        const [, files] = await form.parse(req);
-        if (!files || !files.img) {
-            throw new Error('No file');
+        const [fields, files] = await form.parse(req);
+        if (
+            !files ||
+            !files.img ||
+            !files.img[0] ||
+            !fields ||
+            !fields.options ||
+            !fields.options[0]
+        ) {
+            res.status(400).json({ error: 'No file or options' });
+            return;
         }
 
         const [file] = files.img;
+        const options = JSON.parse(fields.options[0]);
 
         const image = sharp(file.filepath);
         const {
@@ -49,10 +59,7 @@ export default async function handler(
             width: resultWidth,
             height: resultHeight,
             pixels: resultPixels,
-        } = getGrainImage(
-            { width, height, pixels },
-            testColorPreset.getOptions(),
-        );
+        } = getGrainImage({ width, height, pixels }, options);
 
         const resultFilename = `${uniqueFilename('')}.webp`;
 
@@ -70,8 +77,13 @@ export default async function handler(
         res.status(200).json({ filename: resultFilename });
     } catch (err) {
         console.error(err);
+        const message = isError(err)
+            ? err.message
+            : typeof err === 'string'
+              ? err
+              : JSON.stringify(err);
         res.status(500).json({
-            error: 'Error during file upload: ' + err.message,
+            error: 'Error during file upload: ' + message,
         });
     }
 }
