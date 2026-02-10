@@ -3,21 +3,19 @@ import { GrainRenderParameters, Layer } from './grainRenderParameters';
 import { addPixelHsl, nextPixel } from './image';
 
 /**
- * Генерирует двухмерный булевых значений.
+ * Генерирует массив булевых значений.
  * Представляет собой данные для отрисовки единственного зернышка.
  * Отрисовка начинается с центральной клетки заданной сетки
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
  */
-function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
+function generateGrain(grainSize: number, stepsBasis: number): boolean[] {
     const minSteps = Math.ceil(stepsBasis / 2);
     const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
-    const grid: boolean[][] = Array.from({ length: grainSize }, () =>
-        Array(grainSize).fill(false),
-    );
+    const grid: boolean[] = Array(grainSize ** 2).fill(false);
 
     let x = Math.floor(grainSize / 2);
     let y = Math.floor(grainSize / 2);
-    grid[y][x] = true;
+    grid[y * grainSize + x] = true;
 
     for (let i = 0; i < steps; i++) {
         const dir = Math.floor(Math.random() * 4);
@@ -29,7 +27,7 @@ function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
         x = Math.max(0, Math.min(grainSize - 1, x));
         y = Math.max(0, Math.min(grainSize - 1, y));
 
-        grid[y][x] = true;
+        grid[y * grainSize + x] = true;
     }
 
     return grid;
@@ -39,7 +37,7 @@ function generateGrain(grainSize: number, stepsBasis: number): boolean[][] {
  * Сглаживание формы зернышка. Числа в массиве меняются на месте.
  */
 function smoothGrain(
-    grid: boolean[][],
+    grid: boolean[],
     grainSize: number,
     minNeighbors: number,
     maxNeighbors: number,
@@ -48,7 +46,7 @@ function smoothGrain(
         return grid;
     }
 
-    const result = grid.map((row) => row.slice());
+    const result = grid.slice();
 
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
@@ -64,18 +62,18 @@ function smoothGrain(
                         nx < grainSize &&
                         ny >= 0 &&
                         ny < grainSize &&
-                        grid[ny][nx]
+                        grid[ny * grainSize + nx]
                     ) {
                         neighbors++;
                     }
                 }
             }
 
-            if (grid[y][x] && neighbors < minNeighbors) {
-                result[y][x] = false;
+            if (grid[y * grainSize + x] && neighbors < minNeighbors) {
+                result[y * grainSize + x] = false;
             }
-            if (!grid[y][x] && neighbors >= maxNeighbors) {
-                result[y][x] = true;
+            if (!grid[y * grainSize + x] && neighbors >= maxNeighbors) {
+                result[y * grainSize + x] = true;
             }
         }
     }
@@ -85,7 +83,7 @@ function smoothGrain(
 
 function drawGrain(
     dest: SimpleImageData,
-    grain: boolean[][],
+    grain: boolean[],
     offsetX: number,
     offsetY: number,
     layer: Layer,
@@ -101,7 +99,7 @@ function drawGrain(
     const { width, pixels } = dest;
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
-            if (grain[y][x]) {
+            if (grain[y * grainSize + x]) {
                 const brightness = color
                     ? color.v
                     : Math.floor(
