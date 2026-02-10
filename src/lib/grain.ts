@@ -1,9 +1,9 @@
 import { SimpleImageData } from './common';
-import { GrainOptions, Layer } from './grainOptions';
-import { addPixelHsl, clearImage, nextPixel } from './image';
+import { GrainRenderParameters, Layer } from './grainRenderParameters';
+import { addPixelHsl, nextPixel } from './image';
 
 /**
- * Генерирует двухмерный массив чисел.
+ * Генерирует двухмерный булевых значений.
  * Представляет собой данные для отрисовки единственного зернышка.
  * Отрисовка начинается с центральной клетки заданной сетки
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
@@ -92,8 +92,8 @@ function drawGrain(
 ) {
     const {
         grainSize,
-        grainBrightnessMax,
-        grainBrightnessMin,
+        grainBrightnessMax = 100,
+        grainBrightnessMin = 80,
         grainColorAlpha,
         grainOffsetMax,
         color,
@@ -102,10 +102,13 @@ function drawGrain(
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y][x]) {
-                const brightness = Math.floor(
-                    Math.random() * (grainBrightnessMax - grainBrightnessMin) +
-                        grainBrightnessMin,
-                );
+                const brightness = color
+                    ? color.v
+                    : Math.floor(
+                          Math.random() *
+                              (grainBrightnessMax - grainBrightnessMin) +
+                              grainBrightnessMin,
+                      );
 
                 const randomOffsetX = Math.round(
                     Math.random() * grainOffsetMax * 2 - grainOffsetMax,
@@ -122,8 +125,8 @@ function drawGrain(
                     width,
                     finalX,
                     finalY,
-                    color?.hue ?? 0,
-                    color?.saturation ?? 0,
+                    color?.h ?? 0,
+                    color?.s ?? 0,
                     brightness,
                     grainColorAlpha,
                 );
@@ -167,20 +170,18 @@ function drawLayer(
 
 export function getGrainImage(
     srcImage: SimpleImageData,
-    options: GrainOptions,
+    renderParameters: GrainRenderParameters,
 ): SimpleImageData {
     const destImage = {
-        width: srcImage.width * options.resultGridSize,
-        height: srcImage.height * options.resultGridSize,
+        width: srcImage.width * renderParameters.resultGridSize,
+        height: srcImage.height * renderParameters.resultGridSize,
         pixels: new Float32Array(
-            srcImage.pixels.length * options.resultGridSize ** 2,
+            srcImage.pixels.length * renderParameters.resultGridSize ** 2,
         ),
     };
 
-    clearImage(destImage.pixels);
-
-    options.layers.forEach((layer) => {
-        drawLayer(layer, srcImage, destImage, options.resultGridSize);
+    renderParameters.layers.forEach((layer) => {
+        drawLayer(layer, srcImage, destImage, renderParameters.resultGridSize);
     });
 
     return destImage;

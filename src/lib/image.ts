@@ -18,14 +18,6 @@ export function* nextPixel(rgbaPixels: Float32Array, channel: Channel) {
     }
 }
 
-export function clearImage(rgbaPixels: Float32Array) {
-    for (let i = 0; i < rgbaPixels.length; i += 3) {
-        rgbaPixels[i] = 0;
-        rgbaPixels[i + 1] = 0;
-        rgbaPixels[i + 2] = 0;
-    }
-}
-
 export function addPixelHsl(
     rgbaPixels: Float32Array,
     width: number,

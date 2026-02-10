@@ -6,6 +6,7 @@ import { getGrainImage } from '@/lib/grain';
 import formidable from 'formidable';
 import { NextApiRequest, NextApiResponse } from 'next';
 import sharp from 'sharp';
+// @ts-ignore
 import uniqueFilename from 'unique-filename';
 
 export const config = {
@@ -25,7 +26,7 @@ export default async function handler(
 
     const form = formidable({
         uploadDir: 'uploads',
-        filter: ({ mimetype }) => mimetype && mimetype.includes('image'),
+        filter: ({ mimetype }) => !!mimetype && mimetype.includes('image'),
         keepExtensions: true,
     });
 
@@ -36,15 +37,15 @@ export default async function handler(
             !files.img ||
             !files.img[0] ||
             !fields ||
-            !fields.options ||
-            !fields.options[0]
+            !fields.parameters ||
+            !fields.parameters[0]
         ) {
             res.status(400).json({ error: 'No file or options' });
             return;
         }
 
         const [file] = files.img;
-        const options = JSON.parse(fields.options[0]);
+        const options = JSON.parse(fields.parameters[0]);
 
         const image = sharp(file.filepath);
         const {

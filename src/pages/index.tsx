@@ -1,14 +1,25 @@
 import { Settings } from '@/components/Settings';
-import { baseColorPreset, baseGrayscalePreset } from '@/lib/presets';
+import {
+    Color,
+    createColorGrainRenderParameters,
+    defaultColors,
+    initialGrayscaleRenderParameters,
+    RenderMode,
+} from '@/lib/grainRenderParameters';
 import { ChangeEventHandler, useState } from 'react';
 
 export default function Home() {
-    const [file, setFile] = useState<File>(null);
+    const [file, setFile] = useState<File | null>(null);
 
     const [processing, setProcessing] = useState(false);
-    const [resultFilename, setResultFilename] = useState<string>(null);
+    const [resultFilename, setResultFilename] = useState<string | null>(null);
 
-    const [mode, setMode] = useState<'grayscale' | 'color'>('grayscale');
+    const [mode, setMode] = useState<RenderMode>('grayscale');
+    const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
+    const [greenDyeColor, setGreenDyeColor] = useState<Color>(
+        defaultColors.green,
+    );
+    const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
@@ -24,13 +35,19 @@ export default function Home() {
         setResultFilename(null);
         setProcessing(true);
 
-        const formData = new FormData();
-        const options =
+        const renderParameters =
             mode === 'grayscale'
-                ? baseGrayscalePreset.getOptions()
-                : baseColorPreset.getOptions();
+                ? initialGrayscaleRenderParameters
+                : createColorGrainRenderParameters(
+                      initialGrayscaleRenderParameters,
+                      { color: redDyeColor },
+                      { color: greenDyeColor },
+                      { color: blueDyeColor },
+                  );
+
+        const formData = new FormData();
         formData.set('img', file);
-        formData.set('options', JSON.stringify(options));
+        formData.set('parameters', JSON.stringify(renderParameters));
 
         const response = await fetch('/api/getGrain', {
             method: 'POST',
@@ -65,11 +82,20 @@ export default function Home() {
                     onChange={handleFileChange}
                 />
                 <section className="m-4">
-                    <Settings mode={mode} onModeChange={setMode} />
+                    <Settings
+                        mode={mode}
+                        onModeChange={setMode}
+                        redDyeColor={redDyeColor}
+                        onRedDyeColorChange={setRedDyeColor}
+                        greenDyeColor={greenDyeColor}
+                        onGreenDyeColorChange={setGreenDyeColor}
+                        blueDyeColor={blueDyeColor}
+                        onBlueDyeColorChange={setBlueDyeColor}
+                    />
                 </section>
                 <button
                     onClick={handleGenerateClick}
-                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-gray-600 disabled:bg-amber-300"
+                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-gray-600 disabled:bg-gray-200"
                     disabled={processing}
                 >
                     Generate
