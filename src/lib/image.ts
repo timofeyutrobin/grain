@@ -7,7 +7,7 @@ export function* nextPixel(rgbaPixels: Float32Array, channel: Channel) {
         const b = rgbaPixels[i + 2];
 
         if (channel === 'grayscale') {
-            yield Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+            yield 0.299 * r + 0.587 * g + 0.114 * b;
         } else if (channel === 'r') {
             yield r;
         } else if (channel === 'g') {
