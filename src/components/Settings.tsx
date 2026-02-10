@@ -73,7 +73,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 >
                     <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
                         <label htmlFor="red-color" className="cursor-pointer">
-                            Red channel dye
+                            Red channel
                         </label>
                         <button
                             title="Restore default"
@@ -98,7 +98,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                     <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
                         <label htmlFor="green-color" className="cursor-pointer">
-                            Green channel dye
+                            Green channel
                         </label>
                         <button
                             title="Restore default"
@@ -123,7 +123,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                     <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
                         <label htmlFor="blue-color" className="cursor-pointer">
-                            Blue channel dye
+                            Blue channel
                         </label>
                         <button
                             title="Restore default"
