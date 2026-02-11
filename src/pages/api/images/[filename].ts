@@ -14,7 +14,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     const existedFilename = existedFiles.find((name) => name === filename);
 
     const filePath = existedFilename
-        ? path.join(process.env.RESULTS!, existedFilename)
+        ? path.join(process.env.RESULTS_DIR!, existedFilename)
         : null;
 
     if (!filePath || !existsSync(filePath)) {
