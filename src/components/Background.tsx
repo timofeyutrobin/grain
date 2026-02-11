@@ -26,22 +26,22 @@ export const Background: React.FC = () => {
         let animationId: number;
         let time = 0;
 
-        const cols = 80;
-        const rows = 80;
+        const cols = 60;
+        const rows = 60;
         const ampX = 25;
         const ampY = 25;
-        const freq = 0.1;
+        const freq = 0.2;
         const dotSize = 2;
-        const timeScale = 0.01;
+        const timeScale = 0.006;
 
         const draw = () => {
             const logicalWidth = canvas.width / dpr;
             const logicalHeight = canvas.height / dpr;
-            const spacing = logicalWidth / cols;
+            const spacing = logicalWidth / (cols / 1.2);
 
             ctx.clearRect(0, 0, logicalWidth, logicalHeight);
 
-            ctx.fillStyle = 'rgba(100, 180, 255, 0.5)';
+            ctx.fillStyle = 'rgba(100, 180, 255, 0.2)';
             const timeFreq = time * timeScale;
 
             for (let x = 0; x < cols; x++) {
