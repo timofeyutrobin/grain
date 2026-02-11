@@ -17,6 +17,9 @@ interface SettingsProps {
 
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
+
+    grainSpread: number;
+    onGrainSpreadChange: (grainSpreading: number) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -30,6 +33,8 @@ export const Settings: React.FC<SettingsProps> = ({
     onBlueDyeColorChange,
     grainSize,
     onGrainSizeChange,
+    grainSpread,
+    onGrainSpreadChange,
 }) => {
     const select = (m: RenderMode) => {
         onModeChange(m);
@@ -73,6 +78,33 @@ export const Settings: React.FC<SettingsProps> = ({
                     value={grainSize}
                     onChange={(e) =>
                         onGrainSizeChange(parseInt(e.target.value))
+                    }
+                />
+            </SettingsGroup>
+            <SettingsGroup
+                legend="Grain spread"
+                hint={
+                    <>
+                        The higher the grain spread, the more
+                        <br />
+                        randomly grains are spaced
+                        <br />
+                        from each other, which leads
+                        <br />
+                        to a loss of sharpness.
+                    </>
+                }
+                ariaLabel="Grain spread"
+            >
+                <input
+                    className="w-full"
+                    type="range"
+                    max={4}
+                    min={1}
+                    step={1}
+                    value={grainSpread}
+                    onChange={(e) =>
+                        onGrainSpreadChange(parseInt(e.target.value))
                     }
                 />
             </SettingsGroup>

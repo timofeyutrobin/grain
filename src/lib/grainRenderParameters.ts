@@ -41,19 +41,26 @@ interface ColorOptions {
 
 export function createGrayscaleRenderParameters(
     grainSizeK: number = 1,
+    grainSpread: number = 1,
 ): GrainRenderParameters {
     if (grainSizeK < 1) {
         throw new Error('Wrong "grainSizeK": use only numbers larger than 1');
     }
+    if (grainSpread < 1) {
+        throw new Error(
+            'Wrong "grainSpreading": use only numbers larger than 1',
+        );
+    }
 
     grainSizeK = Math.floor(grainSizeK);
+    grainSpread = Math.floor(grainSpread);
 
     return {
         layers: [
             {
                 grainSize: 1 * grainSizeK,
                 stepsBasis: grainSizeK ** 2,
-                grainOffsetMax: 1,
+                grainOffsetMax: 1 * grainSpread,
                 filmResponsePower: 1.1,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
@@ -65,7 +72,7 @@ export function createGrayscaleRenderParameters(
             {
                 grainSize: 2 * grainSizeK,
                 stepsBasis: (2 * grainSizeK) ** 2,
-                grainOffsetMax: 4,
+                grainOffsetMax: 4 * grainSpread,
                 filmResponsePower: 1.8,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
@@ -77,7 +84,7 @@ export function createGrayscaleRenderParameters(
             {
                 grainSize: 3 * grainSizeK,
                 stepsBasis: (3 * grainSizeK) ** 2,
-                grainOffsetMax: 5,
+                grainOffsetMax: 5 * grainSpread,
                 filmResponsePower: 5,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,

@@ -19,6 +19,7 @@ export default function Home() {
 
     const [mode, setMode] = useState<RenderMode>('grayscale');
     const [grainSize, setGrainSize] = useState<GrainSize>(1);
+    const [grainSpread, setGrainSpread] = useState(1);
     const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
         defaultColors.green,
@@ -41,9 +42,15 @@ export default function Home() {
 
         const renderParameters =
             mode === 'grayscale'
-                ? createGrayscaleRenderParameters(grainSize)
+                ? createGrayscaleRenderParameters(
+                      grainSize,
+                      grainSpread === 1 ? 1 : grainSpread * 2,
+                  )
                 : createColorGrainRenderParameters(
-                      createGrayscaleRenderParameters(grainSize),
+                      createGrayscaleRenderParameters(
+                          grainSize,
+                          grainSpread === 1 ? 1 : grainSpread * 2,
+                      ),
                       { color: redDyeColor },
                       { color: greenDyeColor },
                       { color: blueDyeColor },
@@ -86,6 +93,8 @@ export default function Home() {
                         onBlueDyeColorChange={setBlueDyeColor}
                         grainSize={grainSize}
                         onGrainSizeChange={setGrainSize}
+                        grainSpread={grainSpread}
+                        onGrainSpreadChange={setGrainSpread}
                     />
                 </section>
                 <button
