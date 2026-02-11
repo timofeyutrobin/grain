@@ -6,6 +6,7 @@ import {
     initialGrayscaleRenderParameters,
     RenderMode,
 } from '@/lib/grainRenderParameters';
+import Link from 'next/link';
 import { ChangeEventHandler, useState } from 'react';
 
 export default function Home() {
@@ -63,13 +64,13 @@ export default function Home() {
         <main className="absolute w-full h-full">
             <div className="fixed top-0 left-0 flex pl-80 w-full h-full overflow-scroll bg-radial from-gray-500 to-gray-700">
                 {resultFilename && (
-                    <a
+                    <Link
                         className="m-auto py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
-                        href={`/images/${resultFilename}`}
+                        href={`api/images/${resultFilename}`}
                         download
                     >
                         Download Result
-                    </a>
+                    </Link>
                 )}
             </div>
             <aside className="fixed top-0 left-0 flex flex-col w-xs h-full bg-gray-800">
