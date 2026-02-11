@@ -1,3 +1,4 @@
+import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
 import {
     Color,
@@ -62,7 +63,8 @@ export default function Home() {
 
     return (
         <main className="absolute w-full h-full">
-            <div className="fixed top-0 left-0 flex pl-80 w-full h-full overflow-scroll bg-radial from-gray-500 to-gray-700">
+            <div className="fixed top-0 left-0 flex pl-80 w-full h-full bg-gray-700">
+                <Background />
                 {resultFilename && (
                     <Link
                         className="m-auto py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
