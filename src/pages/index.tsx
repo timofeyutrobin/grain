@@ -1,10 +1,11 @@
 import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
+import { GrainSize } from '@/lib/common';
 import {
     Color,
     createColorGrainRenderParameters,
+    createGrayscaleRenderParameters,
     defaultColors,
-    initialGrayscaleRenderParameters,
     RenderMode,
 } from '@/lib/grainRenderParameters';
 import Link from 'next/link';
@@ -17,6 +18,7 @@ export default function Home() {
     const [resultFilename, setResultFilename] = useState<string | null>(null);
 
     const [mode, setMode] = useState<RenderMode>('grayscale');
+    const [grainSize, setGrainSize] = useState<GrainSize>(1);
     const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
         defaultColors.green,
@@ -39,9 +41,9 @@ export default function Home() {
 
         const renderParameters =
             mode === 'grayscale'
-                ? initialGrayscaleRenderParameters
+                ? createGrayscaleRenderParameters(grainSize)
                 : createColorGrainRenderParameters(
-                      initialGrayscaleRenderParameters,
+                      createGrayscaleRenderParameters(grainSize),
                       { color: redDyeColor },
                       { color: greenDyeColor },
                       { color: blueDyeColor },
@@ -62,20 +64,8 @@ export default function Home() {
     };
 
     return (
-        <main className="absolute w-full h-full">
-            <div className="fixed top-0 left-0 flex pl-80 w-full h-full bg-gray-700">
-                <Background />
-                {resultFilename && (
-                    <Link
-                        className="m-auto py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
-                        href={`api/images/${resultFilename}`}
-                        download
-                    >
-                        Download Result
-                    </Link>
-                )}
-            </div>
-            <aside className="fixed top-0 left-0 flex flex-col w-xs h-full bg-gray-800">
+        <main className="fixed flex items-stretch w-full h-full">
+            <aside className="w-xs flex flex-col bg-gray-800">
                 <input
                     className="
                     p-4 bg-gray-900 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
@@ -94,6 +84,8 @@ export default function Home() {
                         onGreenDyeColorChange={setGreenDyeColor}
                         blueDyeColor={blueDyeColor}
                         onBlueDyeColorChange={setBlueDyeColor}
+                        grainSize={grainSize}
+                        onGrainSizeChange={setGrainSize}
                     />
                 </section>
                 <button
@@ -104,6 +96,18 @@ export default function Home() {
                     Generate
                 </button>
             </aside>
+            <div className="relative w-full bg-gray-700">
+                <Background />
+                {resultFilename && (
+                    <Link
+                        className="absolute top-1/2 left-1/2 -translate-1/2 py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
+                        href={`api/images/${resultFilename}`}
+                        download
+                    >
+                        Download Result
+                    </Link>
+                )}
+            </div>
         </main>
     );
 }

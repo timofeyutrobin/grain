@@ -15,3 +15,9 @@ export function isError(value: unknown): value is Error {
             typeof (value as any).message === 'string')
     );
 }
+
+export const enum GrainSize {
+    SMALL = 1,
+    MEDIUM = 2,
+    LARGE = 3,
+}

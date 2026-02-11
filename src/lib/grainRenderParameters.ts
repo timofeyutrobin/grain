@@ -39,47 +39,57 @@ interface ColorOptions {
     color: Color;
 }
 
-export const initialGrayscaleRenderParameters: GrainRenderParameters = {
-    layers: [
-        {
-            grainSize: 1,
-            stepsBasis: 1,
-            grainOffsetMax: 1,
-            filmResponsePower: 1.1,
-            grainBrightnessMin: 80,
-            grainBrightnessMax: 100,
-            grainColorAlpha: 0.3,
-            minNeighbors: 0,
-            maxNeighbors: 0,
-            channel: 'grayscale',
-        },
-        {
-            grainSize: 2,
-            stepsBasis: 2,
-            grainOffsetMax: 4,
-            filmResponsePower: 1.8,
-            grainBrightnessMin: 80,
-            grainBrightnessMax: 100,
-            grainColorAlpha: 0.3,
-            minNeighbors: 1,
-            maxNeighbors: 2,
-            channel: 'grayscale',
-        },
-        {
-            grainSize: 3,
-            stepsBasis: 10,
-            grainOffsetMax: 5,
-            filmResponsePower: 5,
-            grainBrightnessMin: 80,
-            grainBrightnessMax: 100,
-            grainColorAlpha: 0.5,
-            minNeighbors: 3,
-            maxNeighbors: 3,
-            channel: 'grayscale',
-        },
-    ],
-    resultGridSize: 2,
-};
+export function createGrayscaleRenderParameters(
+    grainSizeK: number = 1,
+): GrainRenderParameters {
+    if (grainSizeK < 1) {
+        throw new Error('Wrong "grainSizeK": use only numbers larger than 1');
+    }
+
+    grainSizeK = Math.floor(grainSizeK);
+
+    return {
+        layers: [
+            {
+                grainSize: 1 * grainSizeK,
+                stepsBasis: grainSizeK ** 2,
+                grainOffsetMax: 1,
+                filmResponsePower: 1.1,
+                grainBrightnessMin: 80,
+                grainBrightnessMax: 100,
+                grainColorAlpha: 0.3,
+                minNeighbors: 0,
+                maxNeighbors: 0,
+                channel: 'grayscale',
+            },
+            {
+                grainSize: 2 * grainSizeK,
+                stepsBasis: (2 * grainSizeK) ** 2,
+                grainOffsetMax: 4,
+                filmResponsePower: 1.8,
+                grainBrightnessMin: 80,
+                grainBrightnessMax: 100,
+                grainColorAlpha: 0.3,
+                minNeighbors: 1,
+                maxNeighbors: 2,
+                channel: 'grayscale',
+            },
+            {
+                grainSize: 3 * grainSizeK,
+                stepsBasis: (3 * grainSizeK) ** 2,
+                grainOffsetMax: 5,
+                filmResponsePower: 5,
+                grainBrightnessMin: 80,
+                grainBrightnessMax: 100,
+                grainColorAlpha: 0.5,
+                minNeighbors: 3,
+                maxNeighbors: 3,
+                channel: 'grayscale',
+            },
+        ],
+        resultGridSize: 2,
+    };
+}
 
 export const defaultColors = {
     red: {

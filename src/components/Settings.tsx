@@ -1,3 +1,4 @@
+import { GrainSize } from '@/lib/common';
 import { Color, defaultColors, RenderMode } from '@/lib/grainRenderParameters';
 import { colord } from 'colord';
 import React from 'react';
@@ -6,12 +7,16 @@ import { SettingsGroup } from './SettingsGroup';
 interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
+
     redDyeColor: Color;
     onRedDyeColorChange: (hue: Color) => void;
     greenDyeColor: Color;
     onGreenDyeColorChange: (hue: Color) => void;
     blueDyeColor: Color;
     onBlueDyeColorChange: (hue: Color) => void;
+
+    grainSize: GrainSize;
+    onGrainSizeChange: (grainSize: GrainSize) => void;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -23,6 +28,8 @@ export const Settings: React.FC<SettingsProps> = ({
     onGreenDyeColorChange,
     blueDyeColor,
     onBlueDyeColorChange,
+    grainSize,
+    onGrainSizeChange,
 }) => {
     const select = (m: RenderMode) => {
         onModeChange(m);
@@ -56,6 +63,19 @@ export const Settings: React.FC<SettingsProps> = ({
                     Color
                 </button>
             </div>
+            <SettingsGroup legend="Grain size" ariaLabel="Grain size">
+                <input
+                    className="w-full"
+                    type="range"
+                    max={GrainSize.LARGE}
+                    min={GrainSize.SMALL}
+                    step={1}
+                    value={grainSize}
+                    onChange={(e) =>
+                        onGrainSizeChange(parseInt(e.target.value))
+                    }
+                />
+            </SettingsGroup>
             {mode === 'color' && (
                 <SettingsGroup
                     legend="Dye color"
@@ -69,7 +89,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             color.
                         </>
                     }
-                    aria-label="Channels dye color"
+                    ariaLabel="Channels dye color"
                 >
                     <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
                         <label htmlFor="red-color" className="cursor-pointer">
