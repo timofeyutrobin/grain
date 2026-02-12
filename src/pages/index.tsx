@@ -72,11 +72,11 @@ export default function Home() {
 
     return (
         <main className="fixed flex items-stretch w-full h-full">
-            <aside className="w-xs flex flex-col bg-gray-800">
+            <aside className="w-xs flex flex-col bg-zinc-800">
                 <input
                     className="
-                    p-4 bg-gray-900 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
-                    file:bg-stone-5 hover:cursor-pointer hover:file:bg-blue-50 hover:file:text-blue-700
+                    p-4 bg-zinc-900 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
+                    file:bg-stone-5 hover:cursor-pointer hover:file:bg-amber-300 hover:file:cursor-pointer hover:file:text-zinc-900
                 "
                     type="file"
                     onChange={handleFileChange}
@@ -99,17 +99,17 @@ export default function Home() {
                 </section>
                 <button
                     onClick={handleGenerateClick}
-                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-gray-600 disabled:bg-gray-200"
+                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-200"
                     disabled={processing}
                 >
                     Generate
                 </button>
             </aside>
-            <div className="relative w-full bg-gray-700">
+            <div className="relative w-full bg-zinc-900">
                 <Background />
                 {resultFilename && (
                     <Link
-                        className="absolute top-1/2 left-1/2 -translate-1/2 py-1 px-4 text-2xl border cursor-pointer hover:bg-gray-600"
+                        className="absolute top-1/2 left-1/2 -translate-1/2 py-1 px-4 text-2xl border cursor-pointer hover:bg-zinc-600"
                         href={`api/images/${resultFilename}`}
                         download
                     >

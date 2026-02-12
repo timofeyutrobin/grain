@@ -50,7 +50,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     onClick={() => select('grayscale')}
                     className={`grow px-4 py-2 text-sm border transition-colors focus:outline-none cursor-pointer ${
                         mode === 'grayscale' &&
-                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-gray-800'
+                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-zinc-800'
                     }`}
                 >
                     Grayscale
@@ -62,7 +62,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     onClick={() => select('color')}
                     className={`grow px-4 py-2 text-sm border transition-colors focus:outline-none cursor-pointer ${
                         mode === 'color' &&
-                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-gray-800'
+                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-zinc-800'
                     }`}
                 >
                     Color
@@ -123,7 +123,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     }
                     ariaLabel="Channels dye color"
                 >
-                    <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
+                    <div className="p-2 flex align-middle cursor-pointer hover:bg-zinc-600 transition-colors">
                         <label htmlFor="red-color" className="cursor-pointer">
                             Red channel
                         </label>
@@ -148,7 +148,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             className="mr-0 cursor-pointer"
                         />
                     </div>
-                    <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
+                    <div className="p-2 flex align-middle cursor-pointer hover:bg-zinc-600 transition-colors">
                         <label htmlFor="green-color" className="cursor-pointer">
                             Green channel
                         </label>
@@ -173,7 +173,7 @@ export const Settings: React.FC<SettingsProps> = ({
                             className="mr-0 cursor-pointer"
                         />
                     </div>
-                    <div className="p-2 flex align-middle cursor-pointer hover:bg-gray-600 transition-colors">
+                    <div className="p-2 flex align-middle cursor-pointer hover:bg-zinc-600 transition-colors">
                         <label htmlFor="blue-color" className="cursor-pointer">
                             Blue channel
                         </label>
