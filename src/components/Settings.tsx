@@ -85,13 +85,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 legend="Grain spread"
                 hint={
                     <>
-                        The higher the grain spread, the more
+                        Controls grain diffusion radius.
                         <br />
-                        randomly grains are spaced
-                        <br />
-                        from each other, which leads
-                        <br />
-                        to a loss of sharpness.
+                        Affects percieved sharpness.
                     </>
                 }
                 ariaLabel="Grain spread"

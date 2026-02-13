@@ -87,7 +87,7 @@ export default async function handler(
             },
         })
             .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
-            .toFormat('webp', { lossless: true })
+            .toFormat('webp')
             .toFile(outputPath);
 
         res.status(200).json({ filename: resultFilename });
