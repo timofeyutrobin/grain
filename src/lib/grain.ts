@@ -97,6 +97,12 @@ function drawGrain(
         color,
     } = layer;
     const { width, pixels } = dest;
+    const randomOffsetX = Math.round(
+        Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+    );
+    const randomOffsetY = Math.round(
+        Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+    );
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y * grainSize + x]) {
@@ -107,13 +113,6 @@ function drawGrain(
                               (grainBrightnessMax - grainBrightnessMin) +
                               grainBrightnessMin,
                       );
-
-                const randomOffsetX = Math.round(
-                    Math.random() * grainOffsetMax * 2 - grainOffsetMax,
-                );
-                const randomOffsetY = Math.round(
-                    Math.random() * grainOffsetMax * 2 - grainOffsetMax,
-                );
 
                 const finalX = offsetX + randomOffsetX + x;
                 const finalY = offsetY + randomOffsetY + y;
