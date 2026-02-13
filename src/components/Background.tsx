@@ -41,7 +41,7 @@ export const Background: React.FC = () => {
             const value = (timestamp - start) / duration;
 
             if (value > 1) {
-                const timeFreq = timestamp * 0.0006;
+                const timeFreq = timestamp * 0.0001;
 
                 const logicalWidth = canvas.width / dpr;
                 const logicalHeight = canvas.height / dpr;
@@ -63,7 +63,7 @@ export const Background: React.FC = () => {
                         const posY = baseY + offsetY;
 
                         const hue = (phaseShift * 60 + timeFreq * 100) % 360;
-                        ctx.fillStyle = `hsl(${hue}, 50%, 50%)`;
+                        ctx.fillStyle = `hsla(${hue}, 25%, 50%, 0.3)`;
 
                         ctx.fillRect(
                             posX - dotSize / 2,

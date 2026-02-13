@@ -8,6 +8,7 @@ import {
     defaultColors,
     RenderMode,
 } from '@/lib/grainRenderParameters';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChangeEventHandler, useState } from 'react';
 
@@ -75,7 +76,7 @@ export default function Home() {
             <aside className="w-xs flex flex-col bg-zinc-800">
                 <input
                     className="
-                    p-4 bg-zinc-900 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
+                    p-4 bg-zinc-800 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
                     file:bg-stone-5 hover:cursor-pointer hover:file:bg-amber-300 hover:file:cursor-pointer hover:file:text-zinc-900
                 "
                     type="file"
@@ -102,11 +103,21 @@ export default function Home() {
                     className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-200"
                     disabled={processing}
                 >
-                    Generate
+                    Develop
                 </button>
             </aside>
             <div className="relative w-full bg-zinc-900">
                 <Background />
+                <div className="absolute top-1/4 left-1/2 w-2/3 -translate-1/2 p-4 bg-black shadow-2xl">
+                    <Image
+                        loading="eager"
+                        src="/logo.webp"
+                        alt="logo"
+                        width={1685}
+                        height={186}
+                        className="w-full h-full"
+                    />
+                </div>
                 {resultFilename && (
                     <Link
                         className="absolute top-1/2 left-1/2 -translate-1/2 py-1 px-4 text-2xl border cursor-pointer hover:bg-zinc-600"
