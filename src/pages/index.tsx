@@ -27,6 +27,22 @@ export default function Home() {
     );
     const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
 
+    const renderParameters =
+        mode === 'grayscale'
+            ? createGrayscaleRenderParameters(
+                  grainSize,
+                  grainSpread === 1 ? 1 : grainSpread * 2,
+              )
+            : createColorGrainRenderParameters(
+                  createGrayscaleRenderParameters(
+                      grainSize,
+                      grainSpread === 1 ? 1 : grainSpread * 2,
+                  ),
+                  { color: redDyeColor },
+                  { color: greenDyeColor },
+                  { color: blueDyeColor },
+              );
+
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
             setFile(e.target.files[0]);
@@ -40,22 +56,6 @@ export default function Home() {
 
         setResultFilename(null);
         setProcessing(true);
-
-        const renderParameters =
-            mode === 'grayscale'
-                ? createGrayscaleRenderParameters(
-                      grainSize,
-                      grainSpread === 1 ? 1 : grainSpread * 2,
-                  )
-                : createColorGrainRenderParameters(
-                      createGrayscaleRenderParameters(
-                          grainSize,
-                          grainSpread === 1 ? 1 : grainSpread * 2,
-                      ),
-                      { color: redDyeColor },
-                      { color: greenDyeColor },
-                      { color: blueDyeColor },
-                  );
 
         const formData = new FormData();
         formData.set('img', file);
@@ -73,7 +73,7 @@ export default function Home() {
 
     return (
         <main className="fixed flex items-stretch w-full h-full">
-            <aside className="w-xs flex flex-col bg-zinc-800">
+            <aside className="w-md flex flex-col bg-zinc-800 overflow-y-scroll">
                 <input
                     className="
                     p-4 bg-zinc-800 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
@@ -96,6 +96,7 @@ export default function Home() {
                         onGrainSizeChange={setGrainSize}
                         grainSpread={grainSpread}
                         onGrainSpreadChange={setGrainSpread}
+                        renderParameters={renderParameters}
                     />
                 </section>
                 <button
