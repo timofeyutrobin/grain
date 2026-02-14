@@ -1,7 +1,13 @@
 import { GrainSize } from '@/lib/common';
-import { Color, defaultColors, RenderMode } from '@/lib/grainRenderParameters';
+import {
+    Color,
+    defaultColors,
+    GrainRenderParameters,
+    RenderMode,
+} from '@/lib/grainRenderParameters';
 import { colord } from 'colord';
 import React from 'react';
+import { Microscope } from './Microscope';
 import { SettingsGroup } from './SettingsGroup';
 
 interface SettingsProps {
@@ -20,6 +26,8 @@ interface SettingsProps {
 
     grainSpread: number;
     onGrainSpreadChange: (grainSpreading: number) => void;
+
+    renderParameters: GrainRenderParameters;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -35,6 +43,7 @@ export const Settings: React.FC<SettingsProps> = ({
     onGrainSizeChange,
     grainSpread,
     onGrainSpreadChange,
+    renderParameters,
 }) => {
     const select = (m: RenderMode) => {
         onModeChange(m);
@@ -197,6 +206,20 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                 </SettingsGroup>
             )}
+            <SettingsGroup
+                legend="Microscope"
+                hint={<>Shows grain structure at high magnification</>}
+            >
+                <div className="flex w-full h-full">
+                    <div className="m-auto">
+                        <Microscope
+                            width={240}
+                            height={240}
+                            renderParameters={renderParameters}
+                        />
+                    </div>
+                </div>
+            </SettingsGroup>
         </>
     );
 };

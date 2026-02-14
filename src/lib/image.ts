@@ -28,7 +28,7 @@ export function addPixelHsl(
     value: number,
     alpha: number = 1,
 ) {
-    const rIndex = Math.min((x + y * width) * 3, rgbaPixels.length - 4);
+    const rIndex = Math.min((x + y * width) * 3, rgbaPixels.length);
     const gIndex = rIndex + 1;
     const bIndex = gIndex + 1;
 
@@ -40,6 +40,29 @@ export function addPixelHsl(
     rgbaPixels[rIndex] = blend(r, rgbaPixels[rIndex], alpha);
     rgbaPixels[gIndex] = blend(g, rgbaPixels[gIndex], alpha);
     rgbaPixels[bIndex] = blend(b, rgbaPixels[bIndex], alpha);
+}
+
+export function generateSampleImageBuffer(
+    width: number,
+    height: number,
+): Float32Array {
+    if (width <= 0 || height <= 0) {
+        throw new TypeError('Width and height must be positive');
+    }
+
+    width = Math.floor(width);
+    height = Math.floor(height);
+
+    const buffer = new Float32Array(width * height * 3);
+    const step = 360 / width;
+
+    let hue = 0;
+    for (let i = 0; i < buffer.length; i += 3) {
+        hsvToRgb(hue, 50, 50, buffer, i);
+        hue = (hue + step) % 360;
+    }
+
+    return buffer;
 }
 
 function hsvToRgb(
