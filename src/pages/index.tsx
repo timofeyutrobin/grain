@@ -109,7 +109,7 @@ export default function Home() {
             </aside>
             <div className="relative w-full bg-zinc-900">
                 <Background />
-                <div className="absolute top-1/4 left-1/2 w-2/3 -translate-1/2 p-4 bg-black shadow-2xl">
+                <div className="absolute top-1/4 left-1/2 w-2/3 -translate-1/2 py-4 px-8 bg-black shadow-2xl">
                     <Image
                         loading="eager"
                         src="/logo.webp"
