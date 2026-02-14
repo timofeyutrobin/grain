@@ -87,6 +87,8 @@ export default async function handler(
             },
         })
             .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
+            .normalise({ upper: 95 })
+            .modulate({ saturation: 5 })
             .toFormat('webp')
             .toFile(outputPath);
 
