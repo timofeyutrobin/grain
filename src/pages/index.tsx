@@ -1,6 +1,6 @@
 import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
-import { GrainSize } from '@/lib/common';
+import { GrainSize, ImageType } from '@/lib/common';
 import {
     Color,
     createColorGrainRenderParameters,
@@ -101,33 +101,43 @@ export default function Home() {
                 </section>
                 <button
                     onClick={handleGenerateClick}
-                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-200"
-                    disabled={processing}
+                    className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-900 disabled:text-zinc-500 disabled:cursor-not-allowed"
+                    disabled={processing || !file}
                 >
                     Develop
                 </button>
             </aside>
-            <div className="relative w-full bg-zinc-900">
-                <Background />
-                <div className="absolute top-1/4 left-1/2 w-2/3 -translate-1/2 py-4 px-8 bg-black shadow-2xl">
+            <div className="relative flex flex-col w-full bg-zinc-900 -z-10">
+                <header className="flex h-32 py-4 px-8 ">
                     <Image
                         loading="eager"
                         src="/logo.webp"
                         alt="logo"
-                        width={1685}
-                        height={186}
-                        className="w-full h-full"
+                        width={843}
+                        height={93}
+                        className="w-2/3 m-auto"
+                        unoptimized
                     />
-                </div>
+                </header>
                 {resultFilename && (
-                    <Link
-                        className="absolute top-1/2 left-1/2 -translate-1/2 py-1 px-4 text-2xl border cursor-pointer hover:bg-zinc-600"
-                        href={`api/images/${resultFilename}`}
-                        download
-                    >
-                        Download Result
-                    </Link>
+                    <>
+                        <Image
+                            src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
+                            alt="Result preview"
+                            width={600}
+                            height={600}
+                            className="mt-8 mx-auto"
+                        />
+                        <Link
+                            className="mx-auto my-8 py-1 px-4 text-2xl border cursor-pointer hover:bg-zinc-600"
+                            href={`api/images/${resultFilename}/${ImageType.RESULT}`}
+                            download
+                        >
+                            Download Result
+                        </Link>
+                    </>
                 )}
+                <Background />
             </div>
         </main>
     );

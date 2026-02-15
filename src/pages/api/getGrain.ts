@@ -62,6 +62,7 @@ export default async function handler(
             info: { width, height },
         } = await image
             .removeAlpha()
+            .rotate()
             .raw()
             .toBuffer({ resolveWithObject: true });
         const pixels = convertUint8ToFloat(data);
@@ -71,7 +72,7 @@ export default async function handler(
             pixels: resultPixels,
         } = getGrainImage({ width, height, pixels }, options);
 
-        const resultFilename = `${uniqueFilename('')}.webp`;
+        const resultFilename = `${uniqueFilename('')}.png`;
 
         if (!existsSync(resultsDir)) {
             mkdirSync(resultsDir, { recursive: true });
@@ -87,9 +88,10 @@ export default async function handler(
             },
         })
             .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
-            .normalise({ upper: 95 })
+            .rotate()
+            .normalise({ upper: 96 })
             .modulate({ saturation: 5 })
-            .toFormat('webp')
+            .toFormat('png')
             .toFile(outputPath);
 
         res.status(200).json({ filename: resultFilename });

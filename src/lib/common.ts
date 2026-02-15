@@ -21,3 +21,8 @@ export const enum GrainSize {
     MEDIUM = 2,
     LARGE = 3,
 }
+
+export const enum ImageType {
+    RESULT = 'result',
+    PREVIEW = 'preview',
+}
