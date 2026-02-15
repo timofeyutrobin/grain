@@ -77,6 +77,20 @@ export const Settings: React.FC<SettingsProps> = ({
                     Color
                 </button>
             </div>
+            <SettingsGroup
+                legend="Microscope"
+                hint={<>Shows grain structure at high magnification</>}
+            >
+                <div className="flex w-full h-full">
+                    <div className="m-auto">
+                        <Microscope
+                            width={240}
+                            height={240}
+                            renderParameters={renderParameters}
+                        />
+                    </div>
+                </div>
+            </SettingsGroup>
             <SettingsGroup legend="Grain size" ariaLabel="Grain size">
                 <input
                     className="w-full"
@@ -206,20 +220,6 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                 </SettingsGroup>
             )}
-            <SettingsGroup
-                legend="Microscope"
-                hint={<>Shows grain structure at high magnification</>}
-            >
-                <div className="flex w-full h-full">
-                    <div className="m-auto">
-                        <Microscope
-                            width={240}
-                            height={240}
-                            renderParameters={renderParameters}
-                        />
-                    </div>
-                </div>
-            </SettingsGroup>
         </>
     );
 };
