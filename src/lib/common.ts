@@ -17,12 +17,21 @@ export function isError(value: unknown): value is Error {
 }
 
 export const enum GrainSize {
-    SMALL = 1,
-    MEDIUM = 2,
-    LARGE = 3,
+    s = 1,
+    m = 2,
+    l = 3,
+}
+
+export const enum GrainSpread {
+    s = 1,
+    m = 2,
+    l = 3,
+    xl = 4,
 }
 
 export const enum ImageType {
     RESULT = 'result',
     PREVIEW = 'preview',
 }
+
+export const previewWidth = 600;

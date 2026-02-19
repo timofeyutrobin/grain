@@ -1,6 +1,6 @@
 import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
-import { GrainSize, ImageType } from '@/lib/common';
+import { GrainSize, GrainSpread, ImageType, previewWidth } from '@/lib/common';
 import {
     Color,
     createColorGrainRenderParameters,
@@ -20,7 +20,7 @@ export default function Home() {
 
     const [mode, setMode] = useState<RenderMode>('grayscale');
     const [grainSize, setGrainSize] = useState<GrainSize>(1);
-    const [grainSpread, setGrainSpread] = useState(1);
+    const [grainSpread, setGrainSpread] = useState<GrainSpread>(1);
     const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
         defaultColors.green,
@@ -29,15 +29,9 @@ export default function Home() {
 
     const renderParameters =
         mode === 'grayscale'
-            ? createGrayscaleRenderParameters(
-                  grainSize,
-                  grainSpread === 1 ? 1 : grainSpread * 2,
-              )
+            ? createGrayscaleRenderParameters(grainSize, grainSpread)
             : createColorGrainRenderParameters(
-                  createGrayscaleRenderParameters(
-                      grainSize,
-                      grainSpread === 1 ? 1 : grainSpread * 2,
-                  ),
+                  createGrayscaleRenderParameters(grainSize, grainSpread),
                   { color: redDyeColor },
                   { color: greenDyeColor },
                   { color: blueDyeColor },
@@ -124,8 +118,8 @@ export default function Home() {
                         <Image
                             src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
                             alt="Result preview"
-                            width={600}
-                            height={600}
+                            width={previewWidth}
+                            height={previewWidth}
                             className="mt-8 mx-auto"
                         />
                         <Link
