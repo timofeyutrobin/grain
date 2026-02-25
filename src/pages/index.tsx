@@ -29,9 +29,13 @@ export default function Home() {
 
     const renderParameters =
         mode === 'grayscale'
-            ? createGrayscaleRenderParameters(grainSize, grainSpread)
+            ? createGrayscaleRenderParameters('cubic', grainSize, grainSpread)
             : createColorGrainRenderParameters(
-                  createGrayscaleRenderParameters(grainSize, grainSpread),
+                  createGrayscaleRenderParameters(
+                      'cubic',
+                      grainSize,
+                      grainSpread,
+                  ),
                   { color: redDyeColor },
                   { color: greenDyeColor },
                   { color: blueDyeColor },
