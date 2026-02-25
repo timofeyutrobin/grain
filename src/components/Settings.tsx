@@ -1,4 +1,4 @@
-import { GrainSize } from '@/lib/common';
+import { GrainSize, GrainSpread } from '@/lib/common';
 import {
     Color,
     defaultColors,
@@ -24,8 +24,8 @@ interface SettingsProps {
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
 
-    grainSpread: number;
-    onGrainSpreadChange: (grainSpreading: number) => void;
+    grainSpread: GrainSpread;
+    onGrainSpreadChange: (grainSpreading: GrainSpread) => void;
 
     renderParameters: GrainRenderParameters;
 }
@@ -95,8 +95,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 <input
                     className="w-full"
                     type="range"
-                    max={GrainSize.LARGE}
-                    min={GrainSize.SMALL}
+                    max={GrainSize.l}
+                    min={GrainSize.s}
                     step={1}
                     value={grainSize}
                     onChange={(e) =>
@@ -118,8 +118,8 @@ export const Settings: React.FC<SettingsProps> = ({
                 <input
                     className="w-full"
                     type="range"
-                    max={4}
-                    min={1}
+                    max={GrainSpread.xl}
+                    min={GrainSpread.s}
                     step={1}
                     value={grainSpread}
                     onChange={(e) =>

@@ -2,31 +2,45 @@ import { Channel } from './common';
 
 export type RenderMode = 'grayscale' | 'color';
 
+export interface GrainGeneratorParams {
+    cubic: {
+        grainSize: number;
+        stepsBasis: number;
+        smoothing?: {
+            minNeighbors: number;
+            maxNeighbors: number;
+        };
+    };
+    tabular: {
+        grainSize: number;
+    };
+}
+export type GrainGeneratorType = keyof GrainGeneratorParams;
+
 export interface Color {
     h: number;
     s: number;
     v: number;
 }
 
-export interface Layer {
-    /**
-     * Side length
-     */
-    grainSize: number;
-    stepsBasis: number;
+export interface Layer<
+    GrainType extends GrainGeneratorType = GrainGeneratorType,
+> {
+    grainType: GrainType;
+    grainGeneratorParams: GrainGeneratorParams[GrainType];
     grainOffsetMax: number;
     filmResponsePower: number;
     grainBrightnessMin?: number;
     grainBrightnessMax?: number;
     grainColorAlpha: number;
-    minNeighbors: number;
-    maxNeighbors: number;
     color?: Color;
     channel: Channel;
 }
 
-export interface GrainRenderParameters {
-    layers: Layer[];
+export interface GrainRenderParameters<
+    GrainType extends GrainGeneratorType = GrainGeneratorType,
+> {
+    layers: Layer<GrainType>[];
     /**
      * Side length
      */
@@ -39,10 +53,13 @@ interface ColorOptions {
     color: Color;
 }
 
-export function createGrayscaleRenderParameters(
+export function createGrayscaleRenderParameters<
+    GrainType extends GrainGeneratorType,
+>(
+    grainType: GrainType,
     grainSizeK: number = 1,
     grainSpread: number = 1,
-): GrainRenderParameters {
+): GrainRenderParameters<GrainType> {
     if (grainSizeK < 1) {
         throw new Error('Wrong "grainSizeK": use only numbers larger than 1');
     }
@@ -58,39 +75,42 @@ export function createGrayscaleRenderParameters(
     return {
         layers: [
             {
-                grainSize: 1 * grainSizeK,
-                stepsBasis: grainSizeK ** 2,
+                grainType,
+                grainGeneratorParams: {
+                    grainSize: 1 * grainSizeK,
+                    stepsBasis: grainSizeK ** 2,
+                },
                 grainOffsetMax: 1 * grainSpread,
                 filmResponsePower: 1.1,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
                 grainColorAlpha: 0.3,
-                minNeighbors: 0,
-                maxNeighbors: 9,
                 channel: 'grayscale',
             },
             {
-                grainSize: 2 * grainSizeK,
-                stepsBasis: (2 * grainSizeK) ** 2,
+                grainType,
+                grainGeneratorParams: {
+                    grainSize: 2 * grainSizeK,
+                    stepsBasis: (2 * grainSizeK) ** 2,
+                },
                 grainOffsetMax: 4 * grainSpread,
                 filmResponsePower: 1.8,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
                 grainColorAlpha: 0.3,
-                minNeighbors: 0,
-                maxNeighbors: 9,
                 channel: 'grayscale',
             },
             {
-                grainSize: 3 * grainSizeK,
-                stepsBasis: (3 * grainSizeK) ** 2,
+                grainType,
+                grainGeneratorParams: {
+                    grainSize: 3 * grainSizeK,
+                    stepsBasis: (3 * grainSizeK) ** 2,
+                },
                 grainOffsetMax: 5 * grainSpread,
                 filmResponsePower: 5,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
                 grainColorAlpha: 0.5,
-                minNeighbors: 0,
-                maxNeighbors: 9,
                 channel: 'grayscale',
             },
         ],
@@ -116,13 +136,15 @@ export const defaultColors = {
     },
 };
 
-export function createColorGrainRenderParameters(
-    grayscaleParameters: GrainRenderParameters,
+export function createColorGrainRenderParameters<
+    GrainType extends GrainGeneratorType,
+>(
+    grayscaleParameters: GrainRenderParameters<GrainType>,
     rOptions: ColorOptions,
     gOptions: ColorOptions,
     bOptions: ColorOptions,
-): GrainRenderParameters {
-    const layers: Layer[] = [];
+): GrainRenderParameters<GrainType> {
+    const layers: Layer<GrainType>[] = [];
 
     grayscaleParameters.layers.forEach((layer) => {
         layers.push({

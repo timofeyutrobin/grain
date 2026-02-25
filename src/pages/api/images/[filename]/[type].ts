@@ -1,4 +1,4 @@
-import { ImageType } from '@/lib/common';
+import { ImageType, previewWidth } from '@/lib/common';
 import { existsSync, readdirSync } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
@@ -45,7 +45,7 @@ export default async function handler(
             res.status(200).send(
                 await image
                     .rotate()
-                    .resize(600, 600, {
+                    .resize(previewWidth, previewWidth, {
                         fit: 'contain',
                         background: 'transparent',
                     })
