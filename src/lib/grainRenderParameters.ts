@@ -1,21 +1,7 @@
 import { Channel } from './common';
+import { GrainGeneratorParams, GrainGeneratorType } from './grainGenerators';
 
 export type RenderMode = 'grayscale' | 'color';
-
-export interface GrainGeneratorParams {
-    cubic: {
-        grainSize: number;
-        stepsBasis: number;
-        smoothing?: {
-            minNeighbors: number;
-            maxNeighbors: number;
-        };
-    };
-    tabular: {
-        grainSize: number;
-    };
-}
-export type GrainGeneratorType = keyof GrainGeneratorParams;
 
 export interface Color {
     h: number;
@@ -28,7 +14,7 @@ export interface Layer<
 > {
     grainType: GrainType;
     grainGeneratorParams: GrainGeneratorParams[GrainType];
-    grainOffsetMax: number;
+    grainSpread: number;
     filmResponsePower: number;
     grainBrightnessMin?: number;
     grainBrightnessMax?: number;
@@ -78,9 +64,15 @@ export function createGrayscaleRenderParameters<
                 grainType,
                 grainGeneratorParams: {
                     grainSize: 1 * grainSizeK,
-                    stepsBasis: grainSizeK ** 2,
+                    smoothing:
+                        grainSizeK >= 3
+                            ? {
+                                  minNeighbors: 2,
+                                  maxNeighbors: 4,
+                              }
+                            : undefined,
                 },
-                grainOffsetMax: 1 * grainSpread,
+                grainSpread,
                 filmResponsePower: 1.1,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
@@ -91,9 +83,15 @@ export function createGrayscaleRenderParameters<
                 grainType,
                 grainGeneratorParams: {
                     grainSize: 2 * grainSizeK,
-                    stepsBasis: (2 * grainSizeK) ** 2,
+                    smoothing:
+                        2 * grainSizeK >= 3
+                            ? {
+                                  minNeighbors: 2,
+                                  maxNeighbors: 4,
+                              }
+                            : undefined,
                 },
-                grainOffsetMax: 4 * grainSpread,
+                grainSpread: 2 * grainSpread,
                 filmResponsePower: 1.8,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,
@@ -104,9 +102,12 @@ export function createGrayscaleRenderParameters<
                 grainType,
                 grainGeneratorParams: {
                     grainSize: 3 * grainSizeK,
-                    stepsBasis: (3 * grainSizeK) ** 2,
+                    smoothing: {
+                        minNeighbors: 2,
+                        maxNeighbors: 4,
+                    },
                 },
-                grainOffsetMax: 5 * grainSpread,
+                grainSpread: 5 * grainSpread,
                 filmResponsePower: 5,
                 grainBrightnessMin: 80,
                 grainBrightnessMax: 100,

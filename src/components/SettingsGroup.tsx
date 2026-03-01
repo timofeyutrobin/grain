@@ -15,7 +15,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
     const [isShowed, setIsShowed] = useState(false);
 
     return (
-        <fieldset aria-label={ariaLabel} className="mt-4 p-4 border">
+        <fieldset aria-label={ariaLabel} className="mb-4 p-4 border">
             <legend className="p-1">
                 {legend}
                 {hint && (

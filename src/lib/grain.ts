@@ -1,10 +1,6 @@
 import { SimpleImageData } from './common';
-import { grainGenerators } from './grainGenerators';
-import {
-    GrainGeneratorType,
-    GrainRenderParameters,
-    Layer,
-} from './grainRenderParameters';
+import { grainGenerators, GrainGeneratorType } from './grainGenerators';
+import { GrainRenderParameters, Layer } from './grainRenderParameters';
 import { addPixelHsl, nextPixel } from './image';
 
 function drawGrain(
@@ -19,7 +15,7 @@ function drawGrain(
         grainBrightnessMax = 100,
         grainBrightnessMin = 80,
         grainColorAlpha,
-        grainOffsetMax,
+        grainSpread: grainOffsetMax,
         color,
     } = layer;
     const { width, pixels } = dest;

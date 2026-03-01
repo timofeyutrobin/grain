@@ -1,6 +1,7 @@
 import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
 import { GrainSize, GrainSpread, ImageType, previewWidth } from '@/lib/common';
+import { GrainGeneratorType } from '@/lib/grainGenerators';
 import {
     Color,
     createColorGrainRenderParameters,
@@ -19,6 +20,7 @@ export default function Home() {
     const [resultFilename, setResultFilename] = useState<string | null>(null);
 
     const [mode, setMode] = useState<RenderMode>('grayscale');
+    const [grainType, setGrainType] = useState<GrainGeneratorType>('cubic');
     const [grainSize, setGrainSize] = useState<GrainSize>(1);
     const [grainSpread, setGrainSpread] = useState<GrainSpread>(1);
     const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
@@ -29,10 +31,10 @@ export default function Home() {
 
     const renderParameters =
         mode === 'grayscale'
-            ? createGrayscaleRenderParameters('cubic', grainSize, grainSpread)
+            ? createGrayscaleRenderParameters(grainType, grainSize, grainSpread)
             : createColorGrainRenderParameters(
                   createGrayscaleRenderParameters(
-                      'cubic',
+                      grainType,
                       grainSize,
                       grainSpread,
                   ),
@@ -71,7 +73,7 @@ export default function Home() {
 
     return (
         <main className="fixed flex items-stretch w-full h-full">
-            <aside className="w-md flex flex-col bg-zinc-800 overflow-y-scroll">
+            <aside className="w-md flex flex-col bg-zinc-800">
                 <input
                     className="
                     p-4 bg-zinc-800 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
@@ -80,10 +82,12 @@ export default function Home() {
                     type="file"
                     onChange={handleFileChange}
                 />
-                <section className="m-4">
+                <section className="my-4 px-4 overflow-y-scroll">
                     <Settings
                         mode={mode}
                         onModeChange={setMode}
+                        grainType={grainType}
+                        onGrainTypeChange={setGrainType}
                         redDyeColor={redDyeColor}
                         onRedDyeColorChange={setRedDyeColor}
                         greenDyeColor={greenDyeColor}

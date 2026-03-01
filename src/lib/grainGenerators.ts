@@ -1,7 +1,57 @@
-import {
-    GrainGeneratorParams,
-    GrainGeneratorType,
-} from './grainRenderParameters';
+export interface GrainGeneratorParams {
+    cubic: {
+        grainSize: number;
+        smoothing?: {
+            minNeighbors: number;
+            maxNeighbors: number;
+        };
+    };
+    tabular: {
+        grainSize: number;
+        smoothing?: {
+            minNeighbors: number;
+            maxNeighbors: number;
+        };
+    };
+}
+export type GrainGeneratorType = keyof GrainGeneratorParams;
+
+/**
+ * Отрисовка начинается с центральной клетки заданной сетки
+ * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
+ */
+function steppingGeneration(grainSize: number, stretched?: boolean) {
+    const stepsBasis = grainSize ** 2;
+    const minSteps = Math.ceil(stepsBasis / 2);
+    const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
+    const grid: boolean[] = Array(grainSize ** 2).fill(false);
+
+    let x = Math.floor(grainSize / 2);
+    let y = Math.floor(grainSize / 2);
+    grid[y * grainSize + x] = true;
+
+    for (let i = 0; i < steps; i++) {
+        const dir = Math.min(
+            3,
+            Math.floor(
+                stretched
+                    ? (Math.random() + Math.random() * 0.7) * 4
+                    : Math.random() * 4,
+            ),
+        );
+        if (dir === 0) x++;
+        if (dir === 1) x--;
+        if (dir === 2) y++;
+        if (dir === 3) y--;
+
+        x = Math.max(0, Math.min(grainSize - 1, x));
+        y = Math.max(0, Math.min(grainSize - 1, y));
+
+        grid[y * grainSize + x] = true;
+    }
+
+    return grid;
+}
 
 /**
  * Сглаживание формы зернышка. Числа в массиве меняются на месте.
@@ -51,38 +101,35 @@ function smoothGrain(
     return result;
 }
 
+function rotate(grid: boolean[], grainSize: number, angleDeg: number) {
+    const result = grid.slice();
+
+    const angleRad = angleDeg * (Math.PI / 180);
+    for (let y = 0; y < grainSize; y++) {
+        for (let x = 0; x < grainSize; x++) {
+            const rotatedX = Math.round(
+                x * Math.cos(angleRad) + y * Math.sin(angleRad),
+            );
+            const rotatedY = Math.round(
+                y * Math.cos(angleRad) + x * Math.sin(angleRad),
+            );
+
+            result[rotatedY * grainSize + rotatedX] = grid[y * grainSize + x];
+        }
+    }
+
+    return result;
+}
+
 export const grainGenerators: {
     [GrainType in GrainGeneratorType]: (
         params: GrainGeneratorParams[GrainType],
     ) => boolean[];
 } = {
-    /**
-     * Отрисовка начинается с центральной клетки заданной сетки
-     * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
-     */
     cubic: (params) => {
-        const { stepsBasis, grainSize, smoothing } = params;
+        const { grainSize, smoothing } = params;
 
-        const minSteps = Math.ceil(stepsBasis / 2);
-        const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
-        const grid: boolean[] = Array(grainSize ** 2).fill(false);
-
-        let x = Math.floor(grainSize / 2);
-        let y = Math.floor(grainSize / 2);
-        grid[y * grainSize + x] = true;
-
-        for (let i = 0; i < steps; i++) {
-            const dir = Math.floor(Math.random() * 4);
-            if (dir === 0) x++;
-            if (dir === 1) x--;
-            if (dir === 2) y++;
-            if (dir === 3) y--;
-
-            x = Math.max(0, Math.min(grainSize - 1, x));
-            y = Math.max(0, Math.min(grainSize - 1, y));
-
-            grid[y * grainSize + x] = true;
-        }
+        const grid = steppingGeneration(grainSize);
 
         if (smoothing) {
             return smoothGrain(
@@ -95,45 +142,20 @@ export const grainGenerators: {
 
         return grid;
     },
-    // TODO: not implemented
-    tabular: () => {
-        return [
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-            true,
-            true,
-            true,
-            true,
-            false,
-            false,
-            true,
-            true,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-        ];
+    tabular: (params) => {
+        const { grainSize, smoothing } = params;
+
+        let grid = steppingGeneration(grainSize, true);
+
+        if (smoothing) {
+            grid = smoothGrain(
+                grid,
+                grainSize,
+                smoothing.minNeighbors,
+                smoothing.maxNeighbors,
+            );
+        }
+
+        return rotate(grid, grainSize, Math.random() * 360);
     },
 };

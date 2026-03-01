@@ -1,4 +1,5 @@
 import { GrainSize, GrainSpread } from '@/lib/common';
+import { GrainGeneratorType } from '@/lib/grainGenerators';
 import {
     Color,
     defaultColors,
@@ -8,18 +9,22 @@ import {
 import { colord } from 'colord';
 import React from 'react';
 import { Microscope } from './Microscope';
+import { Segments } from './Segments';
 import { SettingsGroup } from './SettingsGroup';
 
 interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
 
+    grainType: GrainGeneratorType;
+    onGrainTypeChange: (grainType: GrainGeneratorType) => void;
+
     redDyeColor: Color;
-    onRedDyeColorChange: (hue: Color) => void;
+    onRedDyeColorChange: (color: Color) => void;
     greenDyeColor: Color;
-    onGreenDyeColorChange: (hue: Color) => void;
+    onGreenDyeColorChange: (color: Color) => void;
     blueDyeColor: Color;
-    onBlueDyeColorChange: (hue: Color) => void;
+    onBlueDyeColorChange: (color: Color) => void;
 
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
@@ -33,6 +38,8 @@ interface SettingsProps {
 export const Settings: React.FC<SettingsProps> = ({
     mode,
     onModeChange,
+    grainType,
+    onGrainTypeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -45,38 +52,40 @@ export const Settings: React.FC<SettingsProps> = ({
     onGrainSpreadChange,
     renderParameters,
 }) => {
-    const select = (m: RenderMode) => {
-        onModeChange(m);
-    };
-
     return (
         <>
-            <div className="flex" role="radiogroup" aria-label="Color mode">
-                <button
-                    type="button"
-                    role="radio"
-                    aria-checked={mode === 'grayscale'}
-                    onClick={() => select('grayscale')}
-                    className={`grow px-4 py-2 text-sm border transition-colors focus:outline-none cursor-pointer ${
-                        mode === 'grayscale' &&
-                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-zinc-800'
-                    }`}
-                >
-                    Grayscale
-                </button>
-                <button
-                    type="button"
-                    role="radio"
-                    aria-checked={mode === 'color'}
-                    onClick={() => select('color')}
-                    className={`grow px-4 py-2 text-sm border transition-colors focus:outline-none cursor-pointer ${
-                        mode === 'color' &&
-                        'bg-amber-300  border-amber-300 hover:bg-amber-300 text-zinc-800'
-                    }`}
-                >
-                    Color
-                </button>
-            </div>
+            <SettingsGroup legend="Mode">
+                <Segments name="Color mode">
+                    <Segments.Segment
+                        isSelected={mode === 'grayscale'}
+                        onClick={() => onModeChange('grayscale')}
+                    >
+                        Grayscale
+                    </Segments.Segment>
+                    <Segments.Segment
+                        isSelected={mode === 'color'}
+                        onClick={() => onModeChange('color')}
+                    >
+                        Color
+                    </Segments.Segment>
+                </Segments>
+            </SettingsGroup>
+            <SettingsGroup legend="Grain type">
+                <Segments name="Color mode">
+                    <Segments.Segment
+                        isSelected={grainType === 'cubic'}
+                        onClick={() => onGrainTypeChange('cubic')}
+                    >
+                        Cubic
+                    </Segments.Segment>
+                    <Segments.Segment
+                        isSelected={grainType === 'tabular'}
+                        onClick={() => onGrainTypeChange('tabular')}
+                    >
+                        Tabular (beta)
+                    </Segments.Segment>
+                </Segments>
+            </SettingsGroup>
             <SettingsGroup
                 legend="Microscope"
                 hint={<>Shows grain structure at high magnification</>}
