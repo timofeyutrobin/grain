@@ -10,7 +10,7 @@
     "dependencies": {
         "colord": "2.9.3",
         "formidable": "3.5.4",
-        "next": "16.1.6",
+        "next": "16.2.3",
         "react": "19.2.3",
         "react-dom": "19.2.3",
         "sharp": "0.34.5",
