@@ -1,14 +1,7 @@
 import { Background } from '@/components/Background';
 import { Settings } from '@/components/Settings';
-import { GrainSize, GrainSpread, ImageType, previewWidth } from '@/lib/common';
-import { GrainGeneratorType } from '@/lib/grainGenerators';
-import {
-    Color,
-    createColorGrainRenderParameters,
-    createGrayscaleRenderParameters,
-    defaultColors,
-    RenderMode,
-} from '@/lib/grainRenderParameters';
+import { useSettings } from '@/hooks/useSettings';
+import { ImageType, previewWidth } from '@/lib/common';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChangeEventHandler, useState } from 'react';
@@ -19,29 +12,26 @@ export default function Home() {
     const [processing, setProcessing] = useState(false);
     const [resultFilename, setResultFilename] = useState<string | null>(null);
 
-    const [mode, setMode] = useState<RenderMode>('grayscale');
-    const [grainType, setGrainType] = useState<GrainGeneratorType>('cubic');
-    const [grainSize, setGrainSize] = useState<GrainSize>(1);
-    const [grainSpread, setGrainSpread] = useState<GrainSpread>(1);
-    const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
-    const [greenDyeColor, setGreenDyeColor] = useState<Color>(
-        defaultColors.green,
-    );
-    const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
+    const {
+        mode,
+        setMode,
+        grainType,
+        setGrainType,
+        curveType,
+        setCurveType,
+        grainSize,
+        setGrainSize,
+        grainSpread,
+        setGrainSpread,
+        redDyeColor,
+        setRedDyeColor,
+        greenDyeColor,
+        setGreenDyeColor,
+        blueDyeColor,
+        setBlueDyeColor,
 
-    const renderParameters =
-        mode === 'grayscale'
-            ? createGrayscaleRenderParameters(grainType, grainSize, grainSpread)
-            : createColorGrainRenderParameters(
-                  createGrayscaleRenderParameters(
-                      grainType,
-                      grainSize,
-                      grainSpread,
-                  ),
-                  { color: redDyeColor },
-                  { color: greenDyeColor },
-                  { color: blueDyeColor },
-              );
+        renderParameters,
+    } = useSettings();
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
         if (e.target.files) {
@@ -88,6 +78,8 @@ export default function Home() {
                         onModeChange={setMode}
                         grainType={grainType}
                         onGrainTypeChange={setGrainType}
+                        curveType={curveType}
+                        onCurveTypeChange={setCurveType}
                         redDyeColor={redDyeColor}
                         onRedDyeColorChange={setRedDyeColor}
                         greenDyeColor={greenDyeColor}

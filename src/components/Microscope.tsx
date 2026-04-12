@@ -1,6 +1,6 @@
 import { convertFloatToUint8RgbToRgba } from '@/lib/convert';
-import { getGrainImage } from '@/lib/grain';
-import { GrainRenderParameters } from '@/lib/grainRenderParameters';
+import { getGrainImage } from '@/lib/grainRenderer';
+import { GrainRenderParameters } from '@/lib/grainRenderer/grainRenderParameters';
 import { generateSampleImageBuffer } from '@/lib/image';
 import { useEffect, useRef } from 'react';
 

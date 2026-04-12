@@ -1,7 +1,11 @@
-import { SimpleImageData } from './common';
-import { grainGenerators, GrainGeneratorType } from './grainGenerators';
-import { GrainRenderParameters, Layer } from './grainRenderParameters';
-import { addPixelHsl, nextPixel } from './image';
+import { SimpleImageData } from '@/lib/common';
+import { getCharacteristicCurve } from '@/lib/grainRenderer/characteristicCurves';
+import { getGrainGenerator } from '@/lib/grainRenderer/grainGenerators';
+import {
+    GrainRenderParameters,
+    Layer,
+} from '@/lib/grainRenderer/grainRenderParameters';
+import { addPixelHsl, nextPixel } from '@/lib/image';
 
 function drawGrain(
     dest: SimpleImageData,
@@ -12,29 +16,23 @@ function drawGrain(
 ) {
     const {
         grainGeneratorParams: { grainSize },
-        grainBrightnessMax = 100,
-        grainBrightnessMin = 80,
         grainColorAlpha,
-        grainSpread: grainOffsetMax,
+        grainSpread,
         color,
     } = layer;
     const { width, pixels } = dest;
     const randomOffsetX = Math.round(
-        Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+        Math.random() * grainSpread * 2 - grainSpread,
     );
     const randomOffsetY = Math.round(
-        Math.random() * grainOffsetMax * 2 - grainOffsetMax,
+        Math.random() * grainSpread * 2 - grainSpread,
     );
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y * grainSize + x]) {
                 const brightness = color
                     ? color.v
-                    : Math.floor(
-                          Math.random() *
-                              (grainBrightnessMax - grainBrightnessMin) +
-                              grainBrightnessMin,
-                      );
+                    : Math.floor(Math.random() * 20 + 80);
 
                 const finalX = offsetX + randomOffsetX + x;
                 const finalY = offsetY + randomOffsetY + y;
@@ -54,23 +52,19 @@ function drawGrain(
     }
 }
 
-function filmResponse(pixel: number, filmResponsePower: number) {
-    return Math.pow(pixel, filmResponsePower);
-}
-
-function drawLayer<GrainType extends GrainGeneratorType>(
-    layer: Layer<GrainType>,
+function drawLayer(
+    layer: Layer,
     src: SimpleImageData,
     dest: SimpleImageData,
     resultGridSize: number,
 ) {
-    const { grainType, grainGeneratorParams } = layer;
+    const { grainGeneratorParams, curveParams } = layer;
 
     let i = 0;
     for (let pixel of nextPixel(src.pixels, layer.channel)) {
         {
-            if (Math.random() < filmResponse(pixel, layer.filmResponsePower)) {
-                const grain = grainGenerators[grainType](grainGeneratorParams);
+            if (Math.random() < getCharacteristicCurve(curveParams)(pixel)) {
+                const grain = getGrainGenerator(grainGeneratorParams)();
                 drawGrain(
                     dest,
                     grain,
@@ -84,9 +78,9 @@ function drawLayer<GrainType extends GrainGeneratorType>(
     }
 }
 
-export function getGrainImage<GrainType extends GrainGeneratorType>(
+export function getGrainImage(
     srcImage: SimpleImageData,
-    renderParameters: GrainRenderParameters<GrainType>,
+    renderParameters: GrainRenderParameters,
 ): SimpleImageData {
     const destImage = {
         width: srcImage.width * renderParameters.resultGridSize,

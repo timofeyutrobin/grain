@@ -1,20 +1,21 @@
-export interface GrainGeneratorParams {
-    cubic: {
-        grainSize: number;
-        smoothing?: {
-            minNeighbors: number;
-            maxNeighbors: number;
-        };
-    };
-    tabular: {
-        grainSize: number;
-        smoothing?: {
-            minNeighbors: number;
-            maxNeighbors: number;
-        };
-    };
-}
-export type GrainGeneratorType = keyof GrainGeneratorParams;
+export type GrainGeneratorParams =
+    | {
+          type: 'cubic';
+          grainSize: number;
+          smoothing?: {
+              minNeighbors: number;
+              maxNeighbors: number;
+          };
+      }
+    | {
+          type: 'tabular';
+          grainSize: number;
+          smoothing?: {
+              minNeighbors: number;
+              maxNeighbors: number;
+          };
+      };
+export type GrainGeneratorType = GrainGeneratorParams['type'];
 
 /**
  * Отрисовка начинается с центральной клетки заданной сетки
@@ -121,41 +122,93 @@ function rotate(grid: boolean[], grainSize: number, angleDeg: number) {
     return result;
 }
 
-export const grainGenerators: {
-    [GrainType in GrainGeneratorType]: (
-        params: GrainGeneratorParams[GrainType],
-    ) => boolean[];
-} = {
-    cubic: (params) => {
-        const { grainSize, smoothing } = params;
+export function getGrainGenerator(params: GrainGeneratorParams) {
+    switch (params.type) {
+        case 'cubic':
+            return () => {
+                const { grainSize, smoothing } = params;
 
-        const grid = steppingGeneration(grainSize);
+                const grid = steppingGeneration(grainSize);
 
-        if (smoothing) {
-            return smoothGrain(
-                grid,
-                grainSize,
-                smoothing.minNeighbors,
-                smoothing.maxNeighbors,
-            );
-        }
+                if (smoothing) {
+                    return smoothGrain(
+                        grid,
+                        grainSize,
+                        smoothing.minNeighbors,
+                        smoothing.maxNeighbors,
+                    );
+                }
 
-        return grid;
-    },
-    tabular: (params) => {
-        const { grainSize, smoothing } = params;
+                return grid;
+            };
+        case 'tabular':
+            return () => {
+                const { grainSize, smoothing } = params;
 
-        let grid = steppingGeneration(grainSize, true);
+                let grid = steppingGeneration(grainSize, true);
 
-        if (smoothing) {
-            grid = smoothGrain(
-                grid,
-                grainSize,
-                smoothing.minNeighbors,
-                smoothing.maxNeighbors,
-            );
-        }
+                if (smoothing) {
+                    grid = smoothGrain(
+                        grid,
+                        grainSize,
+                        smoothing.minNeighbors,
+                        smoothing.maxNeighbors,
+                    );
+                }
 
-        return rotate(grid, grainSize, Math.random() * 360);
-    },
-};
+                return rotate(grid, grainSize, Math.random() * 360);
+            };
+    }
+}
+
+export class GrainGeneratorParamsBuilder {
+    private params: GrainGeneratorParams[] = [
+        { type: 'cubic', grainSize: 1 },
+        { type: 'cubic', grainSize: 1 },
+        { type: 'cubic', grainSize: 1 },
+    ];
+
+    build() {
+        return this.params;
+    }
+
+    layers(count: number) {
+        this.params =
+            count <= this.params.length
+                ? this.params.slice(0, count)
+                : [
+                      ...this.params,
+                      ...new Array(count - this.params.length).fill({
+                          type: 'cubic',
+                          grainSize: 1,
+                      }),
+                  ];
+
+        return this;
+    }
+
+    type(grainType: GrainGeneratorType) {
+        this.params = this.params.map((paramsForLayer) => ({
+            ...paramsForLayer,
+            grainType,
+        }));
+
+        return this;
+    }
+
+    size(grainSizeK: number) {
+        this.params = this.params.map((paramsForLayer, index) => ({
+            ...paramsForLayer,
+            grainSize: (index + 1) * grainSizeK,
+            smoothing:
+                (index + 1) * grainSizeK >= 3
+                    ? {
+                          minNeighbors: 2,
+                          maxNeighbors: 4,
+                      }
+                    : undefined,
+        }));
+
+        return this;
+    }
+}
