@@ -1,8 +1,6 @@
-// Next.js API route support: https://nextjs.org/docs/api-routes/introduction
-
 import { isError } from '@/lib/common';
 import { convertFloatToUint8, convertUint8ToFloat } from '@/lib/convert';
-import { getGrainImage } from '@/lib/grain';
+import { getGrainImage } from '@/lib/grainRenderer';
 import formidable from 'formidable';
 import { existsSync, mkdirSync } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';

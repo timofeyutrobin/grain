@@ -6,6 +6,14 @@ export interface SimpleImageData {
 
 export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
+export type RenderMode = 'grayscale' | 'color';
+
+export interface Color {
+    h: number;
+    s: number;
+    v: number;
+}
+
 export function isError(value: unknown): value is Error {
     return (
         value instanceof Error ||
@@ -35,3 +43,21 @@ export const enum ImageType {
 }
 
 export const previewWidth = 600;
+
+export const defaultColors = {
+    red: {
+        h: 0,
+        s: 25,
+        v: 50,
+    },
+    green: {
+        h: 120,
+        s: 25,
+        v: 50,
+    },
+    blue: {
+        h: 240,
+        s: 25,
+        v: 50,
+    },
+};

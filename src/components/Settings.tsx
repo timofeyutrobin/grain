@@ -1,16 +1,18 @@
-import { GrainSize, GrainSpread } from '@/lib/common';
-import { GrainGeneratorType } from '@/lib/grainGenerators';
+import { Microscope } from '@/components/Microscope';
+import { Segments } from '@/components/Segments';
+import { SettingsGroup } from '@/components/SettingsGroup';
 import {
     Color,
     defaultColors,
-    GrainRenderParameters,
+    GrainSize,
+    GrainSpread,
     RenderMode,
-} from '@/lib/grainRenderParameters';
+} from '@/lib/common';
+import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
+import { GrainGeneratorType } from '@/lib/grainRenderer/grainGenerators';
+import { GrainRenderParameters } from '@/lib/grainRenderer/grainRenderParameters';
 import { colord } from 'colord';
 import React from 'react';
-import { Microscope } from './Microscope';
-import { Segments } from './Segments';
-import { SettingsGroup } from './SettingsGroup';
 
 interface SettingsProps {
     mode: RenderMode;
@@ -18,6 +20,9 @@ interface SettingsProps {
 
     grainType: GrainGeneratorType;
     onGrainTypeChange: (grainType: GrainGeneratorType) => void;
+
+    curveType: CharacteristicCurveType;
+    onCurveTypeChange: (curveType: CharacteristicCurveType) => void;
 
     redDyeColor: Color;
     onRedDyeColorChange: (color: Color) => void;
@@ -40,6 +45,8 @@ export const Settings: React.FC<SettingsProps> = ({
     onModeChange,
     grainType,
     onGrainTypeChange,
+    curveType,
+    onCurveTypeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -71,7 +78,7 @@ export const Settings: React.FC<SettingsProps> = ({
                 </Segments>
             </SettingsGroup>
             <SettingsGroup legend="Grain type">
-                <Segments name="Color mode">
+                <Segments name="Grain type">
                     <Segments.Segment
                         isSelected={grainType === 'cubic'}
                         onClick={() => onGrainTypeChange('cubic')}
@@ -83,6 +90,22 @@ export const Settings: React.FC<SettingsProps> = ({
                         onClick={() => onGrainTypeChange('tabular')}
                     >
                         Tabular (beta)
+                    </Segments.Segment>
+                </Segments>
+            </SettingsGroup>
+            <SettingsGroup legend="Characteristic curve">
+                <Segments name="Characteristic curve">
+                    <Segments.Segment
+                        isSelected={curveType === 'linear'}
+                        onClick={() => onCurveTypeChange('linear')}
+                    >
+                        Linear (test)
+                    </Segments.Segment>
+                    <Segments.Segment
+                        isSelected={curveType === 'power'}
+                        onClick={() => onCurveTypeChange('power')}
+                    >
+                        Power
                     </Segments.Segment>
                 </Segments>
             </SettingsGroup>
