@@ -38,14 +38,17 @@ export function useSettings() {
         useState<CharacteristicCurveType>('power');
 
     const characteristicCurveParamsBuilder =
-        new CharacteristicCurveParamsBuilder().type(curveType);
+        new CharacteristicCurveParamsBuilder()
+            .type(curveType)
+            .layers(3)
+            .powers(1.1, 1.8, 5);
 
     const grayscaleRenderParameters = createGrayscaleRenderParameters(
         new GrainGeneratorParamsBuilder()
             .type(grainType)
             .size(grainSize)
             .build(),
-        characteristicCurveParamsBuilder.color('grayscale').build(),
+        characteristicCurveParamsBuilder.build(),
         grainSpread,
     );
 
@@ -57,19 +60,19 @@ export function useSettings() {
                   {
                       color: redDyeColor,
                       curveParams: characteristicCurveParamsBuilder
-                          .color('r')
+                          .powerScale(0.9)
                           .build(),
                   },
                   {
                       color: greenDyeColor,
                       curveParams: characteristicCurveParamsBuilder
-                          .color('g')
+                          .powerScale(1)
                           .build(),
                   },
                   {
                       color: blueDyeColor,
                       curveParams: characteristicCurveParamsBuilder
-                          .color('b')
+                          .powerScale(1.1)
                           .build(),
                   },
               );

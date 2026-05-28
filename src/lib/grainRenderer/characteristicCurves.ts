@@ -1,5 +1,3 @@
-import { Channel } from '@/lib/common';
-
 export type CharacteristicCurveParams =
     | {
           type: 'linear';
@@ -17,89 +15,64 @@ export function getCharacteristicCurve(
 ): CharacteristicCurve {
     switch (params.type) {
         case 'linear':
-            return (pixel) => pixel;
+            return (x) => x;
         case 'power':
-            return (pixel) => Math.pow(pixel, params.power);
+            return (x) => Math.pow(x, params.power);
     }
 }
 
 export class CharacteristicCurveParamsBuilder {
-    private curvePowers = [1.1, 1.8, 5];
-
-    private powerScales: Record<Channel, number> = {
-        r: 0.9,
-        g: 1,
-        b: 1.1,
-        grayscale: 1,
-    };
-
-    private params: CharacteristicCurveParams[] = [
-        { type: 'linear' },
-        { type: 'linear' },
-        { type: 'linear' },
-    ];
+    private layersCount: number = 0;
+    private curveType: CharacteristicCurveType = 'linear';
+    private curvePowers: number[] = [];
 
     private validateLayersCount(value: unknown[]) {
-        if (value.length !== this.params.length) {
+        if (this.layersCount === 0) {
+            throw new RangeError('Set layers() first');
+        }
+        if (value.length !== this.layersCount) {
             throw new RangeError(
                 'Layers count in value must be equal to general layers count',
             );
         }
     }
 
-    build() {
-        return this.params;
+    build(): CharacteristicCurveParams[] {
+        return new Array(this.layersCount).fill(0).map((_, index) => ({
+            type: this.curveType,
+            power: this.curvePowers[index],
+        }));
     }
 
-    layers(count: number) {
-        this.params =
-            count <= this.params.length
-                ? this.params.slice(0, count)
-                : [
-                      ...this.params,
-                      ...new Array(count - this.params.length).fill({
-                          type: 'linear',
-                      }),
-                  ];
+    layers(count: number): this {
+        if (count <= 0) {
+            throw new RangeError('"count" must be positive');
+        }
+        if (this.layersCount > 0) {
+            throw new RangeError('Cannot set layers count more than one time');
+        }
+
+        this.layersCount = Math.floor(count);
 
         return this;
     }
 
-    powers(powers: number[]) {
+    powers(...powers: number[]): this {
         this.validateLayersCount(powers);
 
         this.curvePowers = powers;
-    }
-
-    type(curveType: CharacteristicCurveType) {
-        if (curveType === 'power') {
-            this.params = this.params.map((paramsForLayer, index) => ({
-                ...paramsForLayer,
-                type: 'power',
-                power: this.curvePowers[index],
-            }));
-        }
-        if (curveType === 'linear') {
-            this.params = this.params.map((paramsForLayer) => ({
-                ...paramsForLayer,
-                type: 'linear',
-            }));
-        }
 
         return this;
     }
 
-    color(channel: Channel) {
-        this.params = this.params.map((paramsForLayer) => {
-            if (paramsForLayer.type !== 'power') {
-                return paramsForLayer;
-            }
+    powerScale(scale: number): this {
+        this.curvePowers = this.curvePowers.map((power) => power * scale);
 
-            return {
-                ...paramsForLayer,
-                power: paramsForLayer.power * this.powerScales[channel],
-            };
-        });
+        return this;
+    }
+
+    type(curveType: CharacteristicCurveType): this {
+        this.curveType = curveType;
 
         return this;
     }
