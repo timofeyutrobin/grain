@@ -1,8 +1,9 @@
+import { cleanupDirToSize } from '@/lib/apiHelpers';
 import { isError } from '@/lib/common';
 import { convertFloatToUint8, convertUint8ToFloat } from '@/lib/convert';
 import { getGrainImage } from '@/lib/grainRenderer';
 import formidable from 'formidable';
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
 import path from 'path';
 import sharp from 'sharp';
@@ -11,6 +12,7 @@ import uniqueFilename from 'unique-filename';
 
 const uploadsDir = process.env.UPLOADS_DIR!;
 const resultsDir = process.env.RESULTS_DIR!;
+const maxResultsSize = process.env.MAX_RESULTS_SIZE_BYTES!;
 
 export const config = {
     api: {
@@ -103,5 +105,10 @@ export default async function handler(
         res.status(500).json({
             error: 'Error during file upload: ' + message,
         });
+    } finally {
+        readdirSync(uploadsDir).forEach((file) =>
+            rmSync(`${uploadsDir}/${file}`),
+        );
+        cleanupDirToSize(resultsDir, Number(maxResultsSize));
     }
 }
