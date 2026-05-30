@@ -15,8 +15,6 @@ export default function Home() {
     const {
         mode,
         setMode,
-        grainType,
-        setGrainType,
         curveType,
         setCurveType,
         grainSize,
@@ -76,8 +74,6 @@ export default function Home() {
                     <Settings
                         mode={mode}
                         onModeChange={setMode}
-                        grainType={grainType}
-                        onGrainTypeChange={setGrainType}
                         curveType={curveType}
                         onCurveTypeChange={setCurveType}
                         redDyeColor={redDyeColor}

@@ -9,7 +9,6 @@ import {
     RenderMode,
 } from '@/lib/common';
 import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
-import { GrainGeneratorType } from '@/lib/grainRenderer/grainGenerators';
 import { GrainRenderParameters } from '@/lib/grainRenderer/grainRenderParameters';
 import { colord } from 'colord';
 import React from 'react';
@@ -17,9 +16,6 @@ import React from 'react';
 interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
-
-    grainType: GrainGeneratorType;
-    onGrainTypeChange: (grainType: GrainGeneratorType) => void;
 
     curveType: CharacteristicCurveType;
     onCurveTypeChange: (curveType: CharacteristicCurveType) => void;
@@ -43,8 +39,6 @@ interface SettingsProps {
 export const Settings: React.FC<SettingsProps> = ({
     mode,
     onModeChange,
-    grainType,
-    onGrainTypeChange,
     curveType,
     onCurveTypeChange,
     redDyeColor,
@@ -77,35 +71,13 @@ export const Settings: React.FC<SettingsProps> = ({
                     </Segments.Segment>
                 </Segments>
             </SettingsGroup>
-            <SettingsGroup legend="Grain type">
-                <Segments name="Grain type">
-                    <Segments.Segment
-                        isSelected={grainType === 'cubic'}
-                        onClick={() => onGrainTypeChange('cubic')}
-                    >
-                        Cubic
-                    </Segments.Segment>
-                    <Segments.Segment
-                        isSelected={grainType === 'tabular'}
-                        onClick={() => onGrainTypeChange('tabular')}
-                    >
-                        Tabular (beta)
-                    </Segments.Segment>
-                </Segments>
-            </SettingsGroup>
             <SettingsGroup legend="Characteristic curve">
                 <Segments name="Characteristic curve">
                     <Segments.Segment
-                        isSelected={curveType === 'linear'}
-                        onClick={() => onCurveTypeChange('linear')}
+                        isSelected={curveType === 'sigmoid'}
+                        onClick={() => onCurveTypeChange('sigmoid')}
                     >
-                        Linear (test)
-                    </Segments.Segment>
-                    <Segments.Segment
-                        isSelected={curveType === 'power'}
-                        onClick={() => onCurveTypeChange('power')}
-                    >
-                        Power
+                        Sigmoid
                     </Segments.Segment>
                 </Segments>
             </SettingsGroup>

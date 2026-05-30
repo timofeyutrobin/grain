@@ -56,6 +56,8 @@ export default async function handler(
         const [file] = files.img;
         const options = JSON.parse(fields.parameters[0]);
 
+        cleanupDirToSize(resultsDir, Number(maxResultsSize));
+
         const image = sharp(file.filepath);
         const {
             data,
@@ -89,7 +91,7 @@ export default async function handler(
         })
             .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
             .rotate()
-            .normalise({ upper: 96 })
+            .normalise({ upper: 95 })
             .modulate({ saturation: 5 })
             .toFormat('png')
             .toFile(outputPath);
@@ -109,6 +111,5 @@ export default async function handler(
         readdirSync(uploadsDir).forEach((file) =>
             rmSync(`${uploadsDir}/${file}`),
         );
-        cleanupDirToSize(resultsDir, Number(maxResultsSize));
     }
 }

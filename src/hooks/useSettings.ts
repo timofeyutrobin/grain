@@ -35,20 +35,22 @@ export function useSettings() {
     const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
 
     const [curveType, setCurveType] =
-        useState<CharacteristicCurveType>('power');
+        useState<CharacteristicCurveType>('sigmoid');
 
-    const characteristicCurveParamsBuilder =
-        new CharacteristicCurveParamsBuilder()
-            .type(curveType)
-            .layers(3)
-            .powers(1.1, 1.8, 5);
+    const characteristicCurveParams = new CharacteristicCurveParamsBuilder()
+        .type(curveType)
+        .layers(3)
+        .contrast(3, 1.6, 1)
+        .sensitivity(1, 0.5, 0)
+        .build();
 
     const grayscaleRenderParameters = createGrayscaleRenderParameters(
         new GrainGeneratorParamsBuilder()
             .type(grainType)
-            .size(grainSize)
+            .layers(3)
+            .size(grainSize, 2 * grainSize, 3 * grainSize)
             .build(),
-        characteristicCurveParamsBuilder.build(),
+        characteristicCurveParams,
         grainSpread,
     );
 
@@ -59,21 +61,15 @@ export function useSettings() {
                   grayscaleRenderParameters,
                   {
                       color: redDyeColor,
-                      curveParams: characteristicCurveParamsBuilder
-                          .powerScale(0.9)
-                          .build(),
+                      curveParams: characteristicCurveParams,
                   },
                   {
                       color: greenDyeColor,
-                      curveParams: characteristicCurveParamsBuilder
-                          .powerScale(1)
-                          .build(),
+                      curveParams: characteristicCurveParams,
                   },
                   {
                       color: blueDyeColor,
-                      curveParams: characteristicCurveParamsBuilder
-                          .powerScale(1.1)
-                          .build(),
+                      curveParams: characteristicCurveParams,
                   },
               );
 
@@ -124,7 +120,7 @@ function createGrayscaleRenderParameters(
                 grainGeneratorParams: grainGeneratorParams[0],
                 curveParams: curveParams[0],
                 grainSpread,
-                grainColorAlpha: 0.3,
+                grainColorAlpha: 0.5,
                 channel: 'grayscale',
             },
             {
@@ -138,7 +134,7 @@ function createGrayscaleRenderParameters(
                 grainGeneratorParams: grainGeneratorParams[2],
                 curveParams: curveParams[2],
                 grainSpread: 5 * grainSpread,
-                grainColorAlpha: 0.5,
+                grainColorAlpha: 0.1,
                 channel: 'grayscale',
             },
         ],

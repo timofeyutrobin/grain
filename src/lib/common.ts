@@ -14,16 +14,6 @@ export interface Color {
     v: number;
 }
 
-export function isError(value: unknown): value is Error {
-    return (
-        value instanceof Error ||
-        (typeof value === 'object' &&
-            value !== null &&
-            'message' in value &&
-            typeof (value as any).message === 'string')
-    );
-}
-
 export const enum GrainSize {
     s = 1,
     m = 2,
@@ -61,3 +51,21 @@ export const defaultColors = {
         v: 50,
     },
 };
+
+export function isError(value: unknown): value is Error {
+    return (
+        value instanceof Error ||
+        (typeof value === 'object' &&
+            value !== null &&
+            'message' in value &&
+            typeof (value as any).message === 'string')
+    );
+}
+
+export function randomFromTo(from: number, to: number): number {
+    return Math.random() * (to - from) + from;
+}
+
+export function clamp(number: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, number));
+}

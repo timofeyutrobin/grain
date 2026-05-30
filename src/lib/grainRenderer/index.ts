@@ -1,4 +1,4 @@
-import { SimpleImageData } from '@/lib/common';
+import { randomFromTo, SimpleImageData } from '@/lib/common';
 import { getCharacteristicCurve } from '@/lib/grainRenderer/characteristicCurves';
 import { getGrainGenerator } from '@/lib/grainRenderer/grainGenerators';
 import {
@@ -21,18 +21,14 @@ function drawGrain(
         color,
     } = layer;
     const { width, pixels } = dest;
-    const randomOffsetX = Math.round(
-        Math.random() * grainSpread * 2 - grainSpread,
-    );
-    const randomOffsetY = Math.round(
-        Math.random() * grainSpread * 2 - grainSpread,
-    );
+    const randomOffsetX = Math.round(randomFromTo(0, grainSpread));
+    const randomOffsetY = Math.round(randomFromTo(0, grainSpread));
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             if (grain[y * grainSize + x]) {
                 const brightness = color
                     ? color.v
-                    : Math.floor(Math.random() * 20 + 80);
+                    : Math.floor(randomFromTo(80, 100));
 
                 const finalX = offsetX + randomOffsetX + x;
                 const finalY = offsetY + randomOffsetY + y;
@@ -62,17 +58,15 @@ function drawLayer(
 
     let i = 0;
     for (let pixel of nextPixel(src.pixels, layer.channel)) {
-        {
-            if (Math.random() < getCharacteristicCurve(curveParams)(pixel)) {
-                const grain = getGrainGenerator(grainGeneratorParams)();
-                drawGrain(
-                    dest,
-                    grain,
-                    (i % src.width) * resultGridSize,
-                    Math.floor(i / src.width) * resultGridSize,
-                    layer,
-                );
-            }
+        if (Math.random() < getCharacteristicCurve(curveParams)(pixel)) {
+            const grain = getGrainGenerator(grainGeneratorParams)();
+            drawGrain(
+                dest,
+                grain,
+                (i % src.width) * resultGridSize,
+                Math.floor(i / src.width) * resultGridSize,
+                layer,
+            );
         }
         i++;
     }

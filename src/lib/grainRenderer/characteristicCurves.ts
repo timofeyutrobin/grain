@@ -1,10 +1,13 @@
+import { ParamsBuilder } from '@/lib/grainRenderer/ParamsBuilder';
+
 export type CharacteristicCurveParams =
     | {
           type: 'linear';
       }
     | {
-          type: 'power';
-          power: number;
+          type: 'sigmoid';
+          contrast: number;
+          sensitivity: number;
       };
 
 export type CharacteristicCurveType = CharacteristicCurveParams['type'];
@@ -16,31 +19,25 @@ export function getCharacteristicCurve(
     switch (params.type) {
         case 'linear':
             return (x) => x;
-        case 'power':
-            return (x) => Math.pow(x, params.power);
+        case 'sigmoid':
+            return (x) =>
+                (Math.pow(x, params.contrast) /
+                    (Math.pow(x, params.contrast) +
+                        Math.pow(1 - x, params.contrast))) *
+                Math.pow(x, params.sensitivity);
     }
 }
 
-export class CharacteristicCurveParamsBuilder {
-    private layersCount: number = 0;
+export class CharacteristicCurveParamsBuilder extends ParamsBuilder<CharacteristicCurveParams> {
     private curveType: CharacteristicCurveType = 'linear';
-    private curvePowers: number[] = [];
-
-    private validateLayersCount(value: unknown[]) {
-        if (this.layersCount === 0) {
-            throw new RangeError('Set layers() first');
-        }
-        if (value.length !== this.layersCount) {
-            throw new RangeError(
-                'Layers count in value must be equal to general layers count',
-            );
-        }
-    }
+    private curveContrast: number[] = [];
+    private curveSensitivity: number[] = [];
 
     build(): CharacteristicCurveParams[] {
         return new Array(this.layersCount).fill(0).map((_, index) => ({
             type: this.curveType,
-            power: this.curvePowers[index],
+            contrast: this.curveContrast[index],
+            sensitivity: this.curveSensitivity[index],
         }));
     }
 
@@ -57,16 +54,17 @@ export class CharacteristicCurveParamsBuilder {
         return this;
     }
 
-    powers(...powers: number[]): this {
-        this.validateLayersCount(powers);
+    contrast(...contrasts: number[]): this {
+        this.validateLayersCount(contrasts);
 
-        this.curvePowers = powers;
+        this.curveContrast = contrasts;
 
         return this;
     }
 
-    powerScale(scale: number): this {
-        this.curvePowers = this.curvePowers.map((power) => power * scale);
+    sensitivity(...sensitivities: number[]): this {
+        this.validateLayersCount(sensitivities);
+        this.curveSensitivity = sensitivities;
 
         return this;
     }

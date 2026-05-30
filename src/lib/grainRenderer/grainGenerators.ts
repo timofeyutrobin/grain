@@ -1,30 +1,24 @@
-export type GrainGeneratorParams =
-    | {
-          type: 'cubic';
-          grainSize: number;
-          smoothing?: {
-              minNeighbors: number;
-              maxNeighbors: number;
-          };
-      }
-    | {
-          type: 'tabular';
-          grainSize: number;
-          smoothing?: {
-              minNeighbors: number;
-              maxNeighbors: number;
-          };
-      };
+import { clamp, randomFromTo } from '@/lib/common';
+import { ParamsBuilder } from '@/lib/grainRenderer/ParamsBuilder';
+
+export type GrainGeneratorParams = {
+    type: 'cubic';
+    grainSize: number;
+    smoothing?: {
+        minNeighbors: number;
+        maxNeighbors: number;
+    };
+};
 export type GrainGeneratorType = GrainGeneratorParams['type'];
 
 /**
  * Отрисовка начинается с центральной клетки заданной сетки
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
  */
-function steppingGeneration(grainSize: number, stretched?: boolean) {
+function steppingGeneration(grainSize: number): boolean[] {
     const stepsBasis = grainSize ** 2;
     const minSteps = Math.ceil(stepsBasis / 2);
-    const steps = Math.random() * (stepsBasis - minSteps) + minSteps;
+    const steps = randomFromTo(minSteps, stepsBasis);
     const grid: boolean[] = Array(grainSize ** 2).fill(false);
 
     let x = Math.floor(grainSize / 2);
@@ -32,21 +26,14 @@ function steppingGeneration(grainSize: number, stretched?: boolean) {
     grid[y * grainSize + x] = true;
 
     for (let i = 0; i < steps; i++) {
-        const dir = Math.min(
-            3,
-            Math.floor(
-                stretched
-                    ? (Math.random() + Math.random() * 0.7) * 4
-                    : Math.random() * 4,
-            ),
-        );
-        if (dir === 0) x++;
-        if (dir === 1) x--;
-        if (dir === 2) y++;
-        if (dir === 3) y--;
+        const dir = Math.floor(randomFromTo(0, 4));
+        if (dir == 0) x++;
+        if (dir == 1) x--;
+        if (dir == 2) y++;
+        if (dir >= 3) y--;
 
-        x = Math.max(0, Math.min(grainSize - 1, x));
-        y = Math.max(0, Math.min(grainSize - 1, y));
+        x = clamp(x, 0, grainSize - 1);
+        y = clamp(y, 0, grainSize - 1);
 
         grid[y * grainSize + x] = true;
     }
@@ -55,7 +42,7 @@ function steppingGeneration(grainSize: number, stretched?: boolean) {
 }
 
 /**
- * Сглаживание формы зернышка. Числа в массиве меняются на месте.
+ * Сглаживание формы зернышка.
  */
 function smoothGrain(
     grid: boolean[],
@@ -141,73 +128,49 @@ export function getGrainGenerator(params: GrainGeneratorParams) {
 
                 return grid;
             };
-        case 'tabular':
-            return () => {
-                const { grainSize, smoothing } = params;
-
-                let grid = steppingGeneration(grainSize, true);
-
-                if (smoothing) {
-                    grid = smoothGrain(
-                        grid,
-                        grainSize,
-                        smoothing.minNeighbors,
-                        smoothing.maxNeighbors,
-                    );
-                }
-
-                return rotate(grid, grainSize, Math.random() * 360);
-            };
     }
 }
 
-export class GrainGeneratorParamsBuilder {
-    private params: GrainGeneratorParams[] = [
-        { type: 'cubic', grainSize: 1 },
-        { type: 'cubic', grainSize: 1 },
-        { type: 'cubic', grainSize: 1 },
-    ];
+export class GrainGeneratorParamsBuilder extends ParamsBuilder<GrainGeneratorParams> {
+    private grainType: GrainGeneratorType = 'cubic';
+    private grainSize: number[] = [];
 
-    build() {
-        return this.params;
-    }
-
-    layers(count: number) {
-        this.params =
-            count <= this.params.length
-                ? this.params.slice(0, count)
-                : [
-                      ...this.params,
-                      ...new Array(count - this.params.length).fill({
-                          type: 'cubic',
-                          grainSize: 1,
-                      }),
-                  ];
-
-        return this;
-    }
-
-    type(grainType: GrainGeneratorType) {
-        this.params = this.params.map((paramsForLayer) => ({
-            ...paramsForLayer,
-            grainType,
-        }));
-
-        return this;
-    }
-
-    size(grainSizeK: number) {
-        this.params = this.params.map((paramsForLayer, index) => ({
-            ...paramsForLayer,
-            grainSize: (index + 1) * grainSizeK,
+    build(): GrainGeneratorParams[] {
+        return new Array(this.layersCount).fill(0).map((_, index) => ({
+            type: this.grainType,
+            grainSize: this.grainSize[index],
             smoothing:
-                (index + 1) * grainSizeK >= 3
+                this.grainSize[index] >= 3
                     ? {
                           minNeighbors: 2,
                           maxNeighbors: 4,
                       }
                     : undefined,
         }));
+    }
+
+    layers(count: number): this {
+        if (count <= 0) {
+            throw new RangeError('"count" must be positive');
+        }
+        if (this.layersCount > 0) {
+            throw new RangeError('Cannot set layers count more than one time');
+        }
+
+        this.layersCount = Math.floor(count);
+
+        return this;
+    }
+
+    type(grainType: GrainGeneratorType) {
+        this.grainType = grainType;
+
+        return this;
+    }
+
+    size(...grainSize: number[]) {
+        this.validateLayersCount(grainSize);
+        this.grainSize = grainSize;
 
         return this;
     }
