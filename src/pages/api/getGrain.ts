@@ -32,6 +32,9 @@ export default async function handler(
     if (!existsSync(uploadsDir)) {
         mkdirSync(uploadsDir, { recursive: true });
     }
+    if (!existsSync(resultsDir)) {
+        mkdirSync(resultsDir, { recursive: true });
+    }
 
     const form = formidable({
         uploadDir: uploadsDir,
@@ -75,10 +78,6 @@ export default async function handler(
         } = getGrainImage({ width, height, pixels }, options);
 
         const resultFilename = `${uniqueFilename('')}.png`;
-
-        if (!existsSync(resultsDir)) {
-            mkdirSync(resultsDir, { recursive: true });
-        }
 
         const outputPath = path.join(resultsDir, resultFilename);
 
