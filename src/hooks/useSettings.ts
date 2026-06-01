@@ -138,7 +138,7 @@ function createGrayscaleRenderParameters(
                 channel: 'grayscale',
             },
         ],
-        resultGridSize: 2,
+        scale: 2,
     };
 }
 

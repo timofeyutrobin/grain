@@ -77,15 +77,15 @@ export function getGrainImage(
     renderParameters: GrainRenderParameters,
 ): SimpleImageData {
     const destImage = {
-        width: srcImage.width * renderParameters.resultGridSize,
-        height: srcImage.height * renderParameters.resultGridSize,
+        width: srcImage.width * renderParameters.scale,
+        height: srcImage.height * renderParameters.scale,
         pixels: new Float32Array(
-            srcImage.pixels.length * renderParameters.resultGridSize ** 2,
+            srcImage.pixels.length * renderParameters.scale ** 2,
         ),
     };
 
     renderParameters.layers.forEach((layer) => {
-        drawLayer(layer, srcImage, destImage, renderParameters.resultGridSize);
+        drawLayer(layer, srcImage, destImage, renderParameters.scale);
     });
 
     return destImage;

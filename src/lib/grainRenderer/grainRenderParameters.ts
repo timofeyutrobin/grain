@@ -16,5 +16,5 @@ export interface GrainRenderParameters {
     /**
      * Side length
      */
-    resultGridSize: number;
+    scale: number;
 }
