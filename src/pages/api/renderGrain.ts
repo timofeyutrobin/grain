@@ -91,7 +91,6 @@ export default async function handler(
                 height: resultHeight,
             },
         })
-            // .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
             .rotate()
             .normalise({ upper: 95 })
             .modulate({ saturation: 5 })

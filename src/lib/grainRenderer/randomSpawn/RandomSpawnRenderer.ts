@@ -11,6 +11,7 @@ import {
 import { Renderer } from '@/lib/grainRenderer/Renderer';
 import { traverse } from '@/lib/grainUtilities';
 import { addPixelHsl, getPixel } from '@/lib/image';
+import { randomLogNormal } from 'd3-random';
 
 export interface RandomSpawnGrainRenderParameters {
     relativeGrainCount: number;
@@ -20,6 +21,8 @@ export interface RandomSpawnGrainRenderParameters {
 }
 
 export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParameters> {
+    private grainSizeDistribution = randomLogNormal(0.5, 0.6);
+
     constructor(
         srcImage: SimpleImageData,
         params: RandomSpawnGrainRenderParameters,
@@ -74,7 +77,8 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
             const y = Math.floor(randomFromTo(0, this.destImage.height + 1));
             const grainGeneratorParams = {
                 grainSize:
-                    this.params.grainSize * Math.floor(randomFromTo(1, 4)),
+                    this.params.grainSize *
+                    Math.round(this.grainSizeDistribution()),
                 type: this.params.grainType,
             };
             const size = grainGeneratorParams.grainSize;
