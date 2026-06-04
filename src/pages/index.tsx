@@ -1,5 +1,5 @@
 import { Background } from '@/components/Background';
-import { Settings } from '@/components/Settings';
+import { Settings } from '@/components/Settings/Settings';
 import { useSettings } from '@/hooks/useSettings';
 import { ImageType, previewWidth } from '@/lib/common';
 import Image from 'next/image';
@@ -19,8 +19,8 @@ export default function Home() {
         setCurveType,
         grainSize,
         setGrainSize,
-        grainSpread,
-        setGrainSpread,
+        grainCount,
+        setGrainCount,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,
@@ -37,7 +37,7 @@ export default function Home() {
         }
     };
 
-    const handleGenerateClick = async () => {
+    const handleDevelopClick = async () => {
         if (!file) {
             return;
         }
@@ -49,7 +49,7 @@ export default function Home() {
         formData.set('img', file);
         formData.set('parameters', JSON.stringify(renderParameters));
 
-        const response = await fetch('/api/getGrain', {
+        const response = await fetch('/api/renderGrain', {
             method: 'POST',
             body: formData,
         });
@@ -84,13 +84,13 @@ export default function Home() {
                         onBlueDyeColorChange={setBlueDyeColor}
                         grainSize={grainSize}
                         onGrainSizeChange={setGrainSize}
-                        grainSpread={grainSpread}
-                        onGrainSpreadChange={setGrainSpread}
+                        grainCount={grainCount}
+                        onGrainCountChange={setGrainCount}
                         renderParameters={renderParameters}
                     />
                 </section>
                 <button
-                    onClick={handleGenerateClick}
+                    onClick={handleDevelopClick}
                     className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-900 disabled:text-zinc-500 disabled:cursor-not-allowed"
                     disabled={processing || !file}
                 >
