@@ -20,7 +20,7 @@ export const enum GrainSize {
     l = 3,
 }
 
-export const enum GrainSpread {
+export const enum GrainCount {
     s = 1,
     m = 2,
     l = 3,

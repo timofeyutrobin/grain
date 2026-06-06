@@ -1,10 +1,10 @@
 import { Channel } from './common';
 
-export function* nextPixel(rgbaPixels: Float32Array, channel: Channel) {
-    for (let i = 0; i < rgbaPixels.length; i += 3) {
-        const r = rgbaPixels[i];
-        const g = rgbaPixels[i + 1];
-        const b = rgbaPixels[i + 2];
+export function* nextPixel(rgbPixels: Float32Array, channel: Channel) {
+    for (let i = 0; i < rgbPixels.length; i += 3) {
+        const r = rgbPixels[i];
+        const g = rgbPixels[i + 1];
+        const b = rgbPixels[i + 2];
 
         if (channel === 'grayscale') {
             yield 0.299 * r + 0.587 * g + 0.114 * b;
@@ -16,6 +16,29 @@ export function* nextPixel(rgbaPixels: Float32Array, channel: Channel) {
             yield b;
         }
     }
+}
+
+export function getPixel(
+    index: number,
+    rgbPixels: Float32Array,
+    channel: Channel,
+) {
+    index = index * 3;
+    const r = rgbPixels[index];
+    const g = rgbPixels[index + 1];
+    const b = rgbPixels[index + 2];
+
+    if (channel === 'grayscale') {
+        return 0.299 * r + 0.587 * g + 0.114 * b;
+    } else if (channel === 'r') {
+        return r;
+    } else if (channel === 'g') {
+        return g;
+    } else if (channel === 'b') {
+        return b;
+    }
+
+    return 0;
 }
 
 export function addPixelHsl(

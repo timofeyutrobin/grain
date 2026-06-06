@@ -1,7 +1,7 @@
 import { cleanupDirToSize } from '@/lib/apiHelpers';
 import { isError } from '@/lib/common';
 import { convertFloatToUint8, convertUint8ToFloat } from '@/lib/convert';
-import { getGrainImage } from '@/lib/grainRenderer';
+import { RandomSpawnRenderer } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
 import formidable from 'formidable';
 import { existsSync, mkdirSync, readdirSync, rmSync } from 'fs';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -52,12 +52,12 @@ export default async function handler(
             !fields.parameters ||
             !fields.parameters[0]
         ) {
-            res.status(400).json({ error: 'No file or options' });
+            res.status(400).json({ error: 'No file or parameters' });
             return;
         }
 
         const [file] = files.img;
-        const options = JSON.parse(fields.parameters[0]);
+        const parameters = JSON.parse(fields.parameters[0]);
 
         cleanupDirToSize(resultsDir, Number(maxResultsSize));
 
@@ -75,7 +75,10 @@ export default async function handler(
             width: resultWidth,
             height: resultHeight,
             pixels: resultPixels,
-        } = getGrainImage({ width, height, pixels }, options);
+        } = new RandomSpawnRenderer(
+            { width, height, pixels },
+            parameters,
+        ).render();
 
         const resultFilename = `${uniqueFilename('')}.png`;
 
@@ -88,7 +91,6 @@ export default async function handler(
                 height: resultHeight,
             },
         })
-            .resize({ kernel: 'linear', width: Math.floor(resultWidth / 2) })
             .rotate()
             .normalise({ upper: 95 })
             .modulate({ saturation: 5 })
