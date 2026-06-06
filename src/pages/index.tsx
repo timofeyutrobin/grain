@@ -60,8 +60,8 @@ export default function Home() {
     };
 
     return (
-        <main className="fixed flex items-stretch w-full h-full">
-            <aside className="w-md flex flex-col bg-zinc-800">
+        <div className="fixed flex items-stretch w-full h-full">
+            <aside className="w-96 shrink-0 flex flex-col bg-zinc-800">
                 <input
                     className="
                     p-4 bg-zinc-800 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
@@ -97,7 +97,7 @@ export default function Home() {
                     Develop
                 </button>
             </aside>
-            <div className="relative flex flex-col w-full bg-zinc-900 -z-10">
+            <main className="relative basis-full shrink flex flex-col bg-zinc-900 -z-10">
                 <header className="flex h-32 py-4 px-8 ">
                     <Image
                         loading="eager"
@@ -128,7 +128,7 @@ export default function Home() {
                     </>
                 )}
                 <Background />
-            </div>
-        </main>
+            </main>
+        </div>
     );
 }
