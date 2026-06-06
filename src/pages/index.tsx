@@ -1,5 +1,5 @@
 import { Background } from '@/components/Background';
-import { Settings } from '@/components/Settings';
+import { Settings } from '@/components/Settings/Settings';
 import { useSettings } from '@/hooks/useSettings';
 import { ImageType, previewWidth } from '@/lib/common';
 import dynamic from 'next/dynamic';
@@ -25,8 +25,8 @@ export default function Home() {
         setCurveType,
         grainSize,
         setGrainSize,
-        grainSpread,
-        setGrainSpread,
+        grainCount,
+        setGrainCount,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,
@@ -43,7 +43,7 @@ export default function Home() {
         }
     };
 
-    const handleGenerateClick = async () => {
+    const handleDevelopClick = async () => {
         if (!file) {
             return;
         }
@@ -55,7 +55,7 @@ export default function Home() {
         formData.set('img', file);
         formData.set('parameters', JSON.stringify(renderParameters));
 
-        const response = await fetch('/api/getGrain', {
+        const response = await fetch('/api/renderGrain', {
             method: 'POST',
             body: formData,
         });
@@ -66,7 +66,7 @@ export default function Home() {
     };
 
     return (
-        <main className="fixed flex items-stretch w-full h-full">
+        <div className="fixed flex items-stretch w-full h-full">
             <aside className="w-96 shrink-0 flex flex-col bg-zinc-800">
                 <input
                     className="
@@ -90,20 +90,20 @@ export default function Home() {
                         onBlueDyeColorChange={setBlueDyeColor}
                         grainSize={grainSize}
                         onGrainSizeChange={setGrainSize}
-                        grainSpread={grainSpread}
-                        onGrainSpreadChange={setGrainSpread}
+                        grainCount={grainCount}
+                        onGrainCountChange={setGrainCount}
                         renderParameters={renderParameters}
                     />
                 </section>
                 <button
-                    onClick={handleGenerateClick}
+                    onClick={handleDevelopClick}
                     className="mt-auto mb-4 mx-4 p-1 text-2xl border cursor-pointer hover:bg-zinc-600 disabled:bg-zinc-900 disabled:text-zinc-500 disabled:cursor-not-allowed"
                     disabled={processing || !file}
                 >
                     Develop
                 </button>
             </aside>
-            <div className="relative basis-full flex flex-col bg-zinc-900 -z-10">
+            <main className="relative basis-full shrink flex flex-col bg-zinc-900 -z-10">
                 <header className="flex h-32 py-4 px-8 ">
                     <Image
                         loading="eager"
@@ -137,7 +137,7 @@ export default function Home() {
                     </>
                 )}
                 <Background />
-            </div>
-        </main>
+            </main>
+        </div>
     );
 }

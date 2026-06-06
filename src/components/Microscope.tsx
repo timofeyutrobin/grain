@@ -1,13 +1,15 @@
 import { convertFloatToUint8RgbToRgba } from '@/lib/convert';
-import { getGrainImage } from '@/lib/grainRenderer';
-import { GrainRenderParameters } from '@/lib/grainRenderer/grainRenderParameters';
+import {
+    RandomSpawnGrainRenderParameters,
+    RandomSpawnRenderer,
+} from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
 import { generateSampleImageBuffer } from '@/lib/image';
 import { useEffect, useRef } from 'react';
 
 interface MicroscopeProps {
     width: number;
     height: number;
-    renderParameters: GrainRenderParameters;
+    renderParameters: RandomSpawnGrainRenderParameters;
 }
 
 export const Microscope: React.FC<MicroscopeProps> = ({
@@ -17,8 +19,8 @@ export const Microscope: React.FC<MicroscopeProps> = ({
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const bufferWidth = Math.floor(width / 6);
-    const bufferHeight = Math.floor(height / 6);
+    const bufferWidth = Math.floor(width / 3);
+    const bufferHeight = Math.floor(height / 3);
     const sampleImage = generateSampleImageBuffer(bufferWidth, bufferHeight);
 
     useEffect(() => {
@@ -36,17 +38,17 @@ export const Microscope: React.FC<MicroscopeProps> = ({
         createImageBitmap(
             new ImageData(
                 convertFloatToUint8RgbToRgba(
-                    getGrainImage(
+                    new RandomSpawnRenderer(
                         {
                             width: bufferWidth,
                             height: bufferHeight,
                             pixels: sampleImage,
                         },
                         renderParameters,
-                    ).pixels,
+                    ).render().pixels,
                 ),
-                bufferWidth * 2,
-                bufferHeight * 2,
+                bufferWidth,
+                bufferHeight,
             ),
         ).then((bitmap) => {
             ctx.drawImage(bitmap, 0, 0, width, height);
