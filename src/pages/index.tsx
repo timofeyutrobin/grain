@@ -115,7 +115,7 @@ export default function Home() {
                         unoptimized
                     />
                 </header>
-                <div className="h-125 mx-9 mt-9 border border-white bg-black/20">
+                <div className="h-2/3 mx-9 mt-9 border border-white bg-black">
                     <Presentation />
                 </div>
                 {resultFilename && (

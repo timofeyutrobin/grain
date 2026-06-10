@@ -66,6 +66,10 @@ export function randomFromTo(from: number, to: number): number {
     return Math.random() * (to - from) + from;
 }
 
-export function clamp(number: number, min: number, max: number) {
+export function clamp(number: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, number));
+}
+
+export function radians(degrees: number): number {
+    return (Math.PI / 180) * degrees;
 }
