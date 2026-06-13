@@ -8,6 +8,8 @@
         "start": "next start"
     },
     "dependencies": {
+        "@react-three/drei": "10.7.7",
+        "@react-three/fiber": "9.6.1",
         "colord": "2.9.3",
         "d3-random": "3.0.1",
         "formidable": "3.5.4",
@@ -15,6 +17,7 @@
         "react": "19.2.3",
         "react-dom": "19.2.3",
         "sharp": "0.34.5",
+        "three": "0.184.0",
         "unique-filename": "5.0.0"
     },
     "devDependencies": {
@@ -23,6 +26,7 @@
         "@types/formidable": "3.4.6",
         "@types/node": "25.0.10",
         "@types/react": "19.2.10",
+        "@types/three": "0.184.1",
         "babel-plugin-react-compiler": "1.0.0",
         "tailwindcss": "4.1.18",
         "typescript": "5.9.3"
