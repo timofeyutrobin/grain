@@ -32,6 +32,12 @@ export const enum ImageType {
     PREVIEW = 'preview',
 }
 
+export const WELCOME_INTRO_STATE = 'welcome_intro_state';
+export enum WelcomeTourState {
+    TOUR_STATE_GREETING_SEEN = 'greeting_seen',
+    TOUR_STATE_INTRO_SEEN = 'intro_seen',
+}
+
 export const previewWidth = 600;
 
 export const defaultColors = {
@@ -72,4 +78,8 @@ export function clamp(number: number, min: number, max: number): number {
 
 export function radians(degrees: number): number {
     return (Math.PI / 180) * degrees;
+}
+
+export function lerpFactor(distanceForSecond: number, delta: number): number {
+    return 1 - Math.pow(1 - distanceForSecond, delta);
 }

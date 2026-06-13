@@ -21,7 +21,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             </label>
             <button
                 title="Restore default"
-                className="ml-auto mr-1 text-xs text-amber-300 underline cursor-pointer"
+                className="ml-auto mr-1 text-xs text-stone-200 underline cursor-pointer"
                 onClick={() => onChange(defaultColor)}
             >
                 &#9166;

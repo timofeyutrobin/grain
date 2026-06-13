@@ -20,7 +20,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
                 {legend}
                 {hint && (
                     <button
-                        className="inline align-middle ml-2 text-xs text-amber-300 underline cursor-pointer"
+                        className="inline align-middle ml-2 text-xs text-stone-200 underline cursor-pointer"
                         onClick={() => setIsShowed((isShowed) => !isShowed)}
                     >
                         {isShowed ? 'Close' : 'Learn more'}

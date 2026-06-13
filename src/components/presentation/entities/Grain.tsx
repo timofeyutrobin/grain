@@ -1,6 +1,7 @@
-import { useFrame, useLoader } from '@react-three/fiber';
-import { useEffect, useRef } from 'react';
-import { Mesh, RepeatWrapping, TextureLoader } from 'three';
+import { useTexture } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
+import { useRef } from 'react';
+import { Mesh, RepeatWrapping } from 'three';
 
 interface GrainProps {
     rotate?: boolean;
@@ -16,17 +17,14 @@ export const Grain: React.FC<GrainProps> = ({
     const meshRef = useRef<Mesh>(null);
     const time = useRef(0);
 
-    const surfaceTexture = useLoader(
-        TextureLoader,
+    const surfaceTexture = useTexture(
         '/textures/grain-surface.jpg',
+        (texture) => {
+            texture.wrapT = RepeatWrapping;
+            texture.wrapS = RepeatWrapping;
+            texture.repeat.set(5, 5);
+        },
     );
-
-    useEffect(() => {
-        surfaceTexture.wrapT = RepeatWrapping;
-        surfaceTexture.wrapS = RepeatWrapping;
-        surfaceTexture.repeat.x = 5;
-        surfaceTexture.repeat.y = 5;
-    }, [surfaceTexture]);
 
     useFrame((_, delta) => {
         if (!meshRef.current) {
@@ -50,14 +48,14 @@ export const Grain: React.FC<GrainProps> = ({
     });
 
     return (
-        <mesh ref={meshRef} castShadow>
+        <mesh ref={meshRef} name="grain">
             <dodecahedronGeometry args={[1, 0]} />
             <meshPhysicalMaterial
                 metalness={0.5}
                 roughness={0.8}
-                color="#3E4244"
-                map={surfaceTexture}
-                bumpMap={surfaceTexture}
+                color="#78716c"
+                map={surfaceTexture ?? undefined}
+                bumpMap={surfaceTexture ?? undefined}
             />
         </mesh>
     );
