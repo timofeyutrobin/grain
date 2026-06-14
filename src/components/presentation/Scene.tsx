@@ -1,4 +1,3 @@
-import { Caption } from '@/components/presentation/entities/Caption';
 import { Grain } from '@/components/presentation/entities/Grain';
 import { GrainCluster } from '@/components/presentation/entities/GrainCluster';
 import { Negative } from '@/components/presentation/entities/Negative';
@@ -8,11 +7,11 @@ import React, { useRef } from 'react';
 import { DirectionalLight } from 'three';
 import { lerp } from 'three/src/math/MathUtils.js';
 
-interface SlidesProps {
+interface SceneProps {
     currentSlide: number;
 }
 
-export const Scene: React.FC<SlidesProps> = ({ currentSlide }) => {
+export const Scene: React.FC<SceneProps> = ({ currentSlide }) => {
     const lightRef = useRef<DirectionalLight>(null);
 
     useFrame((state, delta) => {
@@ -58,16 +57,6 @@ export const Scene: React.FC<SlidesProps> = ({ currentSlide }) => {
                     <object3D scale={0.8}>
                         <Grain rotate float />
                     </object3D>
-                    {currentSlide === 0 && (
-                        <Caption
-                            float
-                            text="This is a grain."
-                            position={[-1.6, 1.3, 1]}
-                            linePosition="bottom"
-                            pointerPosition="right"
-                            length={1.5}
-                        />
-                    )}
                 </object3D>
             )}
             <object3D position={[0, 0, 5]}>
