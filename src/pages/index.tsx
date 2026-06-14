@@ -1,6 +1,7 @@
 import { Background } from '@/components/Background';
 import { ButtonLink } from '@/components/button/ButtonLink';
 import { ControlPanel } from '@/components/ControlPanel';
+import { DebugOverlay } from '@/components/DebugOverlay';
 import { Greeting } from '@/components/Greeting';
 import { Logo } from '@/components/Logo';
 import { Presentation } from '@/components/presentation/Presentation';
@@ -43,6 +44,7 @@ function Home() {
 
     return (
         <>
+            {process.env.NODE_ENV !== 'production' && <DebugOverlay />}
             <Greeting />
             <div className={`fixed flex items-stretch w-full h-full`}>
                 {welcomeTourState ===
