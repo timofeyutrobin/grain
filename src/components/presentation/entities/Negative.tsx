@@ -1,7 +1,8 @@
-import { useTexture } from '@react-three/drei';
+import { useLoader } from '@react-three/fiber';
+import { TextureLoader } from 'three';
 
 export const Negative: React.FC = () => {
-    const image = useTexture('/images/demo-negative.jpg');
+    const image = useLoader(TextureLoader, '/images/demo-negative.jpg');
 
     return (
         <mesh position={[0, 0, 0]}>

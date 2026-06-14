@@ -1,7 +1,6 @@
-import { useTexture } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
-import { Mesh, RepeatWrapping } from 'three';
+import { useFrame, useLoader } from '@react-three/fiber';
+import { useLayoutEffect, useRef } from 'react';
+import { Mesh, RepeatWrapping, TextureLoader } from 'three';
 
 interface GrainProps {
     rotate?: boolean;
@@ -17,14 +16,16 @@ export const Grain: React.FC<GrainProps> = ({
     const meshRef = useRef<Mesh>(null);
     const time = useRef(0);
 
-    const surfaceTexture = useTexture(
+    const surfaceTexture = useLoader(
+        TextureLoader,
         '/textures/grain-surface.jpg',
-        (texture) => {
-            texture.wrapT = RepeatWrapping;
-            texture.wrapS = RepeatWrapping;
-            texture.repeat.set(5, 5);
-        },
     );
+
+    useLayoutEffect(() => {
+        surfaceTexture.wrapT = RepeatWrapping;
+        surfaceTexture.wrapS = RepeatWrapping;
+        surfaceTexture.repeat.set(5, 5);
+    }, [surfaceTexture]);
 
     useFrame((_, delta) => {
         if (!meshRef.current) {
