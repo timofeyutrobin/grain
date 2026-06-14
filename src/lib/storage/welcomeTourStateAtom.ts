@@ -7,4 +7,6 @@ export enum WelcomeIntroState {
 export default atomWithStorage<WelcomeIntroState | null>(
     'welcome_intro_state',
     null,
+    undefined,
+    { getOnInit: true },
 );
