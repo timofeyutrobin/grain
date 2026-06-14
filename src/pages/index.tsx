@@ -4,30 +4,18 @@ import { ControlPanel } from '@/components/ControlPanel';
 import { Greeting } from '@/components/Greeting';
 import { Logo } from '@/components/Logo';
 import { Presentation } from '@/components/presentation/Presentation';
-import {
-    ImageType,
-    previewWidth,
-    WELCOME_INTRO_STATE,
-    WelcomeTourState,
-} from '@/lib/common';
+import { ImageType, previewWidth } from '@/lib/common';
 import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import welcomeTourStateAtom, {
+    WelcomeIntroState,
+} from '@/lib/storage/welcomeTourStateAtom';
+import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 function Home() {
-    const [welcomeTourState, setWelcomeTourState] =
-        useState<WelcomeTourState | null>(
-            localStorage.getItem(WELCOME_INTRO_STATE) as WelcomeTourState,
-        );
-
-    useEffect(() => {
-        if (!welcomeTourState) {
-            return;
-        }
-
-        localStorage.setItem(WELCOME_INTRO_STATE, welcomeTourState);
-    }, [welcomeTourState]);
+    const [welcomeTourState] = useAtom(welcomeTourStateAtom);
 
     const [loading, setLoading] = useState(false);
     const [resultFilename, setResultFilename] = useState<string | null>(null);
@@ -55,33 +43,23 @@ function Home() {
 
     return (
         <>
-            <Greeting
-                hasSeen={welcomeTourState !== null}
-                onStartPresentation={() =>
-                    setWelcomeTourState(
-                        WelcomeTourState.TOUR_STATE_GREETING_SEEN,
-                    )
-                }
-                onSkip={() => {
-                    setWelcomeTourState(WelcomeTourState.TOUR_STATE_INTRO_SEEN);
-                }}
-            />
+            <Greeting />
             <div className={`fixed flex items-stretch w-full h-full`}>
                 {welcomeTourState ===
-                    WelcomeTourState.TOUR_STATE_INTRO_SEEN && (
+                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                     <ControlPanel onDevelop={handleDevelop} loading={loading} />
                 )}
                 <main className="relative basis-full shrink flex flex-col bg-zinc-900 -z-10">
                     {welcomeTourState !==
-                        WelcomeTourState.TOUR_STATE_GREETING_SEEN && (
+                        WelcomeIntroState.TOUR_STATE_GREETING_SEEN && (
                         <header className="self-center w-1/2 h-32 py-8 px-8">
                             <Logo className="min-w-80" />
                         </header>
                     )}
                     {welcomeTourState !==
-                        WelcomeTourState.TOUR_STATE_INTRO_SEEN && (
+                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                         <Presentation
-                            className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeTourState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                            className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
                         />
                     )}
                     {resultFilename && (

@@ -32,12 +32,6 @@ export const enum ImageType {
     PREVIEW = 'preview',
 }
 
-export const WELCOME_INTRO_STATE = 'welcome_intro_state';
-export enum WelcomeTourState {
-    TOUR_STATE_GREETING_SEEN = 'greeting_seen',
-    TOUR_STATE_INTRO_SEEN = 'intro_seen',
-}
-
 export const previewWidth = 600;
 
 export const defaultColors = {

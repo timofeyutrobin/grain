@@ -1,36 +1,45 @@
 import { Button } from '@/components/button/Button';
+import welcomeTourStateAtom, {
+    WelcomeIntroState,
+} from '@/lib/storage/welcomeTourStateAtom';
+import { useAtom } from 'jotai';
 import { useEffect, useRef } from 'react';
 
-interface GreetingProps {
-    hasSeen: boolean;
-    onStartPresentation: () => void;
-    onSkip: () => void;
-}
-
-export const Greeting: React.FC<GreetingProps> = ({
-    hasSeen,
-    onStartPresentation,
-    onSkip,
-}) => {
+export const Greeting: React.FC = () => {
+    const [welcomeIntroState, setWelcomeIntroState] =
+        useAtom(welcomeTourStateAtom);
     const dialogRef = useRef<HTMLDialogElement>(null);
 
     useEffect(() => {
         const dialog = dialogRef.current;
 
-        if (!hasSeen && dialog && !dialog.open) {
-            dialog.showModal();
+        if (!dialog) {
+            return;
         }
-    }, [hasSeen]);
+
+        if (welcomeIntroState === null && !dialog.open) {
+            dialog.showModal();
+        } else if (welcomeIntroState && dialog.open) {
+            dialog.close(welcomeIntroState);
+        }
+    }, [welcomeIntroState]);
 
     return (
         <dialog
             className="fixed w-screen h-screen max-w-full max-h-full bg-transparent"
             ref={dialogRef}
             onClose={() => {
-                if (dialogRef.current?.returnValue === 'watch') {
-                    onStartPresentation();
+                if (
+                    dialogRef.current?.returnValue ===
+                    WelcomeIntroState.TOUR_STATE_GREETING_SEEN
+                ) {
+                    setWelcomeIntroState(
+                        WelcomeIntroState.TOUR_STATE_GREETING_SEEN,
+                    );
                 } else {
-                    onSkip();
+                    setWelcomeIntroState(
+                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN,
+                    );
                 }
             }}
         >
@@ -50,7 +59,9 @@ export const Greeting: React.FC<GreetingProps> = ({
                     <footer className="mt-6 flex space-x-4">
                         <Button
                             onClick={() => {
-                                dialogRef.current?.close('watch');
+                                dialogRef.current?.close(
+                                    WelcomeIntroState.TOUR_STATE_GREETING_SEEN,
+                                );
                             }}
                         >
                             Watch intro
@@ -58,7 +69,9 @@ export const Greeting: React.FC<GreetingProps> = ({
                         <Button
                             secondary
                             onClick={() => {
-                                dialogRef.current?.close();
+                                dialogRef.current?.close(
+                                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN,
+                                );
                             }}
                         >
                             Skip
