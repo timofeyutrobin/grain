@@ -47,7 +47,12 @@ export const GrainCluster: React.FC<GrainClusterProps> = ({
         <object3D>
             {grains.map(
                 ({ id, phaseShift, scatteredPosition, washed, ...props }) => (
-                    <object3D {...props} name={id.toString()} key={id}>
+                    <object3D
+                        {...props}
+                        position={scatteredPosition}
+                        name={id.toString()}
+                        key={id}
+                    >
                         <Grain
                             geometry={geometry}
                             material={washed ? washedMaterial : material}
