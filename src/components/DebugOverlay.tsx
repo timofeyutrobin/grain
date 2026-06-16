@@ -1,6 +1,6 @@
 import welcomeTourStateAtom, {
     WelcomeIntroState,
-} from '@/lib/storage/welcomeTourStateAtom';
+} from '@/lib/presentation/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
 
 export const DebugOverlay: React.FC = () => {

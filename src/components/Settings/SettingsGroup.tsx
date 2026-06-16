@@ -4,9 +4,11 @@ interface SettingsGroupProps {
     legend: string;
     ariaLabel?: string;
     hint?: ReactNode;
+    className?: string;
 }
 
 export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
+    className,
     children,
     ariaLabel,
     legend,
@@ -15,7 +17,10 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
     const [isShowed, setIsShowed] = useState(false);
 
     return (
-        <fieldset aria-label={ariaLabel} className="mb-4 p-4 border">
+        <fieldset
+            aria-label={ariaLabel}
+            className={`p-4 border border-stone-200 ${className ?? ''}`}
+        >
             <legend className="p-1">
                 {legend}
                 {hint && (

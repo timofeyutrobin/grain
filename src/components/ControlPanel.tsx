@@ -1,5 +1,6 @@
 import { Button } from '@/components/button/Button';
 import { Settings } from '@/components/settings/Settings';
+import { SettingsGroup } from '@/components/settings/SettingsGroup';
 import { useSettings } from '@/hooks/useSettings';
 import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
 import { ChangeEventHandler, useState } from 'react';
@@ -10,11 +11,13 @@ interface ControlPanelProps {
         renderParameters: RandomSpawnGrainRenderParameters,
     ) => void;
     loading?: boolean;
+    className?: string;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
     onDevelop,
     loading,
+    className,
 }) => {
     const [file, setFile] = useState<File | null>(null);
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
@@ -51,16 +54,18 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     };
 
     return (
-        <aside className="w-96 shrink-0 flex flex-col bg-zinc-800">
-            <input
-                className="
-                            p-4 bg-zinc-800 file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
+        <aside className={`flex flex-col bg-zinc-800 ${className ?? ''}`}>
+            <section className="my-4 px-4 overflow-y-scroll space-y-4">
+                <SettingsGroup legend="File">
+                    <input
+                        className="w-full
+                            file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
                             file:bg-stone-5 hover:cursor-pointer hover:file:bg-stone-200 hover:file:cursor-pointer hover:file:text-stone-900
                         "
-                type="file"
-                onChange={handleFileChange}
-            />
-            <section className="my-4 px-4 overflow-y-scroll">
+                        type="file"
+                        onChange={handleFileChange}
+                    />
+                </SettingsGroup>
                 <Settings
                     mode={mode}
                     onModeChange={setMode}

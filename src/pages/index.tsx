@@ -9,7 +9,7 @@ import { ImageType, previewWidth } from '@/lib/common';
 import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
 import welcomeTourStateAtom, {
     WelcomeIntroState,
-} from '@/lib/storage/welcomeTourStateAtom';
+} from '@/lib/presentation/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -46,45 +46,61 @@ function Home() {
         <>
             {process.env.NODE_ENV !== 'production' && <DebugOverlay />}
             <Greeting />
-            <div className={`fixed flex items-stretch w-full h-full`}>
-                {welcomeTourState ===
+            <ControlPanel
+                className={`
+                    absolute top-0 left-0
+                    w-96 h-full
+                    transition-transform duration-500
+                    ${welcomeTourState != WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : ''}
+                `}
+                onDevelop={handleDevelop}
+                loading={loading}
+            />
+            <main className="absolute w-full h-full pl-96 flex flex-col bg-zinc-900 -z-10">
+                <header
+                    className={`
+                        self-center
+                        w-full max-w-2xl h-32
+                        py-8 px-8
+                        transition-all duration-500
+                        ${
+                            welcomeTourState === null
+                                ? '-translate-x-48'
+                                : welcomeTourState ===
+                                    WelcomeIntroState.TOUR_STATE_GREETING_SEEN
+                                  ? 'opacity-0 -translate-x-48'
+                                  : ''
+                        }
+                    `}
+                >
+                    <Logo className="object-contain" />
+                </header>
+                {welcomeTourState !==
                     WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                    <ControlPanel onDevelop={handleDevelop} loading={loading} />
+                    <Presentation
+                        className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                    />
                 )}
-                <main className="relative basis-full shrink flex flex-col bg-zinc-900 -z-10">
-                    {welcomeTourState !==
-                        WelcomeIntroState.TOUR_STATE_GREETING_SEEN && (
-                        <header className="self-center w-1/2 h-32 py-8 px-8">
-                            <Logo className="min-w-80" />
-                        </header>
-                    )}
-                    {welcomeTourState !==
-                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                        <Presentation
-                            className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                {resultFilename && (
+                    <>
+                        <Image
+                            src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
+                            alt="Result preview"
+                            width={previewWidth}
+                            height={previewWidth}
+                            className="mt-8 mx-auto"
                         />
-                    )}
-                    {resultFilename && (
-                        <>
-                            <Image
-                                src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
-                                alt="Result preview"
-                                width={previewWidth}
-                                height={previewWidth}
-                                className="mt-8 mx-auto"
-                            />
-                            <ButtonLink
-                                className="mx-auto my-8"
-                                href={`api/images/${resultFilename}/${ImageType.RESULT}`}
-                                download
-                            >
-                                Download Result
-                            </ButtonLink>
-                        </>
-                    )}
-                    <Background className="absolute top-0 left-0 w-full h-full -z-10" />
-                </main>
-            </div>
+                        <ButtonLink
+                            className="mx-auto my-8"
+                            href={`api/images/${resultFilename}/${ImageType.RESULT}`}
+                            download
+                        >
+                            Download Result
+                        </ButtonLink>
+                    </>
+                )}
+                <Background className="absolute top-0 left-0 w-full h-full -z-10" />
+            </main>
         </>
     );
 }

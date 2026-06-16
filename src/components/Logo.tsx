@@ -6,7 +6,7 @@ export const Logo: React.FC<{ className?: string }> = ({ className }) => {
             className={className}
             loading="eager"
             src="/logo.webp"
-            alt="logo"
+            alt="emulsion engine"
             width={843}
             height={93}
             unoptimized
