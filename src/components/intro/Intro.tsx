@@ -1,10 +1,10 @@
 import { Button } from '@/components/button/Button';
-import { Card } from '@/components/presentation/components/Card';
-import { Scene } from '@/components/presentation/components/Scene';
+import { Card } from '@/components/intro/components/Card';
+import { Scene } from '@/components/intro/components/Scene';
 import { clamp } from '@/lib/common';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
-} from '@/lib/presentation/storage/welcomeIntroStateAtom';
+} from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { Canvas } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import { useState } from 'react';
@@ -103,9 +103,7 @@ const text = [
     },
 ] as const;
 
-export const Presentation: React.FC<{ className?: string }> = ({
-    className,
-}) => {
+export const Intro: React.FC<{ className?: string }> = ({ className }) => {
     const [_, setWelcomeIntroState] = useAtom(welcomeIntroStateAtom);
     const stepsCount = text.length;
     const [currentStep, setCurrentStep] = useState(0);

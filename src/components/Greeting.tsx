@@ -1,7 +1,7 @@
 import { Button } from '@/components/button/Button';
 import welcomeTourStateAtom, {
     WelcomeIntroState,
-} from '@/lib/presentation/storage/welcomeIntroStateAtom';
+} from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
 import { useEffect, useRef } from 'react';
 

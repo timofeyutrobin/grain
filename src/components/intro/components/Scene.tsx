@@ -1,9 +1,9 @@
-import { Grain } from '@/components/presentation/entities/Grain';
-import { GrainCluster } from '@/components/presentation/entities/GrainCluster';
+import { Grain } from '@/components/intro/entities/Grain';
+import { GrainCluster } from '@/components/intro/entities/GrainCluster';
 import {
     lightRaysFragmentShader,
     lightRaysVertexShader,
-} from '@/components/presentation/shaders';
+} from '@/components/intro/shaders';
 import { lerpFactor, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useLayoutEffect, useRef } from 'react';

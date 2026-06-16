@@ -3,13 +3,13 @@ import { ButtonLink } from '@/components/button/ButtonLink';
 import { ControlPanel } from '@/components/ControlPanel';
 import { DebugOverlay } from '@/components/DebugOverlay';
 import { Greeting } from '@/components/Greeting';
+import { Intro } from '@/components/intro/Intro';
 import { Logo } from '@/components/Logo';
-import { Presentation } from '@/components/presentation/Presentation';
 import { ImageType, previewWidth } from '@/lib/common';
 import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
 import welcomeTourStateAtom, {
     WelcomeIntroState,
-} from '@/lib/presentation/storage/welcomeIntroStateAtom';
+} from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
@@ -77,7 +77,7 @@ function Home() {
                 </header>
                 {welcomeTourState !==
                     WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                    <Presentation
+                    <Intro
                         className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
                     />
                 )}

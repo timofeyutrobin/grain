@@ -1,5 +1,5 @@
-import { Grain } from '@/components/presentation/entities/Grain';
-import { grains } from '@/components/presentation/entities/GrainCluster/grains';
+import { Grain } from '@/components/intro/entities/Grain';
+import { grains } from '@/components/intro/entities/GrainCluster/grains';
 import { lerpFactor } from '@/lib/common';
 import { useFrame } from '@react-three/fiber';
 import { RefObject } from 'react';
