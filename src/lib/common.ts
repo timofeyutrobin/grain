@@ -52,6 +52,8 @@ export const defaultColors = {
     },
 };
 
+export type PropsWithClassName<T = {}> = { className?: string } & T;
+
 export function isError(value: unknown): value is Error {
     return (
         value instanceof Error ||

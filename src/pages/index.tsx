@@ -5,9 +5,10 @@ import { DebugOverlay } from '@/components/DebugOverlay';
 import { Greeting } from '@/components/Greeting';
 import { Intro } from '@/components/intro/Intro';
 import { Logo } from '@/components/Logo';
+import { WatchIntroButton } from '@/components/WatchIntroButton';
 import { ImageType, previewWidth } from '@/lib/common';
 import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
-import welcomeTourStateAtom, {
+import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
@@ -16,7 +17,7 @@ import Image from 'next/image';
 import { useState } from 'react';
 
 function Home() {
-    const [welcomeTourState] = useAtom(welcomeTourStateAtom);
+    const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
 
     const [loading, setLoading] = useState(false);
     const [resultFilename, setResultFilename] = useState<string | null>(null);
@@ -46,12 +47,17 @@ function Home() {
         <>
             {process.env.NODE_ENV !== 'production' && <DebugOverlay />}
             <Greeting />
+            {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
+                <Intro
+                    className={`absolute top-0 left-0 w-full h-full ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                />
+            )}
             <ControlPanel
                 className={`
                     absolute top-0 left-0
                     w-96 h-full
                     transition-transform duration-500
-                    ${welcomeTourState != WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : ''}
+                    ${welcomeIntroState != WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : ''}
                 `}
                 onDevelop={handleDevelop}
                 loading={loading}
@@ -60,27 +66,23 @@ function Home() {
                 <header
                     className={`
                         self-center
-                        w-full max-w-2xl h-32
+                        w-full h-32
+                        flex justify-center items-center
                         py-8 px-8
                         transition-all duration-500
                         ${
-                            welcomeTourState === null
+                            welcomeIntroState === null
                                 ? '-translate-x-48'
-                                : welcomeTourState ===
+                                : welcomeIntroState ===
                                     WelcomeIntroState.TOUR_STATE_GREETING_SEEN
                                   ? 'opacity-0 -translate-x-48'
                                   : ''
                         }
                     `}
                 >
-                    <Logo className="object-contain" />
+                    <Logo className="max-w-2xl object-contain" />
+                    <WatchIntroButton className="mx-8" />
                 </header>
-                {welcomeTourState !==
-                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                    <Intro
-                        className={`absolute top-0 left-0 w-full h-full ${welcomeTourState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
-                    />
-                )}
                 {resultFilename && (
                     <>
                         <Image

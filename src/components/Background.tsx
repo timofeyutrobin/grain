@@ -1,6 +1,7 @@
+import { PropsWithClassName } from '@/lib/common';
 import React, { useEffect, useRef } from 'react';
 
-export const Background: React.FC<{ className?: string }> = ({ className }) => {
+export const Background: React.FC<PropsWithClassName> = ({ className }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {

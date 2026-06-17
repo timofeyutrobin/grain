@@ -1,9 +1,9 @@
+import { PropsWithClassName } from '@/lib/common';
 import Link, { LinkProps } from 'next/link';
 import { PropsWithChildren } from 'react';
 
 export const ButtonLink: React.FC<
-    PropsWithChildren<LinkProps> & {
-        className?: string;
+    PropsWithClassName<PropsWithChildren<LinkProps>> & {
         secondary?: boolean;
         download?: boolean;
         small?: boolean;

@@ -1,7 +1,7 @@
 import { Button } from '@/components/button/Button';
 import { Card } from '@/components/intro/components/Card';
 import { Scene } from '@/components/intro/components/Scene';
-import { clamp } from '@/lib/common';
+import { clamp, PropsWithClassName } from '@/lib/common';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
@@ -45,7 +45,7 @@ const text = [
                 остались в тени, смываются в процессе обработки пленки.
             </>
         ),
-        buttonText: null,
+        buttonText: 'Активировать зерна',
     },
     {
         title: 'Вероятность',
@@ -103,7 +103,7 @@ const text = [
     },
 ] as const;
 
-export const Intro: React.FC<{ className?: string }> = ({ className }) => {
+export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
     const [_, setWelcomeIntroState] = useAtom(welcomeIntroStateAtom);
     const stepsCount = text.length;
     const [currentStep, setCurrentStep] = useState(0);

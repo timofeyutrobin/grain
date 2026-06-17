@@ -1,6 +1,7 @@
+import { PropsWithClassName } from '@/lib/common';
 import { PropsWithChildren } from 'react';
 
-export const Card: React.FC<PropsWithChildren<{ className?: string }>> = ({
+export const Card: React.FC<PropsWithChildren<PropsWithClassName>> = ({
     children,
     className,
 }) => {

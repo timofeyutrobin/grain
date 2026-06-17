@@ -1,6 +1,7 @@
+import { PropsWithClassName } from '@/lib/common';
 import Image from 'next/image';
 
-export const Logo: React.FC<{ className?: string }> = ({ className }) => {
+export const Logo: React.FC<PropsWithClassName> = ({ className }) => {
     return (
         <Image
             className={className}

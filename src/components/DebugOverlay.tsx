@@ -6,7 +6,7 @@ import { useAtom } from 'jotai';
 export const DebugOverlay: React.FC = () => {
     const [_, setWelcomeIntroState] = useAtom(welcomeTourStateAtom);
     return (
-        <div className="fixed top-0 right-0 bg-zinc-200 z-100 w-32">
+        <div className="fixed bottom-0 right-0 bg-zinc-200 z-100">
             <button
                 onClick={() =>
                     setWelcomeIntroState(
