@@ -8,7 +8,7 @@ export default `
     varying vec2 vUv;
 
     void main() {
-        vUv = position.xy / 16.0 + 0.5;
+        vUv = vec2(position.x / 16.0, position.y / 10.0) + 0.5;
         vec3 p = position;
 
         float wave = sin(uTime * uSpeed + p.x * uFrequency) * cos(uTime * uSpeed * 0.7 + p.y * uFrequency * 0.5);

@@ -14,24 +14,24 @@ const text = [
     {
         title: 'Зерно',
         paragraph: (
-            <>
+            <p>
                 Перед вами кристалл галогенида серебра. Именно его мы называем
                 "зерно". Это главный строительный кирпичик любой фотопленки.
                 Каждое зёрнышко — уникально, но есть кое-что, что их всех
                 объединяет — они обладают чувствительностью к свету.
-            </>
+            </p>
         ),
         buttonText: null,
     },
     {
         title: 'Фотоэмульсия',
         paragraph: (
-            <>
+            <p>
                 Фотоэмульсия — это светочувствительный слой любой фотопленки.
                 Внутри неё мы увидим множество кристаллов, которые плавают в
                 ней, подобно взвеси. Но что же происходит, когда свет попадает
                 на это облако зерна? Давайте узнаем!
-            </>
+            </p>
         ),
         buttonText: 'Зажечь свет',
     },
@@ -39,11 +39,22 @@ const text = [
         title: 'Экспозиция',
         paragraph: (
             <>
-                Как только затвор камеры открывается, свет заливает собой
-                поверхность пленки. Кристаллы, которые получили достаточно
-                света, активируются. Затем, в процессе проявки, эти кристаллы
-                превращаются в металлическое серебро и чернеют. А те, которые
-                остались в тени, смываются в процессе обработки пленки.
+                <p>
+                    Благодаря устройству камеры и объектива, на пленку
+                    проецируется изображение.
+                </p>
+                <p>
+                    Изображение — это поток фотонов, меняющий свою интенсивность
+                    в зависимости от яркости объекта, который вы снимаете.
+                </p>
+                <p>
+                    Как только затвор камеры открывается, свет заливает собой
+                    поверхность пленки. Кристаллы, которые получили много света,
+                    активируются. Затем, в процессе проявки, эти кристаллы
+                    превращаются в металлическое серебро и чернеют. А те,
+                    которые остались в тени, смываются в процессе обработки
+                    пленки.
+                </p>
             </>
         ),
         buttonText: 'Активировать зерна',
@@ -52,12 +63,17 @@ const text = [
         title: 'Вероятность',
         paragraph: (
             <>
-                Когда свет попадает на зернышко, оно может либо активироваться,
-                либо остаться в исходном состоянии. Мы можем представить, что
-                это случайное событие. Чем больше света попало на зернышко, тем
-                выше вероятность, что оно активируется и станет частью
-                изображения. В этой симуляции распределение вероятностей
-                задаётся S-образной кривой.
+                <p>
+                    Когда свет попадает на зернышко, оно может либо
+                    активироваться, либо остаться в исходном состоянии. Мы можем
+                    представить, что это случайное событие. Чем больше света
+                    попало на зернышко, тем выше вероятность, что оно
+                    активируется и станет частью изображения.
+                </p>
+                <p>
+                    Мы можем предположить, что каждое зернышко имеет формулу
+                    распределения вероятностей. P = (...)
+                </p>
             </>
         ),
         buttonText: null,
@@ -66,16 +82,18 @@ const text = [
         title: 'Изображение',
         paragraph: (
             <>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Maecenas dui arcu, tincidunt vitae dui in, egestas pellentesque
-                lectus. Donec in nisl erat. In varius tellus in mauris posuere,
-                ac tempus ante laoreet. Sed tempor felis in sapien feugiat, sit
-                amet maximus urna rutrum. Aenean ut tortor et purus commodo
-                feugiat. Etiam in pellentesque mi. Maecenas et neque nec nunc
-                mattis interdum vel vitae nisi. Phasellus dapibus porta
-                accumsan. Maecenas convallis ex vel elementum pulvinar. In
-                faucibus congue massa a consequat. Etiam semper iaculis augue,
-                id tempus dui vehicula at.
+                <p>
+                    Перед вами целый пленочный кадр, состоящий из миллионов
+                    зерен. В светлых участках изображения находится больше
+                    зерна, плотность его расположения выше. А в тенях зерна
+                    почти нет — там изображение остается прозрачным. Из-за
+                    разной плотности зерна и формируется целая фотография.
+                </p>
+                <p>
+                    Мы имеем дело с законом больших чисел для вероятности. Из-за
+                    распределения вероятностей для единственного зернышка,
+                    меняется характер всего изображения.
+                </p>
             </>
         ),
         buttonText: null,
@@ -84,34 +102,35 @@ const text = [
         title: 'Цвет',
         paragraph: (
             <>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Maecenas dui arcu, tincidunt vitae dui in, egestas pellentesque
-                lectus. Donec in nisl erat. In varius tellus in mauris posuere,
-                ac tempus ante laoreet. Sed tempor felis in sapien feugiat, sit
-                amet maximus urna rutrum. Aenean ut tortor et purus commodo
-                feugiat. Etiam in pellentesque mi. Maecenas et neque nec nunc
-                mattis interdum vel vitae nisi. Phasellus dapibus porta
-                accumsan. Maecenas convallis ex vel elementum pulvinar. In
-                faucibus congue massa a consequat. Etiam semper iaculis augue,
-                id tempus dui vehicula at.
+                В цветной фотопленке целых три слоя эмульсии вместо одного.
+                Каждый из них имеет чувствительность только к своему базовому
+                цвету — красному, зеленому и синему. В итоге, накладываясь друг
+                на друга, эти слои формируют полноценное цветное изображение.
             </>
         ),
-        buttonText: 'Понятно!',
+        buttonText: 'Наложить слои',
     },
     {
-        title: 'Об этом инструменте',
+        title: 'Цвет',
         paragraph: (
             <>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Maecenas dui arcu, tincidunt vitae dui in, egestas pellentesque
-                lectus. Donec in nisl erat. In varius tellus in mauris posuere,
-                ac tempus ante laoreet. Sed tempor felis in sapien feugiat, sit
-                amet maximus urna rutrum. Aenean ut tortor et purus commodo
-                feugiat. Etiam in pellentesque mi. Maecenas et neque nec nunc
-                mattis interdum vel vitae nisi. Phasellus dapibus porta
-                accumsan. Maecenas convallis ex vel elementum pulvinar. In
-                faucibus congue massa a consequat. Etiam semper iaculis augue,
-                id tempus dui vehicula at.
+                В реальной жизни цвета на пленке инвертированы. Вместо красного,
+                синего и зеленого, вы увидите циан, желтый и пурпурный. А вместо
+                светлых участков, увидите темные. В этой цифровой симуляции
+                сразу рождается оригинальный цвет в формате RGB.
+            </>
+        ),
+        buttonText: 'Далее',
+    },
+    {
+        title: 'Попробуй сам',
+        paragraph: (
+            <>
+                Спасибо за просмотр вступления! Теперь вы можете перейти в
+                редактор, загрузить свою собственную фотографию и превратить её
+                в цифровую эмульсию. Поскольку перед вами модель реальной физики
+                пленки, качество результата будет зависеть от разрешения
+                фотографии. Экспериментируйте!
             </>
         ),
         buttonText: 'К делу!',
@@ -142,7 +161,9 @@ export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
                         {currentStep + 1} / {stepsCount}
                     </small>
                 </header>
-                <p className="text-sm">{text[currentStep].paragraph}</p>
+                <main className="text-sm space-y-2">
+                    {text[currentStep].paragraph}
+                </main>
                 <footer className="flex justify-between mt-6">
                     {currentStep > 0 && (
                         <Button

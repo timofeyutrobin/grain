@@ -81,26 +81,31 @@ function Home() {
                     `}
                 >
                     <Logo className="max-w-2xl object-contain" />
-                    <WatchIntroButton className="mx-8" />
+                    {welcomeIntroState ===
+                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
+                        <WatchIntroButton className="mx-8" />
+                    )}
                 </header>
-                {resultFilename && (
-                    <>
-                        <Image
-                            src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
-                            alt="Result preview"
-                            width={previewWidth}
-                            height={previewWidth}
-                            className="mt-8 mx-auto"
-                        />
-                        <ButtonLink
-                            className="mx-auto my-8"
-                            href={`api/images/${resultFilename}/${ImageType.RESULT}`}
-                            download
-                        >
-                            Download Result
-                        </ButtonLink>
-                    </>
-                )}
+                {welcomeIntroState ===
+                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN &&
+                    resultFilename && (
+                        <>
+                            <Image
+                                src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
+                                alt="Result preview"
+                                width={previewWidth}
+                                height={previewWidth}
+                                className="mt-8 mx-auto"
+                            />
+                            <ButtonLink
+                                className="mx-auto my-8"
+                                href={`api/images/${resultFilename}/${ImageType.RESULT}`}
+                                download
+                            >
+                                Download Result
+                            </ButtonLink>
+                        </>
+                    )}
                 <Background className="absolute top-0 left-0 w-full h-full -z-10" />
             </main>
         </>

@@ -58,6 +58,7 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
                         uColor: { value: new Color(color) },
                         uSaturation: { value: 0 },
                         uTexture: { value: demoImageTexture },
+                        uGrayscale: { value: 1 },
                     }}
                     transparent
                 />

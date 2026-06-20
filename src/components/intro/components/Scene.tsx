@@ -172,6 +172,14 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     washedOpacity: 0,
                     lightRaysGlow: -1,
                 },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 65 },
+                    opacity: 0,
+                    metalness: 0.8,
+                    roughness: 0.4,
+                    washedOpacity: 0,
+                    lightRaysGlow: -1,
+                },
             ],
             currentStep,
         );
@@ -197,11 +205,11 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                 position={[0, 10, 3]}
             />
             <mesh
-                position={[0, 0, 11]}
-                rotation={[radians(-30), 0, 0]}
+                position={[0, 0, 7]}
+                rotation={[radians(-10), 0, 0]}
                 material={lightRaysMaterialRef.current}
             >
-                <cylinderGeometry args={[0.5, 5, 5]} />
+                <cylinderGeometry args={[1, 10, 15]} />
             </mesh>
             <object3D position={[0, 0, 0]}>
                 <object3D scale={0.8}>
@@ -226,7 +234,10 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                 rotation={[radians(-30), 0, 0]}
                 position={[0, 1.4, 50]}
             >
-                <GrainLayerRGB stratified={currentStep === 5} />
+                <GrainLayerRGB
+                    grayscale={currentStep < 6}
+                    stratified={currentStep === 5}
+                />
             </object3D>
         </object3D>
     );

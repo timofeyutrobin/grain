@@ -45,16 +45,17 @@ export const Greeting: React.FC = () => {
         >
             <div className="flex w-full h-full">
                 <article className="m-auto mt-64 w-2xl py-6 px-8 border border-zinc-300 bg-zinc-800 text-zinc-50 text-xl space-y-1.5">
-                    <p>Hi there!</p>
+                    <p>Привет!</p>
                     <p>
-                        This app simulates how real photographic film works. I
-                        created it to show you the science behind photo emulsion
-                        and to give you a tool that turns any of your photos
-                        into a virtual film snapshot.
+                        Перед вами приложение, эмулирующее работу фотопленки. С
+                        помощью него я хочу показать принцип работы
+                        фотоэмульсии, а также предоставить инструмент для
+                        превращения любой вашей фотографии в виртуальную
+                        фотопленку.
                     </p>
                     <p>
-                        Check out the quick intro presentation to see how it
-                        works!
+                        Посмотрите обучающую презентацию, чтобы понять, что
+                        здесь происходит!
                     </p>
                     <footer className="mt-6 flex space-x-4">
                         <Button
@@ -64,7 +65,7 @@ export const Greeting: React.FC = () => {
                                 );
                             }}
                         >
-                            Watch intro
+                            Начать
                         </Button>
                         <Button
                             secondary
@@ -74,7 +75,7 @@ export const Greeting: React.FC = () => {
                                 );
                             }}
                         >
-                            Skip
+                            Пропустить
                         </Button>
                     </footer>
                 </article>
@@ -82,9 +83,3 @@ export const Greeting: React.FC = () => {
         </dialog>
     );
 };
-
-// Привет! Перед вами приложение, эмулирующее работу фотопленки. С
-// помощью него я хочу показать принцип работы фотоэмульсии, а также
-// предоставить инструмент для превращения любой вашей фотографии в
-// виртуальную фотопленку. Посмотрите обучающую презентацию, чтобы
-// понять, что здесь происходит!

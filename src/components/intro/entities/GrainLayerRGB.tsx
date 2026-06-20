@@ -32,9 +32,13 @@ for (let i = 0; i < 60000; i++) {
 
 interface GrainLayerRGBProps {
     stratified?: boolean;
+    grayscale?: boolean;
 }
 
-export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({ stratified }) => {
+export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
+    stratified,
+    grayscale,
+}) => {
     const rLayerRef = useRef<Object3D>(null);
     const gLayerRef = useRef<Object3D>(null);
     const bLayerRef = useRef<Object3D>(null);
@@ -130,6 +134,38 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({ stratified }) => {
                 },
             ],
             stratified ? 0 : 1,
+        );
+        animate<number>(
+            (grayscale) => {
+                if (
+                    !rLayerRef.current ||
+                    !gLayerRef.current ||
+                    !bLayerRef.current ||
+                    !rMaterialRef.current ||
+                    !gMaterialRef.current ||
+                    !bMaterialRef.current
+                ) {
+                    return;
+                }
+
+                rMaterialRef.current.uniforms.uGrayscale.value = lerp(
+                    rMaterialRef.current.uniforms.uGrayscale.value,
+                    grayscale,
+                    alpha,
+                );
+                gMaterialRef.current.uniforms.uGrayscale.value = lerp(
+                    gMaterialRef.current.uniforms.uGrayscale.value,
+                    grayscale,
+                    alpha,
+                );
+                bMaterialRef.current.uniforms.uGrayscale.value = lerp(
+                    bMaterialRef.current.uniforms.uGrayscale.value,
+                    grayscale,
+                    alpha,
+                );
+            },
+            [1, 0],
+            grayscale ? 0 : 1,
         );
     });
 
