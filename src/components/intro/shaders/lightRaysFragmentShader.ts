@@ -1,12 +1,4 @@
-export const lightRaysVertexShader = `
-    varying vec2 vUv;
-    void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-`;
-
-export const lightRaysFragmentShader = `
+export default `
     uniform vec3 uColor;
     uniform float uGlowIntensity;
     uniform float uTime;

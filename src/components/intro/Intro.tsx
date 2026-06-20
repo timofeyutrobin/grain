@@ -9,6 +9,7 @@ import { Canvas } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import { useState } from 'react';
 
+// cspell:disable
 const text = [
     {
         title: 'Зерно',
@@ -51,6 +52,20 @@ const text = [
         title: 'Вероятность',
         paragraph: (
             <>
+                Когда свет попадает на зернышко, оно может либо активироваться,
+                либо остаться в исходном состоянии. Мы можем представить, что
+                это случайное событие. Чем больше света попало на зернышко, тем
+                выше вероятность, что оно активируется и станет частью
+                изображения. В этой симуляции распределение вероятностей
+                задаётся S-образной кривой.
+            </>
+        ),
+        buttonText: null,
+    },
+    {
+        title: 'Изображение',
+        paragraph: (
+            <>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 Maecenas dui arcu, tincidunt vitae dui in, egestas pellentesque
                 lectus. Donec in nisl erat. In varius tellus in mauris posuere,
@@ -81,10 +96,10 @@ const text = [
                 id tempus dui vehicula at.
             </>
         ),
-        buttonText: null,
+        buttonText: 'Понятно!',
     },
     {
-        title: 'Что-то еще',
+        title: 'Об этом инструменте',
         paragraph: (
             <>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
@@ -102,6 +117,7 @@ const text = [
         buttonText: 'К делу!',
     },
 ] as const;
+// cspell:enable
 
 export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
     const [_, setWelcomeIntroState] = useAtom(welcomeIntroStateAtom);

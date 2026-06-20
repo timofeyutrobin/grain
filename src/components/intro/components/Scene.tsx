@@ -1,10 +1,9 @@
 import { Grain } from '@/components/intro/entities/Grain';
 import { GrainCluster } from '@/components/intro/entities/GrainCluster';
-import {
-    lightRaysFragmentShader,
-    lightRaysVertexShader,
-} from '@/components/intro/shaders';
-import { lerpFactor, radians } from '@/lib/common';
+import { GrainLayerRGB } from '@/components/intro/entities/GrainLayerRGB';
+import lightRaysFragmentShader from '@/components/intro/shaders/lightRaysFragmentShader';
+import lightRaysVertexShader from '@/components/intro/shaders/lightRaysVertexShader';
+import { animate, lerpFactor, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useLayoutEffect, useRef } from 'react';
 import {
@@ -15,6 +14,7 @@ import {
     RepeatWrapping,
     ShaderMaterial,
     TextureLoader,
+    Vector3Like,
 } from 'three';
 import { lerp } from 'three/src/math/MathUtils.js';
 
@@ -53,13 +53,22 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         }),
     );
     const grainGeometry = useRef(new DodecahedronGeometry(1, 0));
-    const lightRaysMaterialRef = useRef<ShaderMaterial>(null);
+    const lightRaysMaterialRef = useRef<ShaderMaterial>(
+        new ShaderMaterial({
+            uniforms: {
+                uColor: { value: new Color('#e7e5e4') },
+                uTime: { value: 0 },
+            },
+            fragmentShader: lightRaysFragmentShader,
+            vertexShader: lightRaysVertexShader,
+            side: 2,
+            blending: AdditiveBlending,
+            transparent: true,
+            depthWrite: false,
+        }),
+    );
 
     useFrame((state, delta) => {
-        if (!lightRaysMaterialRef.current) {
-            return;
-        }
-
         const alpha = lerpFactor(0.9, delta) * 2;
         if (!lightRaysMaterialRef.current.uniforms.uGlowIntensity) {
             lightRaysMaterialRef.current.uniforms.uGlowIntensity = {
@@ -67,147 +76,113 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             };
         }
 
-        if (currentStep === 0) {
-            state.camera.position.lerp({ x: 0, y: 0, z: 7 }, alpha);
-            grainMaterial.current.opacity = lerp(
-                grainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            grainMaterial.current.roughness = lerp(
-                grainMaterial.current.roughness,
-                0.8,
-                alpha,
-            );
-            grainMaterial.current.metalness = lerp(
-                grainMaterial.current.metalness,
-                0.5,
-                alpha,
-            );
-            washedGrainMaterial.current.opacity = lerp(
-                washedGrainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value = lerp(
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value,
-                -1,
-                alpha / 2,
-            );
-        } else if (currentStep === 1) {
-            state.camera.position.lerp({ x: 0, y: 0, z: 12 }, alpha);
-            grainMaterial.current.opacity = lerp(
-                grainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            grainMaterial.current.roughness = lerp(
-                grainMaterial.current.roughness,
-                0.8,
-                alpha,
-            );
-            grainMaterial.current.metalness = lerp(
-                grainMaterial.current.metalness,
-                0.5,
-                alpha,
-            );
-            washedGrainMaterial.current.opacity = lerp(
-                washedGrainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value = lerp(
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value,
-                -1,
-                alpha / 2,
-            );
-        } else if (currentStep === 2) {
-            state.camera.position.lerp({ x: 0, y: 0, z: 12 }, alpha);
-            grainMaterial.current.opacity = lerp(
-                grainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            grainMaterial.current.roughness = lerp(
-                grainMaterial.current.roughness,
-                0.8,
-                alpha,
-            );
-            grainMaterial.current.metalness = lerp(
-                grainMaterial.current.metalness,
-                0.5,
-                alpha,
-            );
-            washedGrainMaterial.current.opacity = lerp(
-                washedGrainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value = lerp(
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value,
-                3,
-                alpha / 2,
-            );
-        } else if (currentStep === 3) {
-            state.camera.position.lerp({ x: 0, y: 0, z: 12 }, alpha);
-            grainMaterial.current.opacity = lerp(
-                grainMaterial.current.opacity,
-                1,
-                alpha,
-            );
-            grainMaterial.current.roughness = lerp(
-                grainMaterial.current.roughness,
-                0.4,
-                alpha,
-            );
-            grainMaterial.current.metalness = lerp(
-                grainMaterial.current.metalness,
-                0.8,
-                alpha,
-            );
-            washedGrainMaterial.current.opacity = lerp(
-                washedGrainMaterial.current.opacity,
-                0.05,
-                alpha,
-            );
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value = lerp(
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value,
-                3,
-                alpha / 2,
-            );
-        } else if (currentStep >= 4) {
-            state.camera.position.lerp({ x: 0, y: 0, z: 12 }, alpha);
-            grainMaterial.current.opacity = lerp(
-                grainMaterial.current.opacity,
-                0,
-                alpha * 2,
-            );
-            grainMaterial.current.roughness = lerp(
-                grainMaterial.current.roughness,
-                0.4,
-                alpha,
-            );
-            grainMaterial.current.metalness = lerp(
-                grainMaterial.current.metalness,
-                0.8,
-                alpha,
-            );
-            washedGrainMaterial.current.opacity = lerp(
-                washedGrainMaterial.current.opacity,
-                0,
-                alpha * 2,
-            );
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value = lerp(
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value,
-                -1,
-                alpha,
-            );
-        }
+        animate<{
+            cameraPosition: Vector3Like;
+            opacity: number;
+            washedOpacity: number;
+            metalness: number;
+            roughness: number;
+            lightRaysGlow: number;
+            lightRaysAlpha?: number;
+        }>(
+            (value) => {
+                state.camera.position.lerp(value.cameraPosition, alpha);
+                grainMaterial.current.opacity = lerp(
+                    grainMaterial.current.opacity,
+                    value.opacity,
+                    alpha,
+                );
+                grainMaterial.current.metalness = lerp(
+                    grainMaterial.current.metalness,
+                    value.metalness,
+                    alpha,
+                );
+                grainMaterial.current.roughness = lerp(
+                    grainMaterial.current.roughness,
+                    value.roughness,
+                    alpha,
+                );
+                washedGrainMaterial.current.opacity = lerp(
+                    washedGrainMaterial.current.opacity,
+                    value.washedOpacity,
+                    alpha,
+                );
+                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value =
+                    lerp(
+                        lightRaysMaterialRef.current.uniforms.uGlowIntensity
+                            .value,
+                        value.lightRaysGlow,
+                        value.lightRaysAlpha ?? alpha / 2,
+                    );
+            },
+            [
+                {
+                    cameraPosition: { x: 0, y: 0, z: 7 },
+                    opacity: 1,
+                    metalness: 0.5,
+                    roughness: 0.8,
+                    washedOpacity: 1,
+                    lightRaysGlow: -1,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 12 },
+                    opacity: 1,
+                    metalness: 0.5,
+                    roughness: 0.8,
+                    washedOpacity: 1,
+                    lightRaysGlow: -1,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 12 },
+                    opacity: 1,
+                    metalness: 0.5,
+                    roughness: 0.8,
+                    washedOpacity: 1,
+                    lightRaysGlow: 3,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 12 },
+                    opacity: 1,
+                    metalness: 0.8,
+                    roughness: 0.4,
+                    washedOpacity: 0.05,
+                    lightRaysGlow: 3,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 65 },
+                    opacity: 0,
+                    metalness: 0.8,
+                    roughness: 0.4,
+                    washedOpacity: 0,
+                    lightRaysGlow: -1,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 65 },
+                    opacity: 0,
+                    metalness: 0.8,
+                    roughness: 0.4,
+                    washedOpacity: 0,
+                    lightRaysGlow: -1,
+                },
+                {
+                    cameraPosition: { x: 0, y: 0, z: 65 },
+                    opacity: 0,
+                    metalness: 0.8,
+                    roughness: 0.4,
+                    washedOpacity: 0,
+                    lightRaysGlow: -1,
+                },
+            ],
+            currentStep,
+        );
 
         lightRaysMaterialRef.current.uniforms.uTime.value =
             state.clock.getElapsedTime();
 
-        if (lightRaysMaterialRef.current.uniforms.uGlowIntensity.value > 0) {
+        if (
+            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value > 0 &&
+            currentStep < 4
+        ) {
             lightRaysMaterialRef.current.visible = true;
         } else {
             lightRaysMaterialRef.current.visible = false;
@@ -221,42 +196,38 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                 color="#e4e4e7"
                 position={[0, 10, 3]}
             />
-            <mesh position={[0, 0, 11]} rotation={[radians(-30), 0, 0]}>
+            <mesh
+                position={[0, 0, 11]}
+                rotation={[radians(-30), 0, 0]}
+                material={lightRaysMaterialRef.current}
+            >
                 <cylinderGeometry args={[0.5, 5, 5]} />
-                <shaderMaterial
-                    ref={lightRaysMaterialRef}
-                    uniforms={{
-                        uColor: { value: new Color('#e7e5e4') },
-                        uTime: { value: 0 },
-                    }}
-                    fragmentShader={lightRaysFragmentShader}
-                    vertexShader={lightRaysVertexShader}
-                    side={2}
-                    blending={AdditiveBlending}
-                    transparent
-                    depthWrite={false}
-                />
             </mesh>
-            <>
-                <object3D position={[0, 0, 0]}>
-                    <object3D scale={0.8}>
-                        <Grain
-                            geometry={grainGeometry}
-                            material={grainMaterial}
-                            rotate
-                            float
-                        />
-                    </object3D>
-                </object3D>
-                <object3D position={[0, 0, 5]}>
-                    <GrainCluster
+            <object3D position={[0, 0, 0]}>
+                <object3D scale={0.8}>
+                    <Grain
                         geometry={grainGeometry}
                         material={grainMaterial}
-                        washedMaterial={washedGrainMaterial}
-                        scattered={currentStep < 1}
+                        rotate
+                        float
                     />
                 </object3D>
-            </>
+            </object3D>
+            <object3D position={[0, 0, 5]}>
+                <GrainCluster
+                    geometry={grainGeometry}
+                    material={grainMaterial}
+                    washedMaterial={washedGrainMaterial}
+                    scattered={currentStep < 1}
+                />
+            </object3D>
+            <object3D
+                scale={0.9}
+                rotation={[radians(-30), 0, 0]}
+                position={[0, 1.4, 50]}
+            >
+                <GrainLayerRGB stratified={currentStep === 5} />
+            </object3D>
         </object3D>
     );
 };

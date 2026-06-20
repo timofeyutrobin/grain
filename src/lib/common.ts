@@ -79,3 +79,11 @@ export function radians(degrees: number): number {
 export function lerpFactor(distanceForSecond: number, delta: number): number {
     return 1 - Math.pow(1 - distanceForSecond, delta);
 }
+
+export function animate<P>(
+    frame: (value: P) => void,
+    states: P[],
+    currentState: number,
+) {
+    frame(states[currentState]);
+}
