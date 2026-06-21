@@ -5,7 +5,7 @@ import lightRaysFragmentShader from '@/components/intro/shaders/lightRaysFragmen
 import lightRaysVertexShader from '@/components/intro/shaders/lightRaysVertexShader';
 import { animate, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
     AdditiveBlending,
     Color,
@@ -28,7 +28,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         '/textures/grain-surface.jpg',
     );
 
-    useLayoutEffect(() => {
+    useEffect(() => {
         surfaceTexture.wrapT = RepeatWrapping;
         surfaceTexture.wrapS = RepeatWrapping;
         surfaceTexture.repeat.set(5, 5);
