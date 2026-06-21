@@ -44,12 +44,15 @@ export const Greeting: React.FC = () => {
             }}
         >
             <div className="flex w-full h-full">
-                <article className="m-auto mt-64 w-2xl py-6 px-8 border border-zinc-300 bg-zinc-800 text-zinc-50 text-xl space-y-1.5">
+                <article className="m-auto mt-64 w-full max-w-2xl py-6 px-8 border border-zinc-300 bg-zinc-800 text-zinc-50 text-lg space-y-1.5">
                     <p>Привет!</p>
                     <p>
-                        Перед вами приложение, эмулирующее работу фотопленки. С
-                        помощью него я хочу показать принцип работы
-                        фотоэмульсии, а также предоставить инструмент для
+                        Добро пожаловать в{' '}
+                        <i className="font-semibold">emulsion engine</i>
+                    </p>
+                    <p>
+                        С помощью этого приложения я хочу показать принцип
+                        работы фотоэмульсии, а также предоставить инструмент для
                         превращения любой вашей фотографии в виртуальную
                         фотопленку.
                     </p>
