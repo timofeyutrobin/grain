@@ -58,6 +58,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             uniforms: {
                 uColor: { value: new Color('#e7e5e4') },
                 uTime: { value: 0 },
+                uGlowIntensity: { value: 0 },
             },
             fragmentShader: lightRaysFragmentShader,
             vertexShader: lightRaysVertexShader,
@@ -70,11 +71,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
 
     useFrame((state, delta) => {
         const alpha = lerpFactor(0.9, delta) * 2;
-        if (!lightRaysMaterialRef.current.uniforms.uGlowIntensity) {
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity = {
-                value: 0,
-            };
-        }
 
         animate<{
             cameraPosition: Vector3Like;
