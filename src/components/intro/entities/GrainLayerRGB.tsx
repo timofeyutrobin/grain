@@ -1,9 +1,9 @@
 import { GrainLayer } from '@/components/intro/entities/GrainLayer';
-import { animate, lerpFactor, radians, randomFromTo } from '@/lib/common';
+import { animate, radians, randomFromTo } from '@/lib/common';
 import { useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import { Object3D, ShaderMaterial, Vector3Like } from 'three';
-import { lerp } from 'three/src/math/MathUtils.js';
+import { damp } from 'three/src/math/MathUtils.js';
 
 const vertices1: number[] = [];
 const vertices2: number[] = [];
@@ -48,7 +48,24 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
     const bMaterialRef = useRef<ShaderMaterial>(null);
 
     useFrame((_, delta) => {
-        const alpha = lerpFactor(0.9, delta) * 2;
+        const rLayer = rLayerRef.current;
+        const gLayer = gLayerRef.current;
+        const bLayer = bLayerRef.current;
+        const rMaterial = rMaterialRef.current;
+        const gMaterial = gMaterialRef.current;
+        const bMaterial = bMaterialRef.current;
+        if (
+            !rLayer ||
+            !gLayer ||
+            !bLayer ||
+            !rMaterial ||
+            !gMaterial ||
+            !bMaterial
+        ) {
+            return;
+        }
+
+        const lambda = 5;
 
         animate<{
             scale: number;
@@ -58,63 +75,66 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
             saturation: number;
         }>(
             (value) => {
-                if (
-                    !rLayerRef.current ||
-                    !gLayerRef.current ||
-                    !bLayerRef.current ||
-                    !rMaterialRef.current ||
-                    !gMaterialRef.current ||
-                    !bMaterialRef.current
-                ) {
-                    return;
-                }
-
-                rLayerRef.current.scale.lerp(
-                    { x: value.scale, y: value.scale, z: value.scale },
-                    alpha,
+                rLayer.scale.set(
+                    damp(rLayer.scale.x, value.scale, lambda, delta),
+                    damp(rLayer.scale.y, value.scale, lambda, delta),
+                    damp(rLayer.scale.z, value.scale, lambda, delta),
                 );
-                gLayerRef.current.scale.lerp(
-                    { x: value.scale, y: value.scale, z: value.scale },
-                    alpha,
+                gLayer.scale.set(
+                    damp(gLayer.scale.x, value.scale, lambda, delta),
+                    damp(gLayer.scale.y, value.scale, lambda, delta),
+                    damp(gLayer.scale.z, value.scale, lambda, delta),
                 );
-                bLayerRef.current.scale.lerp(
-                    { x: value.scale, y: value.scale, z: value.scale },
-                    alpha,
+                bLayer.scale.set(
+                    damp(bLayer.scale.x, value.scale, lambda, delta),
+                    damp(bLayer.scale.y, value.scale, lambda, delta),
+                    damp(bLayer.scale.z, value.scale, lambda, delta),
                 );
 
-                rLayerRef.current.position.lerp(value.rPosition, alpha);
-                bLayerRef.current.position.lerp(value.bPosition, alpha);
-
-                rLayerRef.current.rotation.set(
-                    lerp(rLayerRef.current.rotation.x, value.rotation.x, alpha),
-                    lerp(rLayerRef.current.rotation.y, value.rotation.y, alpha),
-                    lerp(rLayerRef.current.rotation.z, value.rotation.z, alpha),
+                rLayer.position.set(
+                    damp(rLayer.position.x, value.rPosition.x, lambda, delta),
+                    damp(rLayer.position.y, value.rPosition.y, lambda, delta),
+                    damp(rLayer.position.z, value.rPosition.z, lambda, delta),
                 );
-                gLayerRef.current.rotation.set(
-                    lerp(gLayerRef.current.rotation.x, value.rotation.x, alpha),
-                    lerp(gLayerRef.current.rotation.y, value.rotation.y, alpha),
-                    lerp(gLayerRef.current.rotation.z, value.rotation.z, alpha),
-                );
-                bLayerRef.current.rotation.set(
-                    lerp(gLayerRef.current.rotation.x, value.rotation.x, alpha),
-                    lerp(gLayerRef.current.rotation.y, value.rotation.y, alpha),
-                    lerp(gLayerRef.current.rotation.z, value.rotation.z, alpha),
+                bLayer.position.set(
+                    damp(bLayer.position.x, value.bPosition.x, lambda, delta),
+                    damp(bLayer.position.y, value.bPosition.y, lambda, delta),
+                    damp(bLayer.position.z, value.bPosition.z, lambda, delta),
                 );
 
-                rMaterialRef.current.uniforms.uSaturation.value = lerp(
-                    rMaterialRef.current.uniforms.uSaturation.value,
+                rLayer.rotation.set(
+                    damp(rLayer.rotation.x, value.rotation.x, lambda, delta),
+                    damp(rLayer.rotation.y, value.rotation.y, lambda, delta),
+                    damp(rLayer.rotation.z, value.rotation.z, lambda, delta),
+                );
+                gLayer.rotation.set(
+                    damp(gLayer.rotation.x, value.rotation.x, lambda, delta),
+                    damp(gLayer.rotation.y, value.rotation.y, lambda, delta),
+                    damp(gLayer.rotation.z, value.rotation.z, lambda, delta),
+                );
+                bLayer.rotation.set(
+                    damp(bLayer.rotation.x, value.rotation.x, lambda, delta),
+                    damp(bLayer.rotation.y, value.rotation.y, lambda, delta),
+                    damp(bLayer.rotation.z, value.rotation.z, lambda, delta),
+                );
+
+                rMaterial.uniforms.uSaturation.value = damp(
+                    rMaterial.uniforms.uSaturation.value,
                     value.saturation,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                gMaterialRef.current.uniforms.uSaturation.value = lerp(
-                    gMaterialRef.current.uniforms.uSaturation.value,
+                gMaterial.uniforms.uSaturation.value = damp(
+                    gMaterial.uniforms.uSaturation.value,
                     value.saturation,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                bMaterialRef.current.uniforms.uSaturation.value = lerp(
-                    bMaterialRef.current.uniforms.uSaturation.value,
+                bMaterial.uniforms.uSaturation.value = damp(
+                    bMaterial.uniforms.uSaturation.value,
                     value.saturation,
-                    alpha,
+                    lambda,
+                    delta,
                 );
             },
             [
@@ -137,36 +157,32 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
         );
         animate<number>(
             (grayscale) => {
-                if (
-                    !rLayerRef.current ||
-                    !gLayerRef.current ||
-                    !bLayerRef.current ||
-                    !rMaterialRef.current ||
-                    !gMaterialRef.current ||
-                    !bMaterialRef.current
-                ) {
-                    return;
-                }
-
-                rMaterialRef.current.uniforms.uGrayscale.value = lerp(
-                    rMaterialRef.current.uniforms.uGrayscale.value,
+                rMaterial.uniforms.uGrayscale.value = damp(
+                    rMaterial.uniforms.uGrayscale.value,
                     grayscale,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                gMaterialRef.current.uniforms.uGrayscale.value = lerp(
-                    gMaterialRef.current.uniforms.uGrayscale.value,
+                gMaterial.uniforms.uGrayscale.value = damp(
+                    gMaterial.uniforms.uGrayscale.value,
                     grayscale,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                bMaterialRef.current.uniforms.uGrayscale.value = lerp(
-                    bMaterialRef.current.uniforms.uGrayscale.value,
+                bMaterial.uniforms.uGrayscale.value = damp(
+                    bMaterial.uniforms.uGrayscale.value,
                     grayscale,
-                    alpha,
+                    lambda,
+                    delta,
                 );
             },
             [1, 0],
             grayscale ? 0 : 1,
         );
+
+        rMaterial.uniforms.uTime.value += delta;
+        gMaterial.uniforms.uTime.value += delta;
+        bMaterial.uniforms.uTime.value += delta;
     });
 
     return (

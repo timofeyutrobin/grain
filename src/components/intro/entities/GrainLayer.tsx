@@ -1,6 +1,6 @@
 import emulsionFragmentShader from '@/components/intro/shaders/emulsionFragmentShader';
 import emulsionVertexShader from '@/components/intro/shaders/emulsionVertexShader';
-import { useFrame, useLoader } from '@react-three/fiber';
+import { useLoader } from '@react-three/fiber';
 import { RefObject, useRef } from 'react';
 import {
     BufferGeometry,
@@ -29,13 +29,6 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
         '/images/demo-image.jpeg',
     );
     const geometryRef = useRef<BufferGeometry>(null);
-
-    useFrame((_, delta) => {
-        if (materialRef?.current) {
-            materialRef.current.uniforms.uTime.value =
-                materialRef.current.uniforms.uTime.value + delta;
-        }
-    });
 
     return (
         <object3D ref={ref}>

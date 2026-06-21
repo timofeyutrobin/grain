@@ -3,7 +3,7 @@ import { GrainCluster } from '@/components/intro/entities/GrainCluster';
 import { GrainLayerRGB } from '@/components/intro/entities/GrainLayerRGB';
 import lightRaysFragmentShader from '@/components/intro/shaders/lightRaysFragmentShader';
 import lightRaysVertexShader from '@/components/intro/shaders/lightRaysVertexShader';
-import { animate, lerpFactor, radians } from '@/lib/common';
+import { animate, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useLayoutEffect, useRef } from 'react';
 import {
@@ -16,7 +16,7 @@ import {
     TextureLoader,
     Vector3Like,
 } from 'three';
-import { lerp } from 'three/src/math/MathUtils.js';
+import { damp } from 'three/src/math/MathUtils.js';
 
 interface SceneProps {
     currentStep: number;
@@ -70,7 +70,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
     );
 
     useFrame((state, delta) => {
-        const alpha = lerpFactor(0.9, delta) * 2;
+        const lambda = 5;
 
         animate<{
             cameraPosition: Vector3Like;
@@ -79,37 +79,73 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             metalness: number;
             roughness: number;
             lightRaysGlow: number;
-            lightRaysAlpha?: number;
         }>(
             (value) => {
-                state.camera.position.lerp(value.cameraPosition, alpha);
-                grainMaterial.current.opacity = lerp(
+                state.camera.position.set(
+                    damp(
+                        state.camera.position.x,
+                        value.cameraPosition.x,
+                        lambda,
+                        delta,
+                    ),
+                    damp(
+                        state.camera.position.y,
+                        value.cameraPosition.y,
+                        lambda,
+                        delta,
+                    ),
+                    damp(
+                        state.camera.position.z,
+                        value.cameraPosition.z,
+                        lambda,
+                        delta,
+                    ),
+                );
+
+                grainMaterial.current.opacity = damp(
                     grainMaterial.current.opacity,
                     value.opacity,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                grainMaterial.current.metalness = lerp(
+                grainMaterial.current.metalness = damp(
                     grainMaterial.current.metalness,
                     value.metalness,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                grainMaterial.current.roughness = lerp(
+                grainMaterial.current.roughness = damp(
                     grainMaterial.current.roughness,
                     value.roughness,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                washedGrainMaterial.current.opacity = lerp(
+                washedGrainMaterial.current.opacity = damp(
                     washedGrainMaterial.current.opacity,
                     value.washedOpacity,
-                    alpha,
+                    lambda,
+                    delta,
                 );
-                lightRaysMaterialRef.current.uniforms.uGlowIntensity.value =
-                    lerp(
+
+                if (Math.abs(state.camera.position.z - 12) <= 0.5) {
+                    if (
                         lightRaysMaterialRef.current.uniforms.uGlowIntensity
-                            .value,
-                        value.lightRaysGlow,
-                        value.lightRaysAlpha ?? alpha / 2,
-                    );
+                            .value > 0
+                    ) {
+                        lightRaysMaterialRef.current.visible = true;
+                    }
+
+                    lightRaysMaterialRef.current.uniforms.uGlowIntensity.value =
+                        damp(
+                            lightRaysMaterialRef.current.uniforms.uGlowIntensity
+                                .value,
+                            value.lightRaysGlow,
+                            lambda,
+                            delta,
+                        );
+                } else {
+                    lightRaysMaterialRef.current.visible = false;
+                }
             },
             [
                 {
@@ -182,15 +218,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
 
         lightRaysMaterialRef.current.uniforms.uTime.value =
             state.clock.getElapsedTime();
-
-        if (
-            lightRaysMaterialRef.current.uniforms.uGlowIntensity.value > 0 &&
-            currentStep < 4
-        ) {
-            lightRaysMaterialRef.current.visible = true;
-        } else {
-            lightRaysMaterialRef.current.visible = false;
-        }
     });
 
     return (

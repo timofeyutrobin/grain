@@ -1,9 +1,9 @@
 import { Grain } from '@/components/intro/entities/Grain';
 import { grains } from '@/components/intro/entities/GrainCluster/grains';
-import { lerpFactor } from '@/lib/common';
 import { useFrame } from '@react-three/fiber';
 import { RefObject } from 'react';
 import { BufferGeometry, Material } from 'three';
+import { damp } from 'three/src/math/MathUtils.js';
 
 interface GrainClusterProps {
     geometry: RefObject<BufferGeometry>;
@@ -27,18 +27,15 @@ export const GrainCluster: React.FC<GrainClusterProps> = ({
                 return;
             }
 
-            const alpha = lerpFactor(0.999, delta);
+            const lambda = 6;
             const targetPosition = scattered
                 ? grain.scatteredPosition
                 : grain.densePosition;
 
-            grainObject.position.lerp(
-                {
-                    x: targetPosition[0],
-                    y: targetPosition[1],
-                    z: targetPosition[2],
-                },
-                alpha,
+            grainObject.position.set(
+                damp(grainObject.position.x, targetPosition[0], lambda, delta),
+                damp(grainObject.position.y, targetPosition[1], lambda, delta),
+                damp(grainObject.position.z, targetPosition[2], lambda, delta),
             );
         });
     });
