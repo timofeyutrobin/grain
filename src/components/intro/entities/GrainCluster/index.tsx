@@ -1,14 +1,13 @@
 import { Grain } from '@/components/intro/entities/Grain';
 import { grains } from '@/components/intro/entities/GrainCluster/grains';
 import { useFrame } from '@react-three/fiber';
-import { RefObject } from 'react';
 import { BufferGeometry, Material } from 'three';
 import { damp } from 'three/src/math/MathUtils.js';
 
 interface GrainClusterProps {
-    geometry: RefObject<BufferGeometry>;
-    material: RefObject<Material>;
-    washedMaterial: RefObject<Material>;
+    geometry: BufferGeometry;
+    material: Material;
+    washedMaterial: Material;
     scattered?: boolean;
 }
 

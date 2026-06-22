@@ -1,10 +1,10 @@
 import { useFrame } from '@react-three/fiber';
-import { RefObject, useRef } from 'react';
+import { useRef } from 'react';
 import { BufferGeometry, Material, Mesh } from 'three';
 
 interface GrainProps {
-    geometry: RefObject<BufferGeometry>;
-    material: RefObject<Material>;
+    geometry: BufferGeometry;
+    material: Material;
     rotate?: boolean;
     float?: boolean;
     phaseShift?: number;
@@ -41,12 +41,5 @@ export const Grain: React.FC<GrainProps> = ({
         }
     });
 
-    return (
-        <mesh
-            ref={meshRef}
-            name="grain"
-            material={material.current}
-            geometry={geometry.current}
-        />
-    );
+    return <mesh ref={meshRef} material={material} geometry={geometry} />;
 };

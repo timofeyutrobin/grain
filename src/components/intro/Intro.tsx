@@ -8,7 +8,7 @@ import welcomeIntroStateAtom, {
 import { Canvas } from '@react-three/fiber';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 
 // cspell:disable
 const text = [
@@ -166,7 +166,9 @@ export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
             <div className="mx-auto w-full h-full min-h-180 max-h-full">
                 <Canvas camera={{ fov: 45, far: 60 }}>
                     <ambientLight />
-                    <Scene currentStep={currentStep} />
+                    <Suspense>
+                        <Scene currentStep={currentStep} />
+                    </Suspense>
                 </Canvas>
             </div>
 

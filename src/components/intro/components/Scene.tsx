@@ -5,7 +5,7 @@ import lightRaysFragmentShader from '@/components/intro/shaders/lightRaysFragmen
 import lightRaysVertexShader from '@/components/intro/shaders/lightRaysVertexShader';
 import { animate, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
     AdditiveBlending,
     Color,
@@ -34,39 +34,45 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         surfaceTexture.repeat.set(5, 5);
     }, [surfaceTexture]);
 
-    const grainMaterial = useRef(
-        new MeshStandardMaterial({
-            metalness: 0.5,
-            roughness: 0.8,
-            color: '#78716c',
-            map: surfaceTexture ?? undefined,
-            bumpMap: surfaceTexture ?? undefined,
-            transparent: true,
-        }),
+    const grainMaterial = useMemo(
+        () =>
+            new MeshStandardMaterial({
+                metalness: 0.5,
+                roughness: 0.8,
+                color: '#78716c',
+                map: surfaceTexture ?? undefined,
+                bumpMap: surfaceTexture ?? undefined,
+                transparent: true,
+            }),
+        [],
     );
-    const washedGrainMaterial = useRef(
-        new MeshStandardMaterial({
-            metalness: 0.5,
-            roughness: 0.8,
-            color: '#78716c',
-            transparent: true,
-        }),
+    const washedGrainMaterial = useMemo(
+        () =>
+            new MeshStandardMaterial({
+                metalness: 0.5,
+                roughness: 0.8,
+                color: '#78716c',
+                transparent: true,
+            }),
+        [],
     );
-    const grainGeometry = useRef(new DodecahedronGeometry(1, 0));
-    const lightRaysMaterialRef = useRef<ShaderMaterial>(
-        new ShaderMaterial({
-            uniforms: {
-                uColor: { value: new Color('#e7e5e4') },
-                uTime: { value: 0 },
-                uGlowIntensity: { value: 0 },
-            },
-            fragmentShader: lightRaysFragmentShader,
-            vertexShader: lightRaysVertexShader,
-            side: 2,
-            blending: AdditiveBlending,
-            transparent: true,
-            depthWrite: false,
-        }),
+    const grainGeometry = useMemo(() => new DodecahedronGeometry(1, 0), []);
+    const lightRaysMaterial = useMemo(
+        () =>
+            new ShaderMaterial({
+                uniforms: {
+                    uColor: { value: new Color('#e7e5e4') },
+                    uTime: { value: 0 },
+                    uGlowIntensity: { value: 0 },
+                },
+                fragmentShader: lightRaysFragmentShader,
+                vertexShader: lightRaysVertexShader,
+                side: 2,
+                blending: AdditiveBlending,
+                transparent: true,
+                depthWrite: false,
+            }),
+        [],
     );
 
     useFrame((state, delta) => {
@@ -102,49 +108,44 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     ),
                 );
 
-                grainMaterial.current.opacity = damp(
-                    grainMaterial.current.opacity,
+                grainMaterial.opacity = damp(
+                    grainMaterial.opacity,
                     value.opacity,
                     lambda,
                     delta,
                 );
-                grainMaterial.current.metalness = damp(
-                    grainMaterial.current.metalness,
+                grainMaterial.metalness = damp(
+                    grainMaterial.metalness,
                     value.metalness,
                     lambda,
                     delta,
                 );
-                grainMaterial.current.roughness = damp(
-                    grainMaterial.current.roughness,
+                grainMaterial.roughness = damp(
+                    grainMaterial.roughness,
                     value.roughness,
                     lambda,
                     delta,
                 );
-                washedGrainMaterial.current.opacity = damp(
-                    washedGrainMaterial.current.opacity,
+                washedGrainMaterial.opacity = damp(
+                    washedGrainMaterial.opacity,
                     value.washedOpacity,
                     lambda,
                     delta,
                 );
 
                 if (Math.abs(state.camera.position.z - 12) <= 0.5) {
-                    if (
-                        lightRaysMaterialRef.current.uniforms.uGlowIntensity
-                            .value > 0
-                    ) {
-                        lightRaysMaterialRef.current.visible = true;
+                    if (lightRaysMaterial.uniforms.uGlowIntensity.value > 0) {
+                        lightRaysMaterial.visible = true;
                     }
 
-                    lightRaysMaterialRef.current.uniforms.uGlowIntensity.value =
-                        damp(
-                            lightRaysMaterialRef.current.uniforms.uGlowIntensity
-                                .value,
-                            value.lightRaysGlow,
-                            lambda,
-                            delta,
-                        );
+                    lightRaysMaterial.uniforms.uGlowIntensity.value = damp(
+                        lightRaysMaterial.uniforms.uGlowIntensity.value,
+                        value.lightRaysGlow,
+                        lambda,
+                        delta,
+                    );
                 } else {
-                    lightRaysMaterialRef.current.visible = false;
+                    lightRaysMaterial.visible = false;
                 }
             },
             [
@@ -216,8 +217,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             currentStep,
         );
 
-        lightRaysMaterialRef.current.uniforms.uTime.value =
-            state.clock.getElapsedTime();
+        lightRaysMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
     });
 
     return (
@@ -230,7 +230,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             <mesh
                 position={[0, 0, 7]}
                 rotation={[radians(-10), 0, 0]}
-                material={lightRaysMaterialRef.current}
+                material={lightRaysMaterial}
             >
                 <cylinderGeometry args={[1, 10, 15]} />
             </mesh>
