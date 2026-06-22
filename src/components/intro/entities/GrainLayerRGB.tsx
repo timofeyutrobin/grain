@@ -75,21 +75,18 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
             saturation: number;
         }>(
             (value) => {
-                rLayer.scale.set(
-                    damp(rLayer.scale.x, value.scale, lambda, delta),
-                    damp(rLayer.scale.y, value.scale, lambda, delta),
-                    damp(rLayer.scale.z, value.scale, lambda, delta),
-                );
-                gLayer.scale.set(
-                    damp(gLayer.scale.x, value.scale, lambda, delta),
-                    damp(gLayer.scale.y, value.scale, lambda, delta),
-                    damp(gLayer.scale.z, value.scale, lambda, delta),
-                );
-                bLayer.scale.set(
-                    damp(bLayer.scale.x, value.scale, lambda, delta),
-                    damp(bLayer.scale.y, value.scale, lambda, delta),
-                    damp(bLayer.scale.z, value.scale, lambda, delta),
-                );
+                [rLayer, gLayer, bLayer].forEach((layer) => {
+                    layer.scale.set(
+                        damp(layer.scale.x, value.scale, lambda, delta),
+                        damp(layer.scale.y, value.scale, lambda, delta),
+                        damp(layer.scale.z, value.scale, lambda, delta),
+                    );
+                    layer.rotation.set(
+                        damp(layer.rotation.x, value.rotation.x, lambda, delta),
+                        damp(layer.rotation.y, value.rotation.y, lambda, delta),
+                        damp(layer.rotation.z, value.rotation.z, lambda, delta),
+                    );
+                });
 
                 rLayer.position.set(
                     damp(rLayer.position.x, value.rPosition.x, lambda, delta),
@@ -102,40 +99,14 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
                     damp(bLayer.position.z, value.bPosition.z, lambda, delta),
                 );
 
-                rLayer.rotation.set(
-                    damp(rLayer.rotation.x, value.rotation.x, lambda, delta),
-                    damp(rLayer.rotation.y, value.rotation.y, lambda, delta),
-                    damp(rLayer.rotation.z, value.rotation.z, lambda, delta),
-                );
-                gLayer.rotation.set(
-                    damp(gLayer.rotation.x, value.rotation.x, lambda, delta),
-                    damp(gLayer.rotation.y, value.rotation.y, lambda, delta),
-                    damp(gLayer.rotation.z, value.rotation.z, lambda, delta),
-                );
-                bLayer.rotation.set(
-                    damp(bLayer.rotation.x, value.rotation.x, lambda, delta),
-                    damp(bLayer.rotation.y, value.rotation.y, lambda, delta),
-                    damp(bLayer.rotation.z, value.rotation.z, lambda, delta),
-                );
-
-                rMaterial.uniforms.uSaturation.value = damp(
-                    rMaterial.uniforms.uSaturation.value,
-                    value.saturation,
-                    lambda,
-                    delta,
-                );
-                gMaterial.uniforms.uSaturation.value = damp(
-                    gMaterial.uniforms.uSaturation.value,
-                    value.saturation,
-                    lambda,
-                    delta,
-                );
-                bMaterial.uniforms.uSaturation.value = damp(
-                    bMaterial.uniforms.uSaturation.value,
-                    value.saturation,
-                    lambda,
-                    delta,
-                );
+                [rMaterial, gMaterial, bMaterial].forEach((material) => {
+                    material.uniforms.uSaturation.value = damp(
+                        material.uniforms.uSaturation.value,
+                        value.saturation,
+                        lambda,
+                        delta,
+                    );
+                });
             },
             [
                 {
@@ -157,24 +128,14 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
         );
         animate<number>(
             (grayscale) => {
-                rMaterial.uniforms.uGrayscale.value = damp(
-                    rMaterial.uniforms.uGrayscale.value,
-                    grayscale,
-                    lambda,
-                    delta,
-                );
-                gMaterial.uniforms.uGrayscale.value = damp(
-                    gMaterial.uniforms.uGrayscale.value,
-                    grayscale,
-                    lambda,
-                    delta,
-                );
-                bMaterial.uniforms.uGrayscale.value = damp(
-                    bMaterial.uniforms.uGrayscale.value,
-                    grayscale,
-                    lambda,
-                    delta,
-                );
+                [rMaterial, gMaterial, bMaterial].forEach((material) => {
+                    material.uniforms.uGrayscale.value = damp(
+                        material.uniforms.uGrayscale.value,
+                        grayscale,
+                        lambda,
+                        delta,
+                    );
+                });
             },
             [1, 0],
             grayscale ? 0 : 1,
