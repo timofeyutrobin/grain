@@ -21,10 +21,9 @@ export const enum GrainSize {
 }
 
 export const enum GrainCount {
-    s = 1,
-    m = 2,
-    l = 3,
-    xl = 4,
+    s = 2,
+    m = 3,
+    l = 4,
 }
 
 export const enum ImageType {
@@ -74,10 +73,6 @@ export function clamp(number: number, min: number, max: number): number {
 
 export function radians(degrees: number): number {
     return (Math.PI / 180) * degrees;
-}
-
-export function lerpFactor(distanceForSecond: number, delta: number): number {
-    return 1 - Math.pow(1 - distanceForSecond, delta);
 }
 
 export function animate<P>(
