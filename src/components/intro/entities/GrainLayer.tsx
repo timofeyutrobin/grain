@@ -1,5 +1,5 @@
 import { useLoader } from '@react-three/fiber';
-import { RefObject } from 'react';
+import { RefObject, useMemo } from 'react';
 import {
     Color,
     ColorRepresentation,
@@ -21,9 +21,29 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
     materialRef,
     ref,
 }) => {
+    'use no memo';
+
     const demoImageTexture = useLoader(
         TextureLoader,
         '/images/demo-image.jpeg',
+    );
+
+    const verticesPositions = useMemo(
+        () => [new Float32Array(vertices), 3] as const,
+        [vertices],
+    );
+    const uniforms = useMemo(
+        () => ({
+            uTime: { value: 0 },
+            uAmplitude: { value: 0.3 },
+            uFrequency: { value: 1 },
+            uSpeed: { value: 1.2 },
+            uColor: { value: new Color(color) },
+            uSaturation: { value: 0 },
+            uTexture: { value: demoImageTexture },
+            uGrayscale: { value: 1 },
+        }),
+        [color],
     );
 
     return (
@@ -32,7 +52,7 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
                 <bufferGeometry>
                     <bufferAttribute
                         attach="attributes-position"
-                        args={[new Float32Array(vertices), 3]}
+                        args={verticesPositions}
                     />
                 </bufferGeometry>
                 <shaderMaterial
@@ -72,16 +92,7 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
                             gl_FragColor = vec4(mix(vec3(mask.rgb * (1.0 - uGrayscale) + (gray * uGrayscale)), uColor, uSaturation * 0.5) + 0.3, gray);
                         }
                     `}
-                    uniforms={{
-                        uTime: { value: 0 },
-                        uAmplitude: { value: 0.3 },
-                        uFrequency: { value: 1 },
-                        uSpeed: { value: 1.2 },
-                        uColor: { value: new Color(color) },
-                        uSaturation: { value: 0 },
-                        uTexture: { value: demoImageTexture },
-                        uGrayscale: { value: 1 },
-                    }}
+                    uniforms={uniforms}
                     transparent
                 />
             </points>

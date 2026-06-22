@@ -17,6 +17,8 @@ export const GrainCluster: React.FC<GrainClusterProps> = ({
     washedMaterial,
     scattered,
 }) => {
+    'use no memo';
+
     useFrame((state, delta) => {
         grains.forEach((grain) => {
             const grainObject = state.scene.getObjectByName(

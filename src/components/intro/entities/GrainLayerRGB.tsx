@@ -39,6 +39,8 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
     stratified,
     grayscale,
 }) => {
+    'use no memo';
+
     const rLayerRef = useRef<Object3D>(null);
     const gLayerRef = useRef<Object3D>(null);
     const bLayerRef = useRef<Object3D>(null);

@@ -17,6 +17,8 @@ export const Grain: React.FC<GrainProps> = ({
     float,
     phaseShift = 0,
 }) => {
+    'use no memo';
+
     const meshRef = useRef<Mesh>(null);
 
     useFrame((state) => {

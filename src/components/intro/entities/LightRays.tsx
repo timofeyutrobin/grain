@@ -9,6 +9,8 @@ interface LightRaysProps {
 }
 
 export const LightRays: React.FC<LightRaysProps> = ({ intensity }) => {
+    'use no memo';
+
     const lightRaysMaterial = useMemo(
         () =>
             new ShaderMaterial({

@@ -19,6 +19,8 @@ interface SceneProps {
 }
 
 export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
+    'use no memo';
+
     const surfaceTexture = useLoader(
         TextureLoader,
         '/textures/grain-surface.jpg',
