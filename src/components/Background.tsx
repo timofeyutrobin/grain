@@ -21,10 +21,8 @@ export const Background: React.FC<PropsWithClassName> = ({ className }) => {
                 parent.clientHeight ||
                 parent.offsetHeight ||
                 window.innerHeight;
-            const w = Math.max(1, Math.floor(width * dpr));
-            const h = Math.max(1, Math.floor(height * dpr));
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = Math.max(1, Math.floor(width * dpr));
+            canvas.height = Math.max(1, Math.floor(height * dpr));
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         };
 
