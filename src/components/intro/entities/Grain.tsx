@@ -18,26 +18,25 @@ export const Grain: React.FC<GrainProps> = ({
     phaseShift = 0,
 }) => {
     const meshRef = useRef<Mesh>(null);
-    const time = useRef(0);
 
-    useFrame((_, delta) => {
+    useFrame((state) => {
         if (!meshRef.current) {
             return;
         }
 
+        const elapsedTime = state.clock.getElapsedTime();
+
         if (rotate) {
-            meshRef.current.rotation.x += delta * 0.3;
-            meshRef.current.rotation.y += delta * 0.1;
+            meshRef.current.rotation.x = elapsedTime * 0.3;
+            meshRef.current.rotation.y = elapsedTime * 0.1;
         }
 
         if (float) {
-            time.current += delta;
-
             meshRef.current.position.y =
-                Math.sin(time.current * 1.6 + phaseShift) * 0.1;
+                Math.sin(elapsedTime * 1.6 + phaseShift) * 0.1;
             meshRef.current.position.x =
-                Math.cos(time.current * 1.2 + phaseShift) * 0.06;
-            meshRef.current.rotation.y += delta * 0.1;
+                Math.cos(elapsedTime * 1.2 + phaseShift) * 0.06;
+            meshRef.current.rotation.y = elapsedTime * 0.1;
         }
     });
 
