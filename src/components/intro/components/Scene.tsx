@@ -134,16 +134,17 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                 );
 
                 if (Math.abs(state.camera.position.z - 12) <= 0.5) {
-                    if (lightRaysMaterial.uniforms.uGlowIntensity.value > 0) {
-                        lightRaysMaterial.visible = true;
-                    }
-
                     lightRaysMaterial.uniforms.uGlowIntensity.value = damp(
                         lightRaysMaterial.uniforms.uGlowIntensity.value,
                         value.lightRaysGlow,
                         lambda,
                         delta,
                     );
+                    if (lightRaysMaterial.uniforms.uGlowIntensity.value > 0) {
+                        lightRaysMaterial.visible = true;
+                    } else {
+                        lightRaysMaterial.visible = false;
+                    }
                 } else {
                     lightRaysMaterial.visible = false;
                 }
