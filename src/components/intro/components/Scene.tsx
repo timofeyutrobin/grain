@@ -1,18 +1,14 @@
 import { Grain } from '@/components/intro/entities/Grain';
 import { GrainCluster } from '@/components/intro/entities/GrainCluster';
 import { GrainLayerRGB } from '@/components/intro/entities/GrainLayerRGB';
-import lightRaysFragmentShader from '@/components/intro/shaders/lightRaysFragmentShader';
-import lightRaysVertexShader from '@/components/intro/shaders/lightRaysVertexShader';
+import { LightRays } from '@/components/intro/entities/LightRays';
 import { animate, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
 import React, { useEffect, useMemo } from 'react';
 import {
-    AdditiveBlending,
-    Color,
     DodecahedronGeometry,
     MeshStandardMaterial,
     RepeatWrapping,
-    ShaderMaterial,
     TextureLoader,
     Vector3Like,
 } from 'three';
@@ -57,23 +53,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         [],
     );
     const grainGeometry = useMemo(() => new DodecahedronGeometry(1, 0), []);
-    const lightRaysMaterial = useMemo(
-        () =>
-            new ShaderMaterial({
-                uniforms: {
-                    uColor: { value: new Color('#e7e5e4') },
-                    uTime: { value: 0 },
-                    uGlowIntensity: { value: 0 },
-                },
-                fragmentShader: lightRaysFragmentShader,
-                vertexShader: lightRaysVertexShader,
-                side: 2,
-                blending: AdditiveBlending,
-                transparent: true,
-                depthWrite: false,
-            }),
-        [],
-    );
 
     useFrame((state, delta) => {
         const lambda = 5;
@@ -84,7 +63,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
             washedOpacity: number;
             metalness: number;
             roughness: number;
-            lightRaysGlow: number;
         }>(
             (value) => {
                 state.camera.position.set(
@@ -132,22 +110,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     lambda,
                     delta,
                 );
-
-                if (Math.abs(state.camera.position.z - 12) <= 0.5) {
-                    lightRaysMaterial.uniforms.uGlowIntensity.value = damp(
-                        lightRaysMaterial.uniforms.uGlowIntensity.value,
-                        value.lightRaysGlow,
-                        lambda,
-                        delta,
-                    );
-                    if (lightRaysMaterial.uniforms.uGlowIntensity.value > 0) {
-                        lightRaysMaterial.visible = true;
-                    } else {
-                        lightRaysMaterial.visible = false;
-                    }
-                } else {
-                    lightRaysMaterial.visible = false;
-                }
             },
             [
                 {
@@ -156,7 +118,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.5,
                     roughness: 0.8,
                     washedOpacity: 1,
-                    lightRaysGlow: -1,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 12 },
@@ -164,7 +125,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.5,
                     roughness: 0.8,
                     washedOpacity: 1,
-                    lightRaysGlow: -1,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 12 },
@@ -172,7 +132,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.5,
                     roughness: 0.8,
                     washedOpacity: 1,
-                    lightRaysGlow: 3,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 12 },
@@ -180,7 +139,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.8,
                     roughness: 0.4,
                     washedOpacity: 0.05,
-                    lightRaysGlow: 3,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 65 },
@@ -188,7 +146,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.8,
                     roughness: 0.4,
                     washedOpacity: 0,
-                    lightRaysGlow: -1,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 65 },
@@ -196,7 +153,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.8,
                     roughness: 0.4,
                     washedOpacity: 0,
-                    lightRaysGlow: -1,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 65 },
@@ -204,7 +160,6 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.8,
                     roughness: 0.4,
                     washedOpacity: 0,
-                    lightRaysGlow: -1,
                 },
                 {
                     cameraPosition: { x: 0, y: 0, z: 65 },
@@ -212,13 +167,10 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                     metalness: 0.8,
                     roughness: 0.4,
                     washedOpacity: 0,
-                    lightRaysGlow: -1,
                 },
             ],
             currentStep,
         );
-
-        lightRaysMaterial.uniforms.uTime.value = state.clock.getElapsedTime();
     });
 
     return (
@@ -228,13 +180,9 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
                 color="#e4e4e7"
                 position={[0, 10, 3]}
             />
-            <mesh
-                position={[0, 0, 7]}
-                rotation={[radians(-10), 0, 0]}
-                material={lightRaysMaterial}
-            >
-                <cylinderGeometry args={[1, 10, 15]} />
-            </mesh>
+            <LightRays
+                intensity={currentStep === 2 || currentStep === 3 ? 3 : -1}
+            />
             <object3D position={[0, 0, 0]}>
                 <object3D scale={0.8}>
                     <Grain
