@@ -1,6 +1,7 @@
+import { PropsWithClassName } from '@/lib/common';
 import React, { useEffect, useRef } from 'react';
 
-export const Background: React.FC = () => {
+export const Background: React.FC<PropsWithClassName> = ({ className }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -10,20 +11,24 @@ export const Background: React.FC = () => {
             return;
         }
 
-        const parent = canvas.parentElement;
         const dpr = window.devicePixelRatio || 1;
 
         const resizeCanvas = () => {
-            if (!parent) return;
-            canvas.width = parent.offsetWidth * dpr;
-            canvas.height = parent.offsetHeight * dpr;
-            ctx.resetTransform();
-            ctx.scale(dpr, dpr);
+            const parent = canvas.parentElement || canvas;
+            const width =
+                parent.clientWidth || parent.offsetWidth || window.innerWidth;
+            const height =
+                parent.clientHeight ||
+                parent.offsetHeight ||
+                window.innerHeight;
+            canvas.width = Math.max(1, Math.floor(width * dpr));
+            canvas.height = Math.max(1, Math.floor(height * dpr));
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         };
 
         resizeCanvas();
 
-        let animationId: number;
+        let animationId: number = 0;
         let start = 0;
 
         const cols = 60;
@@ -45,6 +50,11 @@ export const Background: React.FC = () => {
 
                 const logicalWidth = canvas.width / dpr;
                 const logicalHeight = canvas.height / dpr;
+                if (logicalWidth <= 0 || logicalHeight <= 0) {
+                    start = timestamp;
+                    animationId = requestAnimationFrame(draw);
+                    return;
+                }
                 const spacing = logicalWidth / (cols / 1.2);
 
                 ctx.clearRect(0, 0, logicalWidth, logicalHeight);
@@ -82,22 +92,18 @@ export const Background: React.FC = () => {
 
         requestAnimationFrame(draw);
 
-        const handleResize = () => {
-            resizeCanvas();
-        };
+        const ro = new ResizeObserver(() => resizeCanvas());
+        ro.observe(canvas);
 
+        const handleResize = () => resizeCanvas();
         window.addEventListener('resize', handleResize);
 
         return () => {
             cancelAnimationFrame(animationId);
             window.removeEventListener('resize', handleResize);
+            ro.disconnect();
         };
     }, []);
 
-    return (
-        <canvas
-            ref={canvasRef}
-            className="absolute top-0 left-0 w-full h-full -z-10"
-        />
-    );
+    return <canvas ref={canvasRef} className={className} />;
 };

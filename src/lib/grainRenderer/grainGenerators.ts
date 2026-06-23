@@ -1,4 +1,4 @@
-import { clamp, randomFromTo } from '@/lib/common';
+import { clamp, radians, randomFromTo } from '@/lib/common';
 
 export type GrainGeneratorParams = {
     type: 'cubic';
@@ -91,7 +91,7 @@ function smoothGrain(
 function rotate(grid: boolean[], grainSize: number, angleDeg: number) {
     const result = grid.slice();
 
-    const angleRad = angleDeg * (Math.PI / 180);
+    const angleRad = radians(angleDeg);
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
             const rotatedX = Math.round(

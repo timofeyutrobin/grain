@@ -1,8 +1,8 @@
 import { Microscope } from '@/components/Microscope';
-import { ColorPicker } from '@/components/Settings/items/ColorPicker';
-import { Range } from '@/components/Settings/items/Range';
-import { Segments } from '@/components/Settings/items/Segments';
-import { SettingsGroup } from '@/components/Settings/SettingsGroup';
+import { ColorPicker } from '@/components/settings/items/ColorPicker';
+import { Range } from '@/components/settings/items/Range';
+import { Segments } from '@/components/settings/items/Segments';
+import { SettingsGroup } from '@/components/settings/SettingsGroup';
 import {
     Color,
     defaultColors,

@@ -28,7 +28,7 @@ Segments.Segment = ({ children, onClick, isSelected }) => {
             onClick={onClick}
             className={`grow px-4 py-2 text-sm border transition-colors focus:outline-none cursor-pointer ${
                 isSelected &&
-                'bg-amber-300  border-amber-300 hover:bg-amber-300 text-zinc-800'
+                'bg-stone-200 border-stone-200 hover:bg-stone-200 text-stone-800'
             }`}
         >
             {children}

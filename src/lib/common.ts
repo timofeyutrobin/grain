@@ -21,10 +21,9 @@ export const enum GrainSize {
 }
 
 export const enum GrainCount {
-    s = 1,
-    m = 2,
-    l = 3,
-    xl = 4,
+    s = 2,
+    m = 3,
+    l = 4,
 }
 
 export const enum ImageType {
@@ -52,6 +51,8 @@ export const defaultColors = {
     },
 };
 
+export type PropsWithClassName<T = {}> = { className?: string } & T;
+
 export function isError(value: unknown): value is Error {
     return (
         value instanceof Error ||
@@ -66,6 +67,18 @@ export function randomFromTo(from: number, to: number): number {
     return Math.random() * (to - from) + from;
 }
 
-export function clamp(number: number, min: number, max: number) {
+export function clamp(number: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, number));
+}
+
+export function radians(degrees: number): number {
+    return (Math.PI / 180) * degrees;
+}
+
+export function animate<P>(
+    frame: (value: P) => void,
+    states: P[],
+    currentState: number,
+) {
+    frame(states[currentState]);
 }
