@@ -14,6 +14,72 @@ import {
 } from 'three';
 import { damp } from 'three/src/math/MathUtils.js';
 
+interface SceneAnimationState {
+    cameraPosition: Vector3Like;
+    opacity: number;
+    washedOpacity: number;
+    metalness: number;
+    roughness: number;
+}
+const animationState: SceneAnimationState[] = [
+    {
+        cameraPosition: { x: 0, y: 0, z: 7 },
+        opacity: 1,
+        metalness: 0.5,
+        roughness: 0.8,
+        washedOpacity: 1,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 12 },
+        opacity: 1,
+        metalness: 0.5,
+        roughness: 0.8,
+        washedOpacity: 1,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 12 },
+        opacity: 1,
+        metalness: 0.5,
+        roughness: 0.8,
+        washedOpacity: 1,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 12 },
+        opacity: 1,
+        metalness: 0.8,
+        roughness: 0.4,
+        washedOpacity: 0.05,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 65 },
+        opacity: 0,
+        metalness: 0.8,
+        roughness: 0.4,
+        washedOpacity: 0,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 65 },
+        opacity: 0,
+        metalness: 0.8,
+        roughness: 0.4,
+        washedOpacity: 0,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 65 },
+        opacity: 0,
+        metalness: 0.8,
+        roughness: 0.4,
+        washedOpacity: 0,
+    },
+    {
+        cameraPosition: { x: 0, y: 0, z: 65 },
+        opacity: 0,
+        metalness: 0.8,
+        roughness: 0.4,
+        washedOpacity: 0,
+    },
+];
+
 interface SceneProps {
     currentStep: number;
 }
@@ -30,7 +96,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         surfaceTexture.wrapT = RepeatWrapping;
         surfaceTexture.wrapS = RepeatWrapping;
         surfaceTexture.repeat.set(5, 5);
-    }, [surfaceTexture]);
+    }, []);
 
     const grainMaterial = useMemo(
         () =>
@@ -59,30 +125,24 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
     useFrame((state, delta) => {
         const lambda = 5;
 
-        animate<{
-            cameraPosition: Vector3Like;
-            opacity: number;
-            washedOpacity: number;
-            metalness: number;
-            roughness: number;
-        }>(
-            (value) => {
+        animate<SceneAnimationState>(
+            (animationState) => {
                 state.camera.position.set(
                     damp(
                         state.camera.position.x,
-                        value.cameraPosition.x,
+                        animationState.cameraPosition.x,
                         lambda,
                         delta,
                     ),
                     damp(
                         state.camera.position.y,
-                        value.cameraPosition.y,
+                        animationState.cameraPosition.y,
                         lambda,
                         delta,
                     ),
                     damp(
                         state.camera.position.z,
-                        value.cameraPosition.z,
+                        animationState.cameraPosition.z,
                         lambda,
                         delta,
                     ),
@@ -90,87 +150,30 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
 
                 grainMaterial.opacity = damp(
                     grainMaterial.opacity,
-                    value.opacity,
+                    animationState.opacity,
                     lambda,
                     delta,
                 );
                 grainMaterial.metalness = damp(
                     grainMaterial.metalness,
-                    value.metalness,
+                    animationState.metalness,
                     lambda,
                     delta,
                 );
                 grainMaterial.roughness = damp(
                     grainMaterial.roughness,
-                    value.roughness,
+                    animationState.roughness,
                     lambda,
                     delta,
                 );
                 washedGrainMaterial.opacity = damp(
                     washedGrainMaterial.opacity,
-                    value.washedOpacity,
+                    animationState.washedOpacity,
                     lambda,
                     delta,
                 );
             },
-            [
-                {
-                    cameraPosition: { x: 0, y: 0, z: 7 },
-                    opacity: 1,
-                    metalness: 0.5,
-                    roughness: 0.8,
-                    washedOpacity: 1,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 12 },
-                    opacity: 1,
-                    metalness: 0.5,
-                    roughness: 0.8,
-                    washedOpacity: 1,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 12 },
-                    opacity: 1,
-                    metalness: 0.5,
-                    roughness: 0.8,
-                    washedOpacity: 1,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 12 },
-                    opacity: 1,
-                    metalness: 0.8,
-                    roughness: 0.4,
-                    washedOpacity: 0.05,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 65 },
-                    opacity: 0,
-                    metalness: 0.8,
-                    roughness: 0.4,
-                    washedOpacity: 0,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 65 },
-                    opacity: 0,
-                    metalness: 0.8,
-                    roughness: 0.4,
-                    washedOpacity: 0,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 65 },
-                    opacity: 0,
-                    metalness: 0.8,
-                    roughness: 0.4,
-                    washedOpacity: 0,
-                },
-                {
-                    cameraPosition: { x: 0, y: 0, z: 65 },
-                    opacity: 0,
-                    metalness: 0.8,
-                    roughness: 0.4,
-                    washedOpacity: 0,
-                },
-            ],
+            animationState,
             currentStep,
         );
     });

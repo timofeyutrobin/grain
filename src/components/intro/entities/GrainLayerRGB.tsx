@@ -30,6 +30,31 @@ for (let i = 0; i < 60000; i++) {
     vertices3.push(x, y, z);
 }
 
+interface GrainLayerRGBAnimationState {
+    scale: number;
+    rPosition: Vector3Like;
+    bPosition: Vector3Like;
+    rotation: Vector3Like;
+    saturation: number;
+}
+
+const animationState: GrainLayerRGBAnimationState[] = [
+    {
+        scale: 0.8,
+        rPosition: { x: -6, y: 3.5, z: 1 },
+        bPosition: { x: 7, y: -5, z: 0 },
+        rotation: { x: radians(-30), y: 0, z: 0 },
+        saturation: 1,
+    },
+    {
+        scale: 1,
+        rPosition: { x: 0, y: 0, z: 0 },
+        bPosition: { x: 0, y: 0, z: 0 },
+        rotation: { x: 0, y: 0, z: 0 },
+        saturation: 0,
+    },
+];
+
 interface GrainLayerRGBProps {
     stratified?: boolean;
     grayscale?: boolean;
@@ -69,13 +94,7 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
 
         const lambda = 5;
 
-        animate<{
-            scale: number;
-            rPosition: Vector3Like;
-            bPosition: Vector3Like;
-            rotation: Vector3Like;
-            saturation: number;
-        }>(
+        animate<GrainLayerRGBAnimationState>(
             (value) => {
                 [rLayer, gLayer, bLayer].forEach((layer) => {
                     layer.scale.set(
@@ -110,22 +129,7 @@ export const GrainLayerRGB: React.FC<GrainLayerRGBProps> = ({
                     );
                 });
             },
-            [
-                {
-                    scale: 0.8,
-                    rPosition: { x: -6, y: 3.5, z: 1 },
-                    bPosition: { x: 7, y: -5, z: 0 },
-                    rotation: { x: radians(-30), y: 0, z: 0 },
-                    saturation: 1,
-                },
-                {
-                    scale: 1,
-                    rPosition: { x: 0, y: 0, z: 0 },
-                    bPosition: { x: 0, y: 0, z: 0 },
-                    rotation: { x: 0, y: 0, z: 0 },
-                    saturation: 0,
-                },
-            ],
+            animationState,
             stratified ? 0 : 1,
         );
         animate<number>(
