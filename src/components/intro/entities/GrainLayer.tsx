@@ -8,6 +8,42 @@ import {
     TextureLoader,
 } from 'three';
 
+const vertexShader = `
+    uniform float uTime;
+    uniform float uAmplitude;
+    uniform float uFrequency;
+    uniform float uSpeed;
+    uniform float uSaturation;
+
+    varying vec2 vUv;
+
+    void main() {
+        vUv = vec2(position.x / 16.0, position.y / 10.0) + 0.5;
+        vec3 p = position;
+
+        float wave = sin(uTime * uSpeed + p.x * uFrequency) * cos(uTime * uSpeed * 0.7 + p.y * uFrequency * 0.5);
+        p.z += uAmplitude * wave * 0.2;
+
+        vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+        gl_PointSize = 2.0;
+        gl_Position = projectionMatrix * mvPosition;
+    }
+`;
+const fragmentShader = `
+    uniform vec3 uColor;
+    uniform float uSaturation;
+    uniform sampler2D uTexture;
+    uniform float uGrayscale;
+
+    varying vec2 vUv;
+
+    void main() {
+        vec4 mask = texture2D(uTexture, vUv);
+        float gray = 0.21 * mask.r + 0.71 * mask.g + 0.07 * mask.b;
+        gl_FragColor = vec4(mix(vec3(mask.rgb * (1.0 - uGrayscale) + (gray * uGrayscale)), uColor, uSaturation * 0.5) + 0.3, gray);
+    }
+`;
+
 interface GrainLayerProps {
     vertices: number[];
     color: ColorRepresentation;
@@ -57,41 +93,8 @@ export const GrainLayer: React.FC<GrainLayerProps> = ({
                 </bufferGeometry>
                 <shaderMaterial
                     ref={materialRef}
-                    vertexShader={`
-                        uniform float uTime;
-                        uniform float uAmplitude;
-                        uniform float uFrequency;
-                        uniform float uSpeed;
-                        uniform float uSaturation;
-                    
-                        varying vec2 vUv;
-                    
-                        void main() {
-                            vUv = vec2(position.x / 16.0, position.y / 10.0) + 0.5;
-                            vec3 p = position;
-                    
-                            float wave = sin(uTime * uSpeed + p.x * uFrequency) * cos(uTime * uSpeed * 0.7 + p.y * uFrequency * 0.5);
-                            p.z += uAmplitude * wave * 0.2;
-                    
-                            vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
-                            gl_PointSize = 2.0;
-                            gl_Position = projectionMatrix * mvPosition;
-                        }
-                    `}
-                    fragmentShader={`
-                        uniform vec3 uColor;
-                        uniform float uSaturation;
-                        uniform sampler2D uTexture;
-                        uniform float uGrayscale;
-                    
-                        varying vec2 vUv;
-                    
-                        void main() {
-                            vec4 mask = texture2D(uTexture, vUv);
-                            float gray = 0.21 * mask.r + 0.71 * mask.g + 0.07 * mask.b;
-                            gl_FragColor = vec4(mix(vec3(mask.rgb * (1.0 - uGrayscale) + (gray * uGrayscale)), uColor, uSaturation * 0.5) + 0.3, gray);
-                        }
-                    `}
+                    vertexShader={vertexShader}
+                    fragmentShader={fragmentShader}
                     uniforms={uniforms}
                     transparent
                 />
