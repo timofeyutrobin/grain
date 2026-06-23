@@ -1,10 +1,10 @@
 import { Microscope } from '@/components/Microscope';
-import { ColorPicker } from '@/components/settings/items/ColorPicker';
-import { Range } from '@/components/settings/items/Range';
-import { Segments } from '@/components/settings/items/Segments';
+import { ColorPicker } from '@/components/settings/ColorPicker';
+import { Range } from '@/components/settings/Range';
+import { Segments } from '@/components/settings/Segments';
 import { SettingsGroup } from '@/components/settings/SettingsGroup';
 import {
-    Color,
+    ColorHSV,
     defaultColors,
     GrainCount,
     GrainSize,
@@ -21,12 +21,12 @@ interface SettingsProps {
     curveType: CharacteristicCurveType;
     onCurveTypeChange: (curveType: CharacteristicCurveType) => void;
 
-    redDyeColor: Color;
-    onRedDyeColorChange: (color: Color) => void;
-    greenDyeColor: Color;
-    onGreenDyeColorChange: (color: Color) => void;
-    blueDyeColor: Color;
-    onBlueDyeColorChange: (color: Color) => void;
+    redDyeColor: ColorHSV;
+    onRedDyeColorChange: (color: ColorHSV) => void;
+    greenDyeColor: ColorHSV;
+    onGreenDyeColorChange: (color: ColorHSV) => void;
+    blueDyeColor: ColorHSV;
+    onBlueDyeColorChange: (color: ColorHSV) => void;
 
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
@@ -107,7 +107,7 @@ export const Settings: React.FC<SettingsProps> = ({
             </SettingsGroup>
             <SettingsGroup legend="Grain count" ariaLabel="Grain count">
                 <Range
-                    max={GrainCount.xl}
+                    max={GrainCount.l}
                     min={GrainCount.s}
                     step={1}
                     value={grainCount}

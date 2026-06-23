@@ -1,4 +1,4 @@
-import { Channel, Color, randomFromTo } from '@/lib/common';
+import { Channel, ColorHSV, randomFromTo } from '@/lib/common';
 import {
     CharacteristicCurveParams,
     getCharacteristicCurve,
@@ -16,7 +16,7 @@ export interface Layer {
     curveParams: CharacteristicCurveParams;
     grainSpread: number;
     grainColorAlpha: number;
-    color?: Color;
+    color?: ColorHSV;
     channel: Channel;
 }
 

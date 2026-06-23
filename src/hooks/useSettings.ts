@@ -1,5 +1,5 @@
 import {
-    Color,
+    ColorHSV,
     defaultColors,
     GrainCount,
     GrainSize,
@@ -15,13 +15,15 @@ export function useSettings() {
 
     const [grainType, setGrainType] = useState<GrainGeneratorType>('cubic');
     const [grainSize, setGrainSize] = useState<GrainSize>(1);
-    const [grainCount, setGrainCount] = useState<GrainCount>(1);
+    const [grainCount, setGrainCount] = useState<GrainCount>(2);
 
-    const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
-    const [greenDyeColor, setGreenDyeColor] = useState<Color>(
+    const [redDyeColor, setRedDyeColor] = useState<ColorHSV>(defaultColors.red);
+    const [greenDyeColor, setGreenDyeColor] = useState<ColorHSV>(
         defaultColors.green,
     );
-    const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
+    const [blueDyeColor, setBlueDyeColor] = useState<ColorHSV>(
+        defaultColors.blue,
+    );
 
     const [curveType, setCurveType] =
         useState<CharacteristicCurveType>('sigmoid');
@@ -31,6 +33,14 @@ export function useSettings() {
         curveType,
         grainSize,
         grainType,
+        color:
+            mode === 'color'
+                ? {
+                      r: redDyeColor,
+                      g: greenDyeColor,
+                      b: blueDyeColor,
+                  }
+                : null,
     };
 
     return {

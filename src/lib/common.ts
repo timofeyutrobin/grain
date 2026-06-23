@@ -8,7 +8,7 @@ export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
 export type RenderMode = 'grayscale' | 'color';
 
-export interface Color {
+export interface ColorHSV {
     h: number;
     s: number;
     v: number;

@@ -1,4 +1,10 @@
-import { GrainSize, randomFromTo, SimpleImageData } from '@/lib/common';
+import {
+    Channel,
+    ColorHSV,
+    GrainSize,
+    randomFromTo,
+    SimpleImageData,
+} from '@/lib/common';
 import {
     CharacteristicCurve,
     CharacteristicCurveType,
@@ -18,6 +24,11 @@ export interface RandomSpawnGrainRenderParameters {
     grainSize: GrainSize;
     curveType: CharacteristicCurveType;
     grainType: GrainGeneratorType;
+    color?: null | {
+        r: ColorHSV;
+        g: ColorHSV;
+        b: ColorHSV;
+    };
 }
 
 export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParameters> {
@@ -36,6 +47,8 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
         posX: number,
         posY: number,
         curve: CharacteristicCurve,
+        channel: Channel,
+        color: ColorHSV,
         alpha: number,
     ) {
         let exposure = 0;
@@ -45,7 +58,7 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
             exposure += getPixel(
                 (posY + y) * this.srcImage.width + (posX + x),
                 this.srcImage.pixels,
-                'grayscale',
+                channel,
             );
         });
         exposure /= steps;
@@ -57,16 +70,16 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
                     this.destImage.width,
                     posX + x,
                     posY + y,
-                    0,
-                    0,
-                    Math.floor(randomFromTo(80, 100)),
+                    color.h,
+                    color.s,
+                    color.v,
                     alpha,
                 );
             });
         }
     }
 
-    private spawnGrain() {
+    private spawnGrain(channel: Channel, color: ColorHSV) {
         const grainCount = Math.floor(
             this.srcImage.width *
                 this.srcImage.height *
@@ -85,16 +98,23 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
             const grain = getGrainGenerator(grainGeneratorParams)();
             const curve = getCharacteristicCurve({
                 type: this.params.curveType,
-                contrast: grainGeneratorParams.grainSize / 1.2,
+                contrast: grainGeneratorParams.grainSize / 1.4,
                 sensitivity: 1 / grainGeneratorParams.grainSize,
             });
             const alpha = 0.1;
-            this.activateGrain(grain, size, x, y, curve, alpha);
+            this.activateGrain(grain, size, x, y, curve, channel, color, alpha);
         }
     }
 
     render(): SimpleImageData {
-        this.spawnGrain();
+        if (this.params.color) {
+            this.spawnGrain('r', this.params.color.r);
+            this.spawnGrain('g', this.params.color.g);
+            this.spawnGrain('b', this.params.color.b);
+        } else {
+            this.spawnGrain('grayscale', { h: 0, s: 0, v: 80 });
+        }
+
         return this.destImage;
     }
 }
