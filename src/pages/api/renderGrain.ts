@@ -92,8 +92,8 @@ export default async function handler(
             },
         })
             .rotate()
-            .normalise({ upper: 95 })
-            .modulate({ saturation: 5 })
+            .normalise({ upper: 98 })
+            .modulate({ saturation: 8 })
             .toFormat('png')
             .toFile(outputPath);
 

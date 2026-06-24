@@ -2,6 +2,7 @@ import {
     ColorHSV,
     defaultColors,
     GrainCount,
+    grainCountMap,
     GrainSize,
     RenderMode,
 } from '@/lib/common';
@@ -14,8 +15,8 @@ export function useSettings() {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
     const [grainType, setGrainType] = useState<GrainGeneratorType>('cubic');
-    const [grainSize, setGrainSize] = useState<GrainSize>(1);
-    const [grainCount, setGrainCount] = useState<GrainCount>(2);
+    const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
+    const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.s);
 
     const [redDyeColor, setRedDyeColor] = useState<ColorHSV>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<ColorHSV>(
@@ -29,18 +30,17 @@ export function useSettings() {
         useState<CharacteristicCurveType>('sigmoid');
 
     const renderParameters: RandomSpawnGrainRenderParameters = {
-        relativeGrainCount: grainCount,
+        isColor: mode === 'color',
+        relativeGrainCount: grainCountMap[grainCount],
         curveType,
         grainSize,
         grainType,
-        color:
-            mode === 'color'
-                ? {
-                      r: redDyeColor,
-                      g: greenDyeColor,
-                      b: blueDyeColor,
-                  }
-                : null,
+        color: {
+            r: redDyeColor,
+            g: greenDyeColor,
+            b: blueDyeColor,
+            grayscale: { h: 0, s: 0, v: 80 },
+        },
     };
 
     return {

@@ -2,11 +2,11 @@ import {
     Channel,
     ColorHSV,
     GrainSize,
-    randomFromTo,
+    logNormalDistribution,
+    SeededRandom,
     SimpleImageData,
 } from '@/lib/common';
 import {
-    CharacteristicCurve,
     CharacteristicCurveType,
     getCharacteristicCurve,
 } from '@/lib/grainRenderer/characteristicCurves';
@@ -15,24 +15,21 @@ import {
     GrainGeneratorType,
 } from '@/lib/grainRenderer/grainGenerators';
 import { Renderer } from '@/lib/grainRenderer/Renderer';
-import { traverse } from '@/lib/grainUtilities';
 import { addPixelHsl, getPixel } from '@/lib/image';
-import { randomLogNormal } from 'd3-random';
 
 export interface RandomSpawnGrainRenderParameters {
+    isColor: boolean;
     relativeGrainCount: number;
     grainSize: GrainSize;
     curveType: CharacteristicCurveType;
     grainType: GrainGeneratorType;
-    color?: null | {
-        r: ColorHSV;
-        g: ColorHSV;
-        b: ColorHSV;
-    };
+    color: Record<Channel, ColorHSV>;
 }
 
 export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParameters> {
-    private grainSizeDistribution = randomLogNormal(0.5, 0.6);
+    private sizes: number = 3;
+    private alpha: number =
+        1 / (this.params.relativeGrainCount * this.params.grainSize ** 2);
 
     constructor(
         srcImage: SimpleImageData,
@@ -41,78 +38,99 @@ export class RandomSpawnRenderer extends Renderer<RandomSpawnGrainRenderParamete
         super(srcImage, 1, params);
     }
 
-    private activateGrain(
-        grain: boolean[],
-        size: number,
-        posX: number,
-        posY: number,
-        curve: CharacteristicCurve,
-        channel: Channel,
-        color: ColorHSV,
-        alpha: number,
-    ) {
-        let exposure = 0;
-        let steps = 0;
-        traverse(grain, size, (x, y) => {
-            steps++;
-            exposure += getPixel(
-                (posY + y) * this.srcImage.width + (posX + x),
-                this.srcImage.pixels,
-                channel,
-            );
-        });
-        exposure /= steps;
+    private drawPixel = (x: number, y: number, channel: Channel) => {
+        addPixelHsl(
+            this.destImage.pixels,
+            this.destImage.width,
+            x,
+            y,
+            this.params.color[channel].h,
+            this.params.color[channel].s,
+            this.params.color[channel].v,
+            this.alpha,
+        );
+    };
 
-        if (Math.random() < curve(exposure)) {
-            traverse(grain, size, (x, y) => {
-                addPixelHsl(
-                    this.destImage.pixels,
-                    this.destImage.width,
-                    posX + x,
-                    posY + y,
-                    color.h,
-                    color.s,
-                    color.v,
-                    alpha,
-                );
-            });
+    private calculateGrainCounts(count: number) {
+        const weights = [];
+        let totalWeight = 0;
+
+        for (let i = 1; i <= this.sizes; i++) {
+            const lowerEdge = i === 1 ? 0 : (2 * i - 1) / 2;
+            const upperEdge = i === this.sizes - 1 ? Infinity : (2 * i + 1) / 2;
+
+            const p =
+                logNormalDistribution(upperEdge, 0.1, 0.4) -
+                logNormalDistribution(lowerEdge, 0.1, 0.4);
+            weights[i - 1] = p;
+            totalWeight += p;
         }
+
+        const counts: number[] = [];
+        let allocatedGrains = 0;
+
+        for (let i = 0; i < this.sizes; i++) {
+            const exactCount = count * (weights[i] / totalWeight);
+            counts[i] = Math.round(exactCount);
+            allocatedGrains += counts[i];
+        }
+
+        let diff = count - allocatedGrains;
+        if (diff !== 0) {
+            counts[Math.floor(this.sizes / 2)] += diff;
+        }
+
+        return counts;
     }
 
-    private spawnGrain(channel: Channel, color: ColorHSV) {
+    private spawnGrain(channel: Channel) {
         const grainCount = Math.floor(
             this.srcImage.width *
                 this.srcImage.height *
                 this.params.relativeGrainCount,
         );
-        for (let i = 0; i < grainCount; i++) {
-            const x = Math.floor(randomFromTo(0, this.destImage.width + 1));
-            const y = Math.floor(randomFromTo(0, this.destImage.height + 1));
-            const grainGeneratorParams = {
-                grainSize:
-                    this.params.grainSize *
-                    Math.round(this.grainSizeDistribution()),
-                type: this.params.grainType,
-            };
-            const size = grainGeneratorParams.grainSize;
-            const grain = getGrainGenerator(grainGeneratorParams)();
-            const curve = getCharacteristicCurve({
-                type: this.params.curveType,
-                contrast: grainGeneratorParams.grainSize / 1.4,
-                sensitivity: 1 / grainGeneratorParams.grainSize,
-            });
-            const alpha = 0.1;
-            this.activateGrain(grain, size, x, y, curve, channel, color, alpha);
-        }
+        const grainCountDistribution = this.calculateGrainCounts(grainCount);
+
+        const grainGenerator = getGrainGenerator(this.params.grainType);
+        const curve = getCharacteristicCurve(this.params.curveType);
+        const rng = new SeededRandom(performance.now());
+
+        grainCountDistribution.forEach((count, grainSize) => {
+            for (let i = 0; i < count; i++) {
+                const posX = Math.floor(
+                    rng.next() * (this.destImage.width + 1),
+                );
+                const posY = Math.floor(
+                    rng.next() * (this.destImage.height + 1),
+                );
+
+                // TODO: сделать правильный замер экспозиции под зернышком
+                const exposure = getPixel(
+                    posY * this.srcImage.width + posX,
+                    this.srcImage.pixels,
+                    channel,
+                );
+
+                if (Math.random() < curve(exposure, 1, 0.2)) {
+                    grainGenerator(
+                        (grainSize + 1) * this.params.grainSize,
+                        posX,
+                        posY,
+                        channel,
+                        this.drawPixel,
+                    );
+                }
+            }
+        });
     }
 
     render(): SimpleImageData {
-        if (this.params.color) {
-            this.spawnGrain('r', this.params.color.r);
-            this.spawnGrain('g', this.params.color.g);
-            this.spawnGrain('b', this.params.color.b);
+        if (this.params.isColor) {
+            this.spawnGrain('r');
+            this.spawnGrain('g');
+            this.spawnGrain('b');
         } else {
-            this.spawnGrain('grayscale', { h: 0, s: 0, v: 80 });
+            this.spawnGrain('grayscale');
         }
 
         return this.destImage;

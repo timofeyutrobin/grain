@@ -1,4 +1,4 @@
-import { clamp, radians, randomFromTo } from '@/lib/common';
+import { Channel, clamp, randomFromTo } from '@/lib/common';
 
 export type GrainGeneratorParams = {
     type: 'cubic';
@@ -8,21 +8,22 @@ export type GrainGeneratorParams = {
         maxNeighbors: number;
     };
 };
-export type GrainGeneratorType = GrainGeneratorParams['type'];
+export type GrainGeneratorType = 'cubic';
+
+const buffer: boolean[] = [];
 
 /**
  * Отрисовка начинается с центральной клетки заданной сетки
  * и на каждом шаге двигается в случайном направлении, создавая случайную форму.
  */
-function steppingGeneration(grainSize: number): boolean[] {
+function steppingGeneration(grainSize: number): void {
     const stepsBasis = grainSize ** 2;
     const minSteps = Math.ceil(stepsBasis / 2);
     const steps = randomFromTo(minSteps, stepsBasis);
-    const grid: boolean[] = Array(grainSize ** 2).fill(false);
 
     let x = Math.floor(grainSize / 2);
     let y = Math.floor(grainSize / 2);
-    grid[y * grainSize + x] = true;
+    buffer[y * grainSize + x] = true;
 
     for (let i = 0; i < steps; i++) {
         const dir = Math.floor(randomFromTo(0, 4));
@@ -34,26 +35,21 @@ function steppingGeneration(grainSize: number): boolean[] {
         x = clamp(x, 0, grainSize - 1);
         y = clamp(y, 0, grainSize - 1);
 
-        grid[y * grainSize + x] = true;
+        buffer[y * grainSize + x] = true;
     }
-
-    return grid;
 }
 
 /**
  * Сглаживание формы зернышка.
  */
 function smoothGrain(
-    grid: boolean[],
     grainSize: number,
     minNeighbors: number,
     maxNeighbors: number,
 ) {
     if (grainSize <= 1) {
-        return grid;
+        return;
     }
-
-    const result = grid.slice();
 
     for (let y = 0; y < grainSize; y++) {
         for (let x = 0; x < grainSize; x++) {
@@ -69,63 +65,46 @@ function smoothGrain(
                         nx < grainSize &&
                         ny >= 0 &&
                         ny < grainSize &&
-                        grid[ny * grainSize + nx]
+                        buffer[ny * grainSize + nx]
                     ) {
                         neighbors++;
                     }
                 }
             }
 
-            if (grid[y * grainSize + x] && neighbors < minNeighbors) {
-                result[y * grainSize + x] = false;
+            if (buffer[y * grainSize + x] && neighbors < minNeighbors) {
+                buffer[y * grainSize + x] = false;
             }
-            if (!grid[y * grainSize + x] && neighbors >= maxNeighbors) {
-                result[y * grainSize + x] = true;
+            if (!buffer[y * grainSize + x] && neighbors >= maxNeighbors) {
+                buffer[y * grainSize + x] = true;
             }
         }
     }
-
-    return result;
 }
 
-function rotate(grid: boolean[], grainSize: number, angleDeg: number) {
-    const result = grid.slice();
-
-    const angleRad = radians(angleDeg);
-    for (let y = 0; y < grainSize; y++) {
-        for (let x = 0; x < grainSize; x++) {
-            const rotatedX = Math.round(
-                x * Math.cos(angleRad) + y * Math.sin(angleRad),
-            );
-            const rotatedY = Math.round(
-                y * Math.cos(angleRad) + x * Math.sin(angleRad),
-            );
-
-            result[rotatedY * grainSize + rotatedX] = grid[y * grainSize + x];
-        }
-    }
-
-    return result;
-}
-
-export function getGrainGenerator(params: GrainGeneratorParams) {
-    switch (params.type) {
+export function getGrainGenerator(type: GrainGeneratorType) {
+    switch (type) {
         case 'cubic':
-            return () => {
-                const { grainSize, smoothing } = params;
+            return (
+                size: number,
+                imageX: number,
+                imageY: number,
+                channel: Channel,
+                addPixel: (x: number, y: number, channel: Channel) => void,
+            ) => {
+                steppingGeneration(size);
+                smoothGrain(size, 3, 3);
 
-                const grid = steppingGeneration(grainSize);
+                buffer.forEach((pixel, i) => {
+                    pixel &&
+                        addPixel(
+                            (i % size) + imageX,
+                            Math.floor(i / size) + imageY,
+                            channel,
+                        );
+                });
 
-                if (smoothing) {
-                    return smoothGrain(
-                        grid,
-                        grainSize,
-                        smoothing.minNeighbors,
-                        smoothing.maxNeighbors,
-                    );
-                }
-
-                return grid;
+                buffer.fill(false);
             };
     }
 }

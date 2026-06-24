@@ -8,20 +8,23 @@ export type CharacteristicCurveParams =
           sensitivity: number;
       };
 
-export type CharacteristicCurveType = CharacteristicCurveParams['type'];
-export type CharacteristicCurve = (pixel: number) => number;
+export type CharacteristicCurveType = 'linear' | 'sigmoid';
 
-export function getCharacteristicCurve(
-    params: CharacteristicCurveParams,
-): CharacteristicCurve {
-    switch (params.type) {
+export type CharacteristicCurve = {
+    linear: (x: number) => number;
+    sigmoid: (x: number, contrast: number, sensitivity: number) => number;
+};
+
+export function getCharacteristicCurve<T extends CharacteristicCurveType>(
+    type: T,
+): CharacteristicCurve[T] {
+    switch (type) {
         case 'linear':
-            return (x) => x;
+            return ((x: number) => x) as CharacteristicCurve[T];
         case 'sigmoid':
-            return (x) =>
-                (Math.pow(x, params.contrast) /
-                    (Math.pow(x, params.contrast) +
-                        Math.pow(1 - x, params.contrast))) *
-                Math.pow(x, params.sensitivity);
+            return ((x: number, contrast: number, sensitivity: number) =>
+                (Math.pow(x, contrast) /
+                    (Math.pow(x, contrast) + Math.pow(1 - x, contrast))) *
+                Math.pow(x, sensitivity)) as CharacteristicCurve[T];
     }
 }

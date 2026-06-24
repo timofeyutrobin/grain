@@ -21,10 +21,12 @@ export const enum GrainSize {
 }
 
 export const enum GrainCount {
-    s = 2,
-    m = 3,
-    l = 4,
+    s,
+    m,
+    l,
 }
+
+export const grainCountMap: Record<GrainCount, number> = [8, 16, 32];
 
 export const enum ImageType {
     RESULT = 'result',
@@ -81,4 +83,39 @@ export function animate<P>(
     currentState: number,
 ) {
     frame(states[currentState]);
+}
+
+export function erf(x: number) {
+    const a1 = 0.254829592;
+    const a2 = -0.284496736;
+    const a3 = 1.421413741;
+    const a4 = -1.453152027;
+    const a5 = 1.061405429;
+    const p = 0.3275911;
+
+    const sign = x < 0 ? -1 : 1;
+    x = Math.abs(x);
+
+    const t = 1.0 / (1.0 + p * x);
+    const y =
+        1.0 -
+        ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+
+    return sign * y;
+}
+
+export function logNormalDistribution(x: number, mu: number, sigma: number) {
+    if (x <= 0) {
+        return 0;
+    }
+
+    return 0.5 + 0.5 * erf((Math.log(x) - mu) / (Math.sqrt(2) * sigma));
+}
+
+export class SeededRandom {
+    constructor(private seed: number) {}
+    next() {
+        this.seed = (this.seed * 1664525 + 1013904223) % 2147483648;
+        return this.seed / 2147483648;
+    }
 }
