@@ -4,6 +4,14 @@ const nextConfig = {
     reactCompiler: true,
     reactStrictMode: true,
     output: 'standalone',
+    turbopack: {
+        rules: {
+            '*.{vert,frag}': {
+                loaders: ['raw-loader'],
+                as: '*.js',
+            },
+        },
+    },
 };
 
 export default nextConfig;

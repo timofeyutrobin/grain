@@ -28,6 +28,7 @@
         "@types/react": "19.2.10",
         "@types/three": "0.184.1",
         "babel-plugin-react-compiler": "1.0.0",
+        "raw-loader": "4.0.2",
         "tailwindcss": "4.1.18",
         "typescript": "5.9.3"
     }

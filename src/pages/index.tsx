@@ -1,68 +1,93 @@
 import { Background } from '@/components/Background';
-import { ButtonLink } from '@/components/button/ButtonLink';
 import { ControlPanel } from '@/components/ControlPanel';
 import { DebugOverlay } from '@/components/DebugOverlay';
 import { Greeting } from '@/components/Greeting';
 import { Intro } from '@/components/intro/Intro';
 import { Logo } from '@/components/Logo';
 import { WatchIntroButton } from '@/components/WatchIntroButton';
-import { ImageType, previewWidth } from '@/lib/common';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { isError } from '@/lib/common';
+import { useRenderWorker } from '@/lib/grainRenderer/randomSpawnShader/useRenderWorker';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 function Home() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
 
     const [loading, setLoading] = useState(false);
-    const [resultFilename, setResultFilename] = useState<string | null>(null);
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    const handleDevelop = async (
-        file: File,
-        renderParameters: RandomSpawnGrainRenderParameters,
-    ) => {
-        setResultFilename(null);
+    const renderWorker = useRenderWorker((worker) => {
+        try {
+            const resultCanvas =
+                canvasRef.current?.transferControlToOffscreen();
+            if (!resultCanvas) {
+                return;
+            }
+            worker.postMessage(
+                { type: 'create', resultCanvas },
+                { transfer: [resultCanvas] },
+            );
+        } catch (err) {
+            if (isError(err) && err.name === 'InvalidStateError') {
+                return;
+            }
+            throw err;
+        }
+    });
+
+    const handleDevelop = async (file: File) => {
         setLoading(true);
-
-        const formData = new FormData();
-        formData.set('img', file);
-        formData.set('parameters', JSON.stringify(renderParameters));
-
-        const response = await fetch('/api/renderGrain', {
-            method: 'POST',
-            body: formData,
-        });
-        const filename = (await response.json()).filename;
+        let imageBitmap: ImageBitmap | null = null;
+        try {
+            imageBitmap = await createImageBitmap(file, {
+                imageOrientation: 'flipY',
+            });
+            renderWorker.postMessage(
+                {
+                    type: 'render',
+                    image: imageBitmap,
+                    params: {
+                        layers: [
+                            {
+                                contrast: 0,
+                                sensitivity: 0.05,
+                                grainSize: 2,
+                                alpha: 0.4,
+                            },
+                            {
+                                contrast: 0.5,
+                                sensitivity: 0.3,
+                                grainSize: 1,
+                                alpha: 0.6,
+                            },
+                            {
+                                contrast: 1.2,
+                                sensitivity: 0.5,
+                                grainSize: 0.5,
+                                alpha: 0.7,
+                            },
+                        ],
+                    },
+                },
+                [imageBitmap],
+            );
+        } finally {
+            imageBitmap?.close();
+        }
 
         setLoading(false);
-        setResultFilename(filename);
     };
 
     return (
         <>
             {process.env.NODE_ENV !== 'production' && <DebugOverlay />}
+            <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
-            {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                <Intro
-                    className={`absolute top-0 left-0 w-full h-full ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
-                />
-            )}
-            <ControlPanel
-                className={`
-                    absolute top-0 left-0
-                    w-96 h-full
-                    transition-transform duration-500
-                    ${welcomeIntroState != WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : ''}
-                `}
-                onDevelop={handleDevelop}
-                loading={loading}
-            />
-            <main className="absolute w-full h-full pl-96 flex flex-col bg-zinc-900 -z-10">
+            <main className="absolute w-full h-full pl-96 flex flex-col">
                 <header
                     className={`
                         self-center
@@ -87,27 +112,25 @@ function Home() {
                     )}
                 </header>
                 {welcomeIntroState ===
-                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN &&
-                    resultFilename && (
-                        <>
-                            <Image
-                                src={`/api/images/${resultFilename}/${ImageType.PREVIEW}`}
-                                alt="Result preview"
-                                width={previewWidth}
-                                height={previewWidth}
-                                className="mt-8 mx-auto"
-                            />
-                            <ButtonLink
-                                className="mx-auto my-8"
-                                href={`api/images/${resultFilename}/${ImageType.RESULT}`}
-                                download
-                            >
-                                Download Result
-                            </ButtonLink>
-                        </>
-                    )}
-                <Background className="absolute top-0 left-0 w-full h-full -z-10" />
+                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
+                    <canvas className="mx-8" ref={canvasRef} />
+                )}
             </main>
+            <ControlPanel
+                className={`
+                    fixed top-0 left-0
+                    w-96 h-full
+                    transition-transform duration-500
+                    ${welcomeIntroState != WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : ''}
+                `}
+                onDevelop={handleDevelop}
+                loading={loading}
+            />
+            {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
+                <Intro
+                    className={`absolute top-0 left-0 w-full h-full ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                />
+            )}
         </>
     );
 }

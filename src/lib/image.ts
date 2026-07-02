@@ -42,7 +42,7 @@ export function getPixel(
 }
 
 export function addPixelHsl(
-    rgbaPixels: Float32Array,
+    rgbPixels: Float32Array,
     width: number,
     x: number,
     y: number,
@@ -51,18 +51,18 @@ export function addPixelHsl(
     value: number,
     alpha: number = 1,
 ) {
-    const rIndex = Math.min((x + y * width) * 3, rgbaPixels.length);
+    const rIndex = Math.min((x + y * width) * 3, rgbPixels.length);
     const gIndex = rIndex + 1;
     const bIndex = gIndex + 1;
 
-    const r = rgbaPixels[rIndex];
-    const g = rgbaPixels[gIndex];
-    const b = rgbaPixels[bIndex];
-    hsvToRgb(hue, saturation, value, rgbaPixels, rIndex);
+    const r = rgbPixels[rIndex];
+    const g = rgbPixels[gIndex];
+    const b = rgbPixels[bIndex];
+    hsvToRgb(hue, saturation, value, rgbPixels, rIndex);
 
-    rgbaPixels[rIndex] = blend(r, rgbaPixels[rIndex], alpha);
-    rgbaPixels[gIndex] = blend(g, rgbaPixels[gIndex], alpha);
-    rgbaPixels[bIndex] = blend(b, rgbaPixels[bIndex], alpha);
+    rgbPixels[rIndex] = blend(r, rgbPixels[rIndex], alpha);
+    rgbPixels[gIndex] = blend(g, rgbPixels[gIndex], alpha);
+    rgbPixels[bIndex] = blend(b, rgbPixels[bIndex], alpha);
 }
 
 export function generateSampleImageBuffer(
