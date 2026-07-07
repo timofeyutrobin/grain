@@ -18,6 +18,7 @@ function Home() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
 
     const [loading, setLoading] = useState(false);
+    const [canvasVisible, setCanvasVisible] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const renderWorker = useRenderWorker((worker) => {
@@ -40,6 +41,9 @@ function Home() {
     });
 
     const handleDevelop = async (file: File) => {
+        if (!canvasRef.current) {
+            return;
+        }
         setLoading(true);
         let imageBitmap: ImageBitmap | null = null;
         try {
@@ -53,22 +57,22 @@ function Home() {
                     params: {
                         layers: [
                             {
-                                contrast: 0,
-                                sensitivity: 0.05,
+                                contrast: 0.14,
+                                sensitivity: 0.1,
                                 grainSize: 2,
-                                alpha: 0.4,
+                                spawnRate: 4,
                             },
                             {
-                                contrast: 0.5,
-                                sensitivity: 0.3,
+                                contrast: 0.8,
+                                sensitivity: 0.2,
                                 grainSize: 1,
-                                alpha: 0.6,
+                                spawnRate: 6,
                             },
                             {
-                                contrast: 1.2,
-                                sensitivity: 0.5,
-                                grainSize: 0.5,
-                                alpha: 0.7,
+                                contrast: 1.6,
+                                sensitivity: 1,
+                                grainSize: 1,
+                                spawnRate: 8,
                             },
                         ],
                     },
@@ -79,7 +83,14 @@ function Home() {
             imageBitmap?.close();
         }
 
-        setLoading(false);
+        renderWorker.addEventListener('message', (event) => {
+            if (event.data.type === 'ready') {
+                setLoading(false);
+            }
+            if (event.data.type === 'canvasSizeSet') {
+                setCanvasVisible(true);
+            }
+        });
     };
 
     return (
@@ -87,7 +98,7 @@ function Home() {
             {process.env.NODE_ENV !== 'production' && <DebugOverlay />}
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
-            <main className="absolute w-full h-full pl-96 flex flex-col">
+            <main className="fixed w-full h-full pl-96 flex flex-col">
                 <header
                     className={`
                         self-center
@@ -108,12 +119,15 @@ function Home() {
                     <Logo className="max-w-2xl object-contain" />
                     {welcomeIntroState ===
                         WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                        <WatchIntroButton className="mx-8" />
+                        <WatchIntroButton disabled={loading} className="mx-8" />
                     )}
                 </header>
                 {welcomeIntroState ===
                     WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                    <canvas className="mx-8" ref={canvasRef} />
+                    <canvas
+                        ref={canvasRef}
+                        className={`self-center mx-32 max-h-4/5 ${canvasVisible ? '' : 'invisible'}`}
+                    />
                 )}
             </main>
             <ControlPanel

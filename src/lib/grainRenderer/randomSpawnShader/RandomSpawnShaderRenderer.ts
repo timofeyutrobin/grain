@@ -12,34 +12,51 @@ export interface Layer {
     sensitivity: number;
     grainSize: number;
     alpha: number;
+    spawnRate: number;
 }
 
 export interface RandomSpawnShaderRenderParameters {
     layers: Layer[];
 }
 
-const SUPER_SAMPLING_SCALE = 2;
-const MAX_IMAGE_WIDTH = 4096;
-const MAX_IMAGE_HEIGHT = 4096;
+interface Tile {
+    width: number;
+    height: number;
+    offsetX: number;
+    offsetY: number;
+}
+
+const MAX_TILE_WIDTH = 256;
+const MAX_TILE_HEIGHT = 256;
 
 export class RandomSpawnShaderRenderer {
+    private superSamplingScale: number = 1;
+    private tiles: Tile[] = [];
+
     private renderingCanvas = new OffscreenCanvas(0, 0);
 
     private gl: WebGL2RenderingContext;
+    private resultCtx: OffscreenCanvasRenderingContext2D;
 
     private resolutionUniformLocation: WebGLUniformLocation | null;
     private contrastUniformLocation: WebGLUniformLocation | null;
     private sensitivityUniformLocation: WebGLUniformLocation | null;
     private grainSizeUniformLocation: WebGLUniformLocation | null;
     private alphaUniformLocation: WebGLUniformLocation | null;
+    private seedUniformLocation: WebGLUniformLocation | null;
 
-    constructor(private canvas: OffscreenCanvas) {
+    constructor(private resultCanvas: OffscreenCanvas) {
         const gl = this.renderingCanvas.getContext('webgl2');
         if (!gl) {
-            throw new Error('WebGL2 is not supported');
+            throw new Error('WebGL2 is not available');
+        }
+        const ctx = this.resultCanvas.getContext('2d');
+        if (!ctx) {
+            throw new Error('2d context is not available');
         }
 
         this.gl = gl;
+        this.resultCtx = ctx;
         createFullScreenQuad(gl);
 
         const vertexShader = createShader(
@@ -74,6 +91,7 @@ export class RandomSpawnShaderRenderer {
             'u_grainSize',
         );
         this.alphaUniformLocation = gl.getUniformLocation(program, 'u_alpha');
+        this.seedUniformLocation = gl.getUniformLocation(program, 'u_seed');
 
         const imageTextureUniformLocation = gl.getUniformLocation(
             program,
@@ -84,55 +102,129 @@ export class RandomSpawnShaderRenderer {
         gl.uniform1i(imageTextureUniformLocation, 0);
 
         gl.enable(gl.BLEND);
-        gl.blendColor(0.5, 0.5, 0.5, 0.5);
-        gl.blendFunc(gl.CONSTANT_ALPHA, gl.ONE_MINUS_CONSTANT_ALPHA);
+        gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_COLOR);
 
         gl.clearColor(0, 0, 0, 1);
     }
 
-    render(image: ImageBitmap, params: RandomSpawnShaderRenderParameters) {
-        const iw = Math.max(1, image.width);
-        const ih = Math.max(1, image.height);
-        const scale = Math.min(
-            SUPER_SAMPLING_SCALE,
-            MAX_IMAGE_WIDTH / iw,
-            MAX_IMAGE_HEIGHT / ih,
-        );
-        const width = Math.round(iw * scale);
-        const height = Math.round(ih * scale);
-        this.renderingCanvas.width = width;
-        this.renderingCanvas.height = height;
-        this.gl.viewport(0, 0, width, height);
+    setResultCanvasSize(width: number, height: number) {
+        this.resultCanvas.width = width;
+        this.resultCanvas.height = height;
+    }
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-        for (const {
-            contrast,
-            sensitivity,
-            grainSize,
-            alpha,
-        } of params.layers) {
-            this.gl.uniform2f(this.resolutionUniformLocation, width, height);
-            this.gl.uniform1f(this.contrastUniformLocation, contrast);
-            this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
-            this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
-            this.gl.uniform1f(this.alphaUniformLocation, alpha);
+    async render(
+        image: ImageBitmap,
+        params: RandomSpawnShaderRenderParameters,
+    ): Promise<void> {
+        this.resultCtx.imageSmoothingQuality = 'high';
+        this.resultCtx.fillStyle = '#000';
 
-            const imageTexture = createTexture(this.gl, image);
+        this.prepareTiles(image);
+        await this.renderTiles(image, params);
+        this.tiles = [];
+    }
+
+    private async renderTiles(
+        image: ImageBitmap,
+        params: RandomSpawnShaderRenderParameters,
+    ): Promise<void> {
+        for (const { width, height, offsetX, offsetY } of this.tiles) {
+            const scaledWidth = width * this.superSamplingScale;
+            const scaledHeight = height * this.superSamplingScale;
+
+            this.renderingCanvas.width = scaledWidth;
+            this.renderingCanvas.height = scaledHeight;
+
+            const imageBitmap = await createImageBitmap(
+                image,
+                offsetX,
+                offsetY,
+                width,
+                height,
+            );
+
+            const imageTexture = createTexture(this.gl, imageBitmap);
             this.gl.activeTexture(this.gl.TEXTURE0);
             this.gl.bindTexture(this.gl.TEXTURE_2D, imageTexture);
 
-            this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-        }
-        this.gl.flush();
+            this.gl.viewport(0, 0, scaledWidth, scaledHeight);
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT);
+            for (const {
+                contrast,
+                sensitivity,
+                grainSize,
+                spawnRate,
+            } of params.layers) {
+                this.gl.uniform2f(
+                    this.resolutionUniformLocation,
+                    scaledWidth,
+                    scaledHeight,
+                );
+                this.gl.uniform1f(this.contrastUniformLocation, contrast);
+                this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
+                this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
+                this.gl.uniform1f(this.alphaUniformLocation, 0.1);
 
-        const ctx = this.canvas.getContext('2d');
-        if (!ctx) {
-            return;
+                for (let i = 0; i < spawnRate; i++) {
+                    this.gl.uniform1ui(
+                        this.seedUniformLocation,
+                        Math.floor(Math.random() * 1000),
+                    );
+
+                    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+                }
+            }
+            await new Promise((resolve) =>
+                requestAnimationFrame(() => resolve(null)),
+            );
+            imageBitmap.close();
+            this.gl.flush();
+
+            const resultBitmap = this.renderingCanvas.transferToImageBitmap();
+            this.resultCtx.fillRect(
+                offsetX,
+                this.resultCanvas.height - offsetY - height,
+                width,
+                height,
+            );
+            this.resultCtx.drawImage(
+                resultBitmap,
+                offsetX,
+                this.resultCanvas.height - offsetY - height,
+                width,
+                height,
+            );
+            resultBitmap.close();
         }
-        this.canvas.width = Math.floor(width / scale);
-        this.canvas.height = Math.floor(height / scale);
-        const bitmap = this.renderingCanvas.transferToImageBitmap();
-        ctx.drawImage(bitmap, 0, 0, this.canvas.width, this.canvas.height);
-        bitmap.close();
+    }
+
+    private prepareTiles(image: ImageBitmap): void {
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        if (imageWidth <= 1024 && imageHeight <= 1024) {
+            this.superSamplingScale = 4;
+        } else if (imageWidth <= 2048 && imageHeight <= 2048) {
+            this.superSamplingScale = 2;
+        } else if (imageWidth <= 8192 && imageHeight <= 8192) {
+            this.superSamplingScale = 1;
+        } else {
+            throw new Error('Image is too big');
+        }
+
+        const widthTilesCount = Math.ceil(imageWidth / MAX_TILE_WIDTH);
+        const heightTilesCount = Math.ceil(imageHeight / MAX_TILE_HEIGHT);
+        const tileWidth = Math.floor(imageWidth / widthTilesCount);
+        const tileHeight = Math.floor(imageHeight / heightTilesCount);
+
+        for (let i = 0; i < widthTilesCount; i++) {
+            for (let j = 0; j < heightTilesCount; j++) {
+                this.tiles.push({
+                    offsetX: i * tileWidth,
+                    offsetY: j * tileHeight,
+                    width: tileWidth,
+                    height: tileHeight,
+                });
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@ import { RandomSpawnShaderRenderer } from '@/lib/grainRenderer/randomSpawnShader
 
 let renderer: RandomSpawnShaderRenderer;
 
-self.addEventListener('message', (event) => {
+self.addEventListener('message', async (event) => {
     switch (event.data.type) {
         case 'create':
             if (renderer) {
@@ -11,7 +11,13 @@ self.addEventListener('message', (event) => {
             renderer = new RandomSpawnShaderRenderer(event.data.resultCanvas);
             break;
         case 'render':
-            renderer.render(event.data.image, event.data.params);
+            renderer.setResultCanvasSize(
+                event.data.image.width,
+                event.data.image.height,
+            );
+            postMessage({ type: 'canvasSizeSet' });
+            await renderer.render(event.data.image, event.data.params);
+            postMessage({ type: 'ready' });
             break;
     }
 });
