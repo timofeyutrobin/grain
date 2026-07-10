@@ -78,12 +78,5 @@ export const Microscope: React.FC<MicroscopeProps> = ({
         renderer.render(sampleImage, magnifyGrain(renderParameters));
     }, [renderParameters, renderer, sampleImage, width, height]);
 
-    return (
-        <canvas
-            className="brightness-250"
-            width={width}
-            height={height}
-            ref={canvasRef}
-        />
-    );
+    return <canvas width={width} height={height} ref={canvasRef} />;
 };

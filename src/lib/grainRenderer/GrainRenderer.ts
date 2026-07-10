@@ -12,7 +12,7 @@ export interface Layer {
     sensitivity: number;
     grainSize: number;
     spawnRate: number;
-    alpha?: number;
+    alpha: number;
 }
 
 export interface GrainRenderParameters {
@@ -101,8 +101,9 @@ export class GrainRenderer {
 
         gl.uniform1i(imageTextureUniformLocation, 0);
 
+        gl.depthMask(false);
         gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_COLOR, gl.ONE_MINUS_SRC_COLOR);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_COLOR);
 
         gl.clearColor(0, 0, 0, 1);
     }
@@ -154,6 +155,7 @@ export class GrainRenderer {
                 sensitivity,
                 grainSize,
                 spawnRate,
+                alpha,
             } of params.layers) {
                 this.gl.uniform2f(
                     this.resolutionUniformLocation,
@@ -165,7 +167,7 @@ export class GrainRenderer {
                 this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
                 this.gl.uniform1f(
                     this.alphaUniformLocation,
-                    (1 / spawnRate) * 0.4,
+                    (1 / spawnRate) * alpha,
                 );
 
                 for (let i = 0; i < spawnRate; i++) {

@@ -26,22 +26,25 @@ export function useSettings() {
     const renderParameters: GrainRenderParameters = {
         layers: [
             {
-                contrast: 0.14,
-                sensitivity: 0.1,
+                contrast: 0.2,
+                sensitivity: 0.2,
                 grainSize: 2 * grainSize,
                 spawnRate: grainCount,
+                alpha: 0.1,
             },
             {
-                contrast: 0.8,
+                contrast: 0.5,
                 sensitivity: 0.2,
                 grainSize: grainSize,
                 spawnRate: 2 * grainCount,
+                alpha: 0.4,
             },
             {
                 contrast: 1.6,
                 sensitivity: 1,
                 grainSize: grainSize,
                 spawnRate: 3 * grainCount,
+                alpha: 0.5,
             },
         ],
     };
