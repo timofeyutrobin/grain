@@ -2,13 +2,12 @@ import {
     ColorHSV,
     defaultColors,
     GrainCount,
-    grainCountMap,
     GrainSize,
     RenderMode,
 } from '@/lib/common';
 import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
 import { GrainGeneratorType } from '@/lib/grainRenderer/grainGenerators';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
 import { useState } from 'react';
 
 export function useSettings() {
@@ -29,18 +28,28 @@ export function useSettings() {
     const [curveType, setCurveType] =
         useState<CharacteristicCurveType>('sigmoid');
 
-    const renderParameters: RandomSpawnGrainRenderParameters = {
-        isColor: mode === 'color',
-        relativeGrainCount: grainCountMap[grainCount],
-        curveType,
-        grainSize,
-        grainType,
-        color: {
-            r: redDyeColor,
-            g: greenDyeColor,
-            b: blueDyeColor,
-            grayscale: { h: 0, s: 0, v: 80 },
-        },
+    // TODO: пресеты
+    const renderParameters: RandomSpawnShaderRenderParameters = {
+        layers: [
+            {
+                contrast: 0.14,
+                sensitivity: 0.1,
+                grainSize: 2 * grainSize,
+                spawnRate: grainCount,
+            },
+            {
+                contrast: 0.8,
+                sensitivity: 0.2,
+                grainSize: grainSize,
+                spawnRate: 2 * grainCount,
+            },
+            {
+                contrast: 1.6,
+                sensitivity: 1,
+                grainSize: grainSize,
+                spawnRate: 3 * grainCount,
+            },
+        ],
     };
 
     return {

@@ -11,8 +11,8 @@ export interface Layer {
     contrast: number;
     sensitivity: number;
     grainSize: number;
-    alpha: number;
     spawnRate: number;
+    alpha?: number;
 }
 
 export interface RandomSpawnShaderRenderParameters {
@@ -26,8 +26,8 @@ interface Tile {
     offsetY: number;
 }
 
-const MAX_TILE_WIDTH = 256;
-const MAX_TILE_HEIGHT = 256;
+const MAX_TILE_WIDTH = 512;
+const MAX_TILE_HEIGHT = 512;
 
 export class RandomSpawnShaderRenderer {
     private superSamplingScale: number = 1;
@@ -163,7 +163,10 @@ export class RandomSpawnShaderRenderer {
                 this.gl.uniform1f(this.contrastUniformLocation, contrast);
                 this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
                 this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
-                this.gl.uniform1f(this.alphaUniformLocation, 0.1);
+                this.gl.uniform1f(
+                    this.alphaUniformLocation,
+                    (1 / spawnRate) * 0.4,
+                );
 
                 for (let i = 0; i < spawnRate; i++) {
                     this.gl.uniform1ui(

@@ -1,14 +1,14 @@
 import { Button } from '@/components/button/Button';
 import { Settings } from '@/components/settings/Settings';
 import { SettingsGroup } from '@/components/settings/SettingsGroup';
-import { useSettings } from '@/hooks/useSettings';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { useSettings } from '@/components/settings/useSettings';
+import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
 import { ChangeEventHandler, useState } from 'react';
 
 interface ControlPanelProps {
     onDevelop: (
         file: File,
-        renderParameters: RandomSpawnGrainRenderParameters,
+        renderParameters: RandomSpawnShaderRenderParameters,
     ) => void;
     loading?: boolean;
     className?: string;

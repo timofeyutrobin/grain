@@ -21,12 +21,10 @@ export const enum GrainSize {
 }
 
 export const enum GrainCount {
-    s,
-    m,
-    l,
+    s = 1,
+    m = 2,
+    l = 3,
 }
-
-export const grainCountMap: Record<GrainCount, number> = [8, 16, 32];
 
 export const enum ImageType {
     RESULT = 'result',

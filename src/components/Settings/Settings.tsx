@@ -1,4 +1,4 @@
-import { Microscope } from '@/components/Microscope';
+import { Microscope } from '@/components/editor/Microscope';
 import { ColorPicker } from '@/components/settings/ColorPicker';
 import { Range } from '@/components/settings/Range';
 import { Segments } from '@/components/settings/Segments';
@@ -11,7 +11,7 @@ import {
     RenderMode,
 } from '@/lib/common';
 import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
 import React from 'react';
 
 interface SettingsProps {
@@ -34,7 +34,7 @@ interface SettingsProps {
     grainCount: GrainCount;
     onGrainCountChange: (grainSpreading: GrainCount) => void;
 
-    renderParameters: RandomSpawnGrainRenderParameters;
+    renderParameters: RandomSpawnShaderRenderParameters;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
@@ -67,6 +67,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     <Segments.Segment
                         isSelected={mode === 'color'}
                         onClick={() => onModeChange('color')}
+                        disabled
                     >
                         Color
                     </Segments.Segment>
@@ -89,9 +90,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 <div className="flex w-full h-full">
                     <div className="m-auto">
                         <Microscope
+                            renderParameters={renderParameters}
                             width={240}
                             height={240}
-                            renderParameters={renderParameters}
                         />
                     </div>
                 </div>
@@ -105,7 +106,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     onChange={onGrainSizeChange}
                 />
             </SettingsGroup>
-            <SettingsGroup legend="Grain count" ariaLabel="Grain count">
+            <SettingsGroup legend="Grain density" ariaLabel="Grain density">
                 <Range
                     max={GrainCount.l}
                     min={GrainCount.s}

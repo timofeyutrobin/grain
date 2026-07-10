@@ -9,6 +9,7 @@ self.addEventListener('message', async (event) => {
                 return;
             }
             renderer = new RandomSpawnShaderRenderer(event.data.resultCanvas);
+            postMessage({ type: 'rendererCreated' });
             break;
         case 'render':
             renderer.setResultCanvasSize(
