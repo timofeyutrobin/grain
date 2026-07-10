@@ -1,6 +1,6 @@
-import { RandomSpawnShaderRenderer } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
+import { GrainRenderer } from '@/lib/grainRenderer/GrainRenderer';
 
-let renderer: RandomSpawnShaderRenderer;
+let renderer: GrainRenderer;
 
 self.addEventListener('message', async (event) => {
     switch (event.data.type) {
@@ -8,7 +8,7 @@ self.addEventListener('message', async (event) => {
             if (renderer) {
                 return;
             }
-            renderer = new RandomSpawnShaderRenderer(event.data.resultCanvas);
+            renderer = new GrainRenderer(event.data.resultCanvas);
             postMessage({ type: 'rendererCreated' });
             break;
         case 'render':

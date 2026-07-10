@@ -5,7 +5,7 @@ interface SegmentsProps {
 }
 
 interface SegmentProps {
-    onClick: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+    onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     isSelected?: boolean;
     disabled?: boolean;
 }

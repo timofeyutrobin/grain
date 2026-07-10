@@ -5,15 +5,12 @@ import {
     GrainSize,
     RenderMode,
 } from '@/lib/common';
-import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
-import { GrainGeneratorType } from '@/lib/grainRenderer/grainGenerators';
-import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
+import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import { useState } from 'react';
 
 export function useSettings() {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
-    const [grainType, setGrainType] = useState<GrainGeneratorType>('cubic');
     const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
     const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.s);
 
@@ -25,11 +22,8 @@ export function useSettings() {
         defaultColors.blue,
     );
 
-    const [curveType, setCurveType] =
-        useState<CharacteristicCurveType>('sigmoid');
-
     // TODO: пресеты
-    const renderParameters: RandomSpawnShaderRenderParameters = {
+    const renderParameters: GrainRenderParameters = {
         layers: [
             {
                 contrast: 0.14,
@@ -55,10 +49,6 @@ export function useSettings() {
     return {
         mode,
         setMode,
-        grainType,
-        setGrainType,
-        curveType,
-        setCurveType,
         grainSize,
         setGrainSize,
         grainCount,

@@ -6,8 +6,8 @@ import { Logo } from '@/components/editor/Logo';
 import { WatchIntroButton } from '@/components/editor/WatchIntroButton';
 import { Intro } from '@/components/intro/Intro';
 import { isError } from '@/lib/common';
-import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
-import { useRenderWorker } from '@/lib/grainRenderer/randomSpawnShader/useRenderWorker';
+import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
+import { useRenderWorker } from '@/lib/grainRenderer/useRenderWorker';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
@@ -43,7 +43,7 @@ function Editor() {
 
     const handleDevelop = async (
         file: File,
-        renderParameters: RandomSpawnShaderRenderParameters,
+        renderParameters: GrainRenderParameters,
     ) => {
         if (!canvasRef.current) {
             return;

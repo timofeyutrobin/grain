@@ -3,9 +3,9 @@ import {
     createProgram,
     createShader,
     createTexture,
-} from '@/lib/grainRenderer/randomSpawnShader/common';
-import grainFragmentShader from '@/lib/grainRenderer/randomSpawnShader/grain.frag';
-import grainVertexShader from '@/lib/grainRenderer/randomSpawnShader/grain.vert';
+} from '@/lib/grainRenderer/common';
+import grainFragmentShader from '@/lib/grainRenderer/grain.frag';
+import grainVertexShader from '@/lib/grainRenderer/grain.vert';
 
 export interface Layer {
     contrast: number;
@@ -15,7 +15,7 @@ export interface Layer {
     alpha?: number;
 }
 
-export interface RandomSpawnShaderRenderParameters {
+export interface GrainRenderParameters {
     layers: Layer[];
 }
 
@@ -29,7 +29,7 @@ interface Tile {
 const MAX_TILE_WIDTH = 512;
 const MAX_TILE_HEIGHT = 512;
 
-export class RandomSpawnShaderRenderer {
+export class GrainRenderer {
     private superSamplingScale: number = 1;
     private tiles: Tile[] = [];
 
@@ -114,7 +114,7 @@ export class RandomSpawnShaderRenderer {
 
     async render(
         image: ImageBitmap,
-        params: RandomSpawnShaderRenderParameters,
+        params: GrainRenderParameters,
     ): Promise<void> {
         this.resultCtx.imageSmoothingQuality = 'high';
         this.resultCtx.fillStyle = '#000';
@@ -126,7 +126,7 @@ export class RandomSpawnShaderRenderer {
 
     private async renderTiles(
         image: ImageBitmap,
-        params: RandomSpawnShaderRenderParameters,
+        params: GrainRenderParameters,
     ): Promise<void> {
         for (const { width, height, offsetX, offsetY } of this.tiles) {
             const scaledWidth = width * this.superSamplingScale;

@@ -1,8 +1,8 @@
 import { Microscope } from '@/components/editor/Microscope';
-import { ColorPicker } from '@/components/settings/ColorPicker';
-import { Range } from '@/components/settings/Range';
-import { Segments } from '@/components/settings/Segments';
-import { SettingsGroup } from '@/components/settings/SettingsGroup';
+import { ColorPicker } from '@/components/editor/settings/ColorPicker';
+import { Range } from '@/components/editor/settings/Range';
+import { Segments } from '@/components/editor/settings/Segments';
+import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import {
     ColorHSV,
     defaultColors,
@@ -10,16 +10,12 @@ import {
     GrainSize,
     RenderMode,
 } from '@/lib/common';
-import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
-import { RandomSpawnShaderRenderParameters } from '@/lib/grainRenderer/randomSpawnShader/RandomSpawnShaderRenderer';
+import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import React from 'react';
 
 interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
-
-    curveType: CharacteristicCurveType;
-    onCurveTypeChange: (curveType: CharacteristicCurveType) => void;
 
     redDyeColor: ColorHSV;
     onRedDyeColorChange: (color: ColorHSV) => void;
@@ -34,14 +30,12 @@ interface SettingsProps {
     grainCount: GrainCount;
     onGrainCountChange: (grainSpreading: GrainCount) => void;
 
-    renderParameters: RandomSpawnShaderRenderParameters;
+    renderParameters: GrainRenderParameters;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
     mode,
     onModeChange,
-    curveType,
-    onCurveTypeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -75,12 +69,7 @@ export const Settings: React.FC<SettingsProps> = ({
             </SettingsGroup>
             <SettingsGroup legend="Characteristic curve">
                 <Segments name="Characteristic curve">
-                    <Segments.Segment
-                        isSelected={curveType === 'sigmoid'}
-                        onClick={() => onCurveTypeChange('sigmoid')}
-                    >
-                        Sigmoid
-                    </Segments.Segment>
+                    <Segments.Segment isSelected>Sigmoid</Segments.Segment>
                 </Segments>
             </SettingsGroup>
             <SettingsGroup
