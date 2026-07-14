@@ -3,7 +3,6 @@ const nextConfig = {
     /* config options here */
     reactCompiler: true,
     reactStrictMode: true,
-    output: 'standalone',
     turbopack: {
         rules: {
             '*.{vert,frag}': {
