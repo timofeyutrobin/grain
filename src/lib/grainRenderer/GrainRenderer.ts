@@ -108,9 +108,13 @@ export class GrainRenderer {
         gl.clearColor(0, 0, 0, 1);
     }
 
-    setResultCanvasSize(width: number, height: number) {
+    setResultCanvasSize(width: number, height: number): void {
         this.resultCanvas.width = width;
         this.resultCanvas.height = height;
+    }
+
+    async getImage(): Promise<Blob> {
+        return this.resultCanvas.convertToBlob({ type: 'image/png' });
     }
 
     async render(

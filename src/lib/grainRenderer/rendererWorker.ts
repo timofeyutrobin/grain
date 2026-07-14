@@ -20,5 +20,9 @@ self.addEventListener('message', async (event) => {
             await renderer.render(event.data.image, event.data.params);
             postMessage({ type: 'ready' });
             break;
+        case 'getBlob':
+            const blob = await renderer.getImage();
+            postMessage({ type: 'blobReady', blob });
+            break;
     }
 });
