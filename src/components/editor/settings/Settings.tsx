@@ -50,8 +50,8 @@ export const Settings: React.FC<SettingsProps> = ({
 }) => {
     return (
         <>
-            <SettingsGroup legend="Mode">
-                <Segments name="Color mode">
+            <SettingsGroup legend="Режим">
+                <Segments name="Режим">
                     <Segments.Segment
                         isSelected={mode === 'grayscale'}
                         onClick={() => onModeChange('grayscale')}
