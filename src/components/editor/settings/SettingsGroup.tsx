@@ -28,7 +28,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
                         className="inline align-middle ml-2 text-xs text-stone-200 underline cursor-pointer"
                         onClick={() => setIsShowed((isShowed) => !isShowed)}
                     >
-                        {isShowed ? 'Close' : 'Learn more'}
+                        {isShowed ? 'Скрыть' : 'Подробнее'}
                     </button>
                 )}
             </legend>

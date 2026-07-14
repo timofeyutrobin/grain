@@ -104,7 +104,7 @@ function Editor() {
 
     const fileInputLabel = (
         <FileInputLabel className="w-full" htmlFor={FILE_UPLOAD_INPUT_ID}>
-            Open&nbsp;Image
+            Открыть&nbsp;изображение
         </FileInputLabel>
     );
     const fileInfo = !!file && !!imageBitmap && (
@@ -121,7 +121,7 @@ function Editor() {
             className="block w-full text-center"
             href={downloadUrl}
         >
-            Download
+            Скачать
         </ButtonAnchor>
     );
 
@@ -164,7 +164,7 @@ function Editor() {
                                     className="w-full"
                                     onClick={() => setControlPanelOpen(true)}
                                 >
-                                    Develop
+                                    Проявка
                                 </Button>
                                 {fileInputLabel}
                             </div>

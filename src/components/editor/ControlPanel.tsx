@@ -46,7 +46,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <aside className={`flex flex-col bg-zinc-800 ${className ?? ''}`}>
             <Logo className="hidden md:block w-full px-4 pt-4 object-contain" />
             <section className="self-center w-full max-w-96 my-4 px-4 overflow-y-scroll space-y-4">
-                <SettingsGroup className="hidden md:block" legend="File">
+                <SettingsGroup className="hidden md:block" legend="Файл">
                     {fileInputLabel}
                 </SettingsGroup>
                 <Settings
@@ -72,7 +72,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     className="md:hidden w-full"
                     onClick={onClose}
                 >
-                    Close
+                    Закрыть
                 </Button>
                 <Button
                     small
@@ -80,7 +80,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     onClick={handleDevelopClick}
                     disabled={disabled}
                 >
-                    Develop
+                    Проявить
                 </Button>
             </footer>
         </aside>

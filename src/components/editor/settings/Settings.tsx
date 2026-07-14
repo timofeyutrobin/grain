@@ -56,25 +56,25 @@ export const Settings: React.FC<SettingsProps> = ({
                         isSelected={mode === 'grayscale'}
                         onClick={() => onModeChange('grayscale')}
                     >
-                        Grayscale
+                        Ч/Б
                     </Segments.Segment>
                     <Segments.Segment
                         isSelected={mode === 'color'}
                         onClick={() => onModeChange('color')}
                         disabled
                     >
-                        Color
+                        Цвет
                     </Segments.Segment>
                 </Segments>
             </SettingsGroup>
-            <SettingsGroup legend="Characteristic curve">
-                <Segments name="Characteristic curve">
-                    <Segments.Segment isSelected>Sigmoid</Segments.Segment>
+            <SettingsGroup legend="Характеристическая кривая">
+                <Segments name="Характеристическая кривая">
+                    <Segments.Segment isSelected>Сигмоида</Segments.Segment>
                 </Segments>
             </SettingsGroup>
             <SettingsGroup
-                legend="Microscope"
-                hint={<>Shows grain structure at high magnification</>}
+                legend="Микроскоп"
+                hint={<>Показывает структуру зерна под большим увеличением</>}
             >
                 <div className="flex w-full h-full">
                     <div className="m-auto">
@@ -86,7 +86,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                 </div>
             </SettingsGroup>
-            <SettingsGroup legend="Grain size" ariaLabel="Grain size">
+            <SettingsGroup legend="Размер зерна" ariaLabel="Размер зерна">
                 <Range
                     max={GrainSize.l}
                     min={GrainSize.s}
@@ -95,7 +95,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     onChange={onGrainSizeChange}
                 />
             </SettingsGroup>
-            <SettingsGroup legend="Grain density" ariaLabel="Grain density">
+            <SettingsGroup legend="Плотность зерна" ariaLabel="Плотность зерна">
                 <Range
                     max={GrainCount.l}
                     min={GrainCount.s}
@@ -106,33 +106,35 @@ export const Settings: React.FC<SettingsProps> = ({
             </SettingsGroup>
             {mode === 'color' && (
                 <SettingsGroup
-                    legend="Dye color"
+                    legend="Цвет красителя"
                     hint={
                         <>
-                            Set dye color for each channel (R, G, B).
+                            Выберите цвет красителя для каждого канала (R, G,
+                            B).
                             <br />
-                            This dye will be used to color the grain.
+                            Выбранные цвета будут использоваться для окраски
+                            зерна
                             <br />
-                            For better result don't set too bright and saturated
-                            color.
+                            Для лучшего результата рекомендуется не выставлять
+                            слишком яркий и насыщенный цвет
                         </>
                     }
                     ariaLabel="Channels dye color"
                 >
                     <ColorPicker
-                        title="Red channel"
+                        title="Красный канал"
                         value={redDyeColor}
                         onChange={onRedDyeColorChange}
                         defaultColor={defaultColors.red}
                     />
                     <ColorPicker
-                        title="Green channel"
+                        title="Зеленый канал"
                         value={greenDyeColor}
                         onChange={onGreenDyeColorChange}
                         defaultColor={defaultColors.green}
                     />
                     <ColorPicker
-                        title="Blue channel"
+                        title="Синий канал"
                         value={blueDyeColor}
                         onChange={onBlueDyeColorChange}
                         defaultColor={defaultColors.blue}
