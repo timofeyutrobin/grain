@@ -37,14 +37,14 @@ export function useSettings() {
                 sensitivity: 0.2,
                 grainSize: grainSize,
                 spawnRate: 2 * grainCount,
-                alpha: 0.4,
+                alpha: 0.2,
             },
             {
                 contrast: 1.6,
                 sensitivity: 1,
                 grainSize: grainSize,
                 spawnRate: 3 * grainCount,
-                alpha: 0.5,
+                alpha: 0.2,
             },
         ],
     };
