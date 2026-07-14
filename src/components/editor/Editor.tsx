@@ -6,6 +6,7 @@ import { FileInfo } from '@/components/editor/FileInfo';
 import { FileInputLabel } from '@/components/editor/FileInputLabel';
 import { Greeting } from '@/components/editor/Greeting';
 import { Logo } from '@/components/editor/Logo';
+import { WatchIntroButton } from '@/components/editor/WatchIntroButton';
 import { Intro } from '@/components/intro/Intro';
 import { FILE_UPLOAD_INPUT_ID, isError } from '@/lib/common';
 import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
@@ -150,6 +151,7 @@ function Editor() {
                             />
                             <div className="mt-4">{downloadButton}</div>
                         </div>
+                        <WatchIntroButton className="shrink-0 self-start m-4" />
                         <footer className="md:hidden w-full p-4 bg-zinc-800">
                             <div className="w-full max-w-96 mb-2">
                                 {downloadButton}
