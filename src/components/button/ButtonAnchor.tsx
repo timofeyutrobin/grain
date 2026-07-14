@@ -1,17 +1,17 @@
 import styles from '@/components/button/button.module.css';
 import { PropsWithClassName } from '@/lib/common';
-import Link, { LinkProps } from 'next/link';
-import { PropsWithChildren } from 'react';
+import { AnchorHTMLAttributes, PropsWithChildren } from 'react';
 
-export const ButtonLink: React.FC<
-    PropsWithClassName<PropsWithChildren<LinkProps>> & {
+export const ButtonAnchor: React.FC<
+    PropsWithClassName<
+        PropsWithChildren<AnchorHTMLAttributes<HTMLAnchorElement>>
+    > & {
         secondary?: boolean;
-        download?: boolean;
         small?: boolean;
     }
 > = ({ className, secondary, small, ...props }) => {
     return (
-        <Link
+        <a
             {...props}
             className={`
                 ${className ?? ''}

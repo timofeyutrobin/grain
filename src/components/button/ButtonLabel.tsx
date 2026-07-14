@@ -1,20 +1,19 @@
 import styles from '@/components/button/button.module.css';
-import { PropsWithClassName } from '@/lib/common';
-import Link, { LinkProps } from 'next/link';
-import { PropsWithChildren } from 'react';
+import { LabelHTMLAttributes } from 'react';
 
-export const ButtonLink: React.FC<
-    PropsWithClassName<PropsWithChildren<LinkProps>> & {
+export const ButtonLabel: React.FC<
+    LabelHTMLAttributes<HTMLLabelElement> & {
         secondary?: boolean;
-        download?: boolean;
         small?: boolean;
     }
-> = ({ className, secondary, small, ...props }) => {
+> = ({ secondary, className, small, ...props }) => {
     return (
-        <Link
+        <label
             {...props}
             className={`
                 ${className ?? ''}
+                block
+                text-center
                 ${styles.button}
                 ${small ? styles.buttonSmall : ''}
                 ${secondary ? styles.buttonSecondary : ''}
