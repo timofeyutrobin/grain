@@ -12,7 +12,7 @@ export function useSettings() {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
     const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
-    const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.s);
+    const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.l);
 
     const [redDyeColor, setRedDyeColor] = useState<ColorHSV>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<ColorHSV>(
