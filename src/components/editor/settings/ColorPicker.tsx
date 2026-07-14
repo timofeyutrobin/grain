@@ -1,11 +1,11 @@
-import { Color } from '@/lib/common';
+import { ColorHSV } from '@/lib/common';
 import { colord } from 'colord';
 
 interface ColorPickerProps {
     title: string;
-    value: Color;
-    defaultColor: Color;
-    onChange: (color: Color) => void;
+    value: ColorHSV;
+    defaultColor: ColorHSV;
+    onChange: (color: ColorHSV) => void;
 }
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({

@@ -8,7 +8,7 @@ export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
 export type RenderMode = 'grayscale' | 'color';
 
-export interface Color {
+export interface ColorHSV {
     h: number;
     s: number;
     v: number;
@@ -21,17 +21,10 @@ export const enum GrainSize {
 }
 
 export const enum GrainCount {
-    s = 2,
-    m = 3,
-    l = 4,
+    s = 1,
+    m = 2,
+    l = 3,
 }
-
-export const enum ImageType {
-    RESULT = 'result',
-    PREVIEW = 'preview',
-}
-
-export const previewWidth = 600;
 
 export const defaultColors = {
     red: {

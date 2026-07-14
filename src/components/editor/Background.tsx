@@ -1,3 +1,4 @@
+import { ResizableCanvas } from '@/components/ResizableCanvas';
 import { PropsWithClassName } from '@/lib/common';
 import React, { useEffect, useRef } from 'react';
 
@@ -10,23 +11,6 @@ export const Background: React.FC<PropsWithClassName> = ({ className }) => {
         if (!canvas || !ctx) {
             return;
         }
-
-        const dpr = window.devicePixelRatio || 1;
-
-        const resizeCanvas = () => {
-            const parent = canvas.parentElement || canvas;
-            const width =
-                parent.clientWidth || parent.offsetWidth || window.innerWidth;
-            const height =
-                parent.clientHeight ||
-                parent.offsetHeight ||
-                window.innerHeight;
-            canvas.width = Math.max(1, Math.floor(width * dpr));
-            canvas.height = Math.max(1, Math.floor(height * dpr));
-            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        };
-
-        resizeCanvas();
 
         let animationId: number = 0;
         let start = 0;
@@ -48,8 +32,8 @@ export const Background: React.FC<PropsWithClassName> = ({ className }) => {
             if (value > 1) {
                 const timeFreq = timestamp * 0.0001;
 
-                const logicalWidth = canvas.width / dpr;
-                const logicalHeight = canvas.height / dpr;
+                const logicalWidth = canvas.width;
+                const logicalHeight = canvas.height;
                 if (logicalWidth <= 0 || logicalHeight <= 0) {
                     start = timestamp;
                     animationId = requestAnimationFrame(draw);
@@ -92,18 +76,10 @@ export const Background: React.FC<PropsWithClassName> = ({ className }) => {
 
         requestAnimationFrame(draw);
 
-        const ro = new ResizeObserver(() => resizeCanvas());
-        ro.observe(canvas);
-
-        const handleResize = () => resizeCanvas();
-        window.addEventListener('resize', handleResize);
-
         return () => {
             cancelAnimationFrame(animationId);
-            window.removeEventListener('resize', handleResize);
-            ro.disconnect();
         };
     }, []);
 
-    return <canvas ref={canvasRef} className={className} />;
+    return <ResizableCanvas ref={canvasRef} className={className} />;
 };

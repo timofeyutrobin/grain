@@ -1,32 +1,28 @@
-import { Microscope } from '@/components/Microscope';
-import { ColorPicker } from '@/components/settings/items/ColorPicker';
-import { Range } from '@/components/settings/items/Range';
-import { Segments } from '@/components/settings/items/Segments';
-import { SettingsGroup } from '@/components/settings/SettingsGroup';
+import { Microscope } from '@/components/editor/Microscope';
+import { ColorPicker } from '@/components/editor/settings/ColorPicker';
+import { Range } from '@/components/editor/settings/Range';
+import { Segments } from '@/components/editor/settings/Segments';
+import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import {
-    Color,
+    ColorHSV,
     defaultColors,
     GrainCount,
     GrainSize,
     RenderMode,
 } from '@/lib/common';
-import { CharacteristicCurveType } from '@/lib/grainRenderer/characteristicCurves';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import React from 'react';
 
 interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
 
-    curveType: CharacteristicCurveType;
-    onCurveTypeChange: (curveType: CharacteristicCurveType) => void;
-
-    redDyeColor: Color;
-    onRedDyeColorChange: (color: Color) => void;
-    greenDyeColor: Color;
-    onGreenDyeColorChange: (color: Color) => void;
-    blueDyeColor: Color;
-    onBlueDyeColorChange: (color: Color) => void;
+    redDyeColor: ColorHSV;
+    onRedDyeColorChange: (color: ColorHSV) => void;
+    greenDyeColor: ColorHSV;
+    onGreenDyeColorChange: (color: ColorHSV) => void;
+    blueDyeColor: ColorHSV;
+    onBlueDyeColorChange: (color: ColorHSV) => void;
 
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
@@ -34,14 +30,12 @@ interface SettingsProps {
     grainCount: GrainCount;
     onGrainCountChange: (grainSpreading: GrainCount) => void;
 
-    renderParameters: RandomSpawnGrainRenderParameters;
+    renderParameters: GrainRenderParameters;
 }
 
 export const Settings: React.FC<SettingsProps> = ({
     mode,
     onModeChange,
-    curveType,
-    onCurveTypeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -67,6 +61,7 @@ export const Settings: React.FC<SettingsProps> = ({
                     <Segments.Segment
                         isSelected={mode === 'color'}
                         onClick={() => onModeChange('color')}
+                        disabled
                     >
                         Color
                     </Segments.Segment>
@@ -74,12 +69,7 @@ export const Settings: React.FC<SettingsProps> = ({
             </SettingsGroup>
             <SettingsGroup legend="Characteristic curve">
                 <Segments name="Characteristic curve">
-                    <Segments.Segment
-                        isSelected={curveType === 'sigmoid'}
-                        onClick={() => onCurveTypeChange('sigmoid')}
-                    >
-                        Sigmoid
-                    </Segments.Segment>
+                    <Segments.Segment isSelected>Sigmoid</Segments.Segment>
                 </Segments>
             </SettingsGroup>
             <SettingsGroup
@@ -89,9 +79,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 <div className="flex w-full h-full">
                     <div className="m-auto">
                         <Microscope
+                            renderParameters={renderParameters}
                             width={240}
                             height={240}
-                            renderParameters={renderParameters}
                         />
                     </div>
                 </div>
@@ -105,9 +95,9 @@ export const Settings: React.FC<SettingsProps> = ({
                     onChange={onGrainSizeChange}
                 />
             </SettingsGroup>
-            <SettingsGroup legend="Grain count" ariaLabel="Grain count">
+            <SettingsGroup legend="Grain density" ariaLabel="Grain density">
                 <Range
-                    max={GrainCount.xl}
+                    max={GrainCount.l}
                     min={GrainCount.s}
                     step={1}
                     value={grainCount}

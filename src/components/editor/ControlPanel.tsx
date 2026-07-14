@@ -1,15 +1,12 @@
 import { Button } from '@/components/button/Button';
-import { Settings } from '@/components/settings/Settings';
-import { SettingsGroup } from '@/components/settings/SettingsGroup';
-import { useSettings } from '@/hooks/useSettings';
-import { RandomSpawnGrainRenderParameters } from '@/lib/grainRenderer/randomSpawn/RandomSpawnRenderer';
+import { Settings } from '@/components/editor/settings/Settings';
+import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
+import { useSettings } from '@/components/editor/settings/useSettings';
+import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import { ChangeEventHandler, useState } from 'react';
 
 interface ControlPanelProps {
-    onDevelop: (
-        file: File,
-        renderParameters: RandomSpawnGrainRenderParameters,
-    ) => void;
+    onDevelop: (file: File, renderParameters: GrainRenderParameters) => void;
     loading?: boolean;
     className?: string;
 }
@@ -29,8 +26,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     const {
         mode,
         setMode,
-        curveType,
-        setCurveType,
         grainSize,
         setGrainSize,
         grainCount,
@@ -69,8 +64,6 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                 <Settings
                     mode={mode}
                     onModeChange={setMode}
-                    curveType={curveType}
-                    onCurveTypeChange={setCurveType}
                     redDyeColor={redDyeColor}
                     onRedDyeColorChange={setRedDyeColor}
                     greenDyeColor={greenDyeColor}

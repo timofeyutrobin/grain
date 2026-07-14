@@ -1,70 +1,3 @@
-import { Channel } from './common';
-
-export function* nextPixel(rgbPixels: Float32Array, channel: Channel) {
-    for (let i = 0; i < rgbPixels.length; i += 3) {
-        const r = rgbPixels[i];
-        const g = rgbPixels[i + 1];
-        const b = rgbPixels[i + 2];
-
-        if (channel === 'grayscale') {
-            yield 0.299 * r + 0.587 * g + 0.114 * b;
-        } else if (channel === 'r') {
-            yield r;
-        } else if (channel === 'g') {
-            yield g;
-        } else if (channel === 'b') {
-            yield b;
-        }
-    }
-}
-
-export function getPixel(
-    index: number,
-    rgbPixels: Float32Array,
-    channel: Channel,
-) {
-    index = index * 3;
-    const r = rgbPixels[index];
-    const g = rgbPixels[index + 1];
-    const b = rgbPixels[index + 2];
-
-    if (channel === 'grayscale') {
-        return 0.299 * r + 0.587 * g + 0.114 * b;
-    } else if (channel === 'r') {
-        return r;
-    } else if (channel === 'g') {
-        return g;
-    } else if (channel === 'b') {
-        return b;
-    }
-
-    return 0;
-}
-
-export function addPixelHsl(
-    rgbaPixels: Float32Array,
-    width: number,
-    x: number,
-    y: number,
-    hue: number,
-    saturation: number,
-    value: number,
-    alpha: number = 1,
-) {
-    const rIndex = Math.min((x + y * width) * 3, rgbaPixels.length);
-    const gIndex = rIndex + 1;
-    const bIndex = gIndex + 1;
-
-    const r = rgbaPixels[rIndex];
-    const g = rgbaPixels[gIndex];
-    const b = rgbaPixels[bIndex];
-    hsvToRgb(hue, saturation, value, rgbaPixels, rIndex);
-
-    rgbaPixels[rIndex] = blend(r, rgbaPixels[rIndex], alpha);
-    rgbaPixels[gIndex] = blend(g, rgbaPixels[gIndex], alpha);
-    rgbaPixels[bIndex] = blend(b, rgbaPixels[bIndex], alpha);
-}
-
 export function generateSampleImageBuffer(
     width: number,
     height: number,
@@ -136,8 +69,4 @@ function hsvToRgb(
     out[rIndex] = r1 + m;
     out[rIndex + 1] = g1 + m;
     out[rIndex + 2] = b1 + m;
-}
-
-function blend(originalColor: number, newColor: number, alpha: number): number {
-    return newColor * alpha + originalColor * (1 - alpha);
 }
