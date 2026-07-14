@@ -44,7 +44,7 @@ export const Greeting: React.FC = () => {
             }}
         >
             <div className="flex w-full h-full">
-                <article className="m-auto mt-64 w-full max-w-2xl py-6 px-8 border border-zinc-300 bg-zinc-800 text-zinc-50 text-lg space-y-1.5">
+                <article className="mt-auto w-full text-sm space-y-1.5 md:m-auto md:mt-64 md:max-w-2xl py-6 px-8 md:border md:border-zinc-300 bg-zinc-800 text-zinc-50 md:text-base">
                     <p>Привет!</p>
                     <p>
                         Добро пожаловать в{' '}
@@ -62,6 +62,7 @@ export const Greeting: React.FC = () => {
                     </p>
                     <footer className="mt-6 flex space-x-4">
                         <Button
+                            small
                             onClick={() => {
                                 dialogRef.current?.close(
                                     WelcomeIntroState.TOUR_STATE_GREETING_SEEN,
@@ -71,6 +72,7 @@ export const Greeting: React.FC = () => {
                             Начать
                         </Button>
                         <Button
+                            small
                             secondary
                             onClick={() => {
                                 dialogRef.current?.close(

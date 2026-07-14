@@ -1,9 +1,3 @@
-export interface SimpleImageData {
-    width: number;
-    height: number;
-    pixels: Float32Array;
-}
-
 export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
 export type RenderMode = 'grayscale' | 'color';
@@ -26,6 +20,10 @@ export const enum GrainCount {
     l = 3,
 }
 
+export type PropsWithClassName<T = {}> = { className?: string } & T;
+
+export const FILE_UPLOAD_INPUT_ID = 'upload';
+
 export const defaultColors = {
     red: {
         h: 0,
@@ -43,8 +41,6 @@ export const defaultColors = {
         v: 50,
     },
 };
-
-export type PropsWithClassName<T = {}> = { className?: string } & T;
 
 export function isError(value: unknown): value is Error {
     return (

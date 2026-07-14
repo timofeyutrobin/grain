@@ -75,14 +75,14 @@ const text = [
                     В emulsion engine я использовал следующую формулу
                     распределения вероятности для каждого зернышка:
                 </p>
-                <p className="flex items-center justify-around">
+                <p className="md:flex md:items-center md:justify-around">
                     <Image
                         src="/images/formula.svg"
                         alt="Probability function"
                         width={300}
                         height={55}
                     />
-                    <span className="text-lg">
+                    <span className="block text-sm mt-2 md:text-lg">
                         a — контраст
                         <br />b — чувствительность
                     </span>
@@ -162,9 +162,21 @@ export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
     const stepsCount = text.length;
     const [currentStep, setCurrentStep] = useState(0);
 
+    const header = (
+        <div className="flex justify-between align-baseline space-x-8">
+            <h2 className="text-xl font-semibold">{text[currentStep].title}</h2>
+            <small className="text-xl font-light text-stone-300">
+                {currentStep + 1} / {stepsCount}
+            </small>
+        </div>
+    );
+
     return (
-        <div className={`${className ?? ''} flex`}>
-            <div className="mx-auto w-full h-full min-h-180 max-h-full">
+        <div className={`${className ?? ''} flex flex-col`}>
+            <header className="bg-zinc-800 md:hidden px-4 py-6">
+                {header}
+            </header>
+            <div className="w-full h-1/2 md:h-full md:min-h-180 md:max-h-1/2">
                 <Canvas camera={{ fov: 45, far: 60 }}>
                     <ambientLight />
                     <Suspense>
@@ -173,19 +185,23 @@ export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
                 </Canvas>
             </div>
 
-            <Card className="absolute bottom-16 left-1/2 -translate-x-1/2 max-w-2xl min-w-md space-y-4 flex flex-col">
-                <header className="flex justify-between align-baseline space-x-8">
-                    <h2 className="text-xl font-semibold">
-                        {text[currentStep].title}
-                    </h2>
-                    <small className="text-xl font-light text-stone-300">
-                        {currentStep + 1} / {stepsCount}
-                    </small>
-                </header>
-                <main className="text-md space-y-2">
+            <Card
+                className="
+                    absolute bottom-0 left-0
+                    mt-auto w-full
+                    max-h-1/2
+                    md:h-auto md:min-h-auto
+                    md:bottom-16 md:left-1/2
+                    md:-translate-x-1/2
+                    md:max-w-2xl md:min-w-md
+                    space-y-4 flex flex-col
+                "
+            >
+                <header className="hidden md:block">{header}</header>
+                <main className="text-sm md:text-base space-y-2 overflow-y-scroll">
                     {text[currentStep].paragraph}
                 </main>
-                <footer className="flex justify-between mt-6">
+                <footer className="flex justify-between md:mt-6">
                     {currentStep > 0 && (
                         <Button
                             small
