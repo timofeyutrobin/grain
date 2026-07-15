@@ -1,9 +1,8 @@
 import { Button } from '@/components/button/Button';
 import { ButtonAnchor } from '@/components/button/ButtonAnchor';
+import { ButtonLabel } from '@/components/button/ButtonLabel';
 import { Background } from '@/components/editor/Background';
 import { ControlPanel } from '@/components/editor/ControlPanel';
-import { FileInfo } from '@/components/editor/FileInfo';
-import { FileInputLabel } from '@/components/editor/FileInputLabel';
 import { Greeting } from '@/components/editor/Greeting';
 import { Logo } from '@/components/editor/Logo';
 import { WatchIntroButton } from '@/components/editor/WatchIntroButton';
@@ -93,16 +92,17 @@ function Editor() {
     };
 
     const fileInputLabel = (
-        <FileInputLabel className="w-full" htmlFor={FILE_UPLOAD_INPUT_ID}>
+        <ButtonLabel className="w-full" small htmlFor={FILE_UPLOAD_INPUT_ID}>
             Открыть&nbsp;изображение
-        </FileInputLabel>
+        </ButtonLabel>
     );
     const fileInfo = !!fileName && !!imageSize && (
-        <FileInfo
-            fileName={fileName}
-            imageWidth={imageSize[0]}
-            imageHeight={imageSize[1]}
-        />
+        <div className="flex justify-between text-xs font-light text-zinc-200">
+            <span>{fileName}</span>
+            <span>
+                {imageSize[0]}x{imageSize[1]}
+            </span>
+        </div>
     );
     const downloadButton = downloadUrl && !loading && (
         <ButtonAnchor
