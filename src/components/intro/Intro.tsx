@@ -6,6 +6,7 @@ import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
 import { Canvas } from '@react-three/fiber';
+import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import Image from 'next/image';
 import { Suspense, useState } from 'react';
@@ -172,7 +173,7 @@ export const Intro: React.FC<PropsWithClassName> = ({ className }) => {
     );
 
     return (
-        <div className={`${className ?? ''} flex flex-col`}>
+        <div className={classNames('flex flex-col', className)}>
             <header className="bg-zinc-800 md:hidden px-4 py-6">
                 {header}
             </header>

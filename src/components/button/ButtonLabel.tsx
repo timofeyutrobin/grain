@@ -1,4 +1,5 @@
 import styles from '@/components/button/button.module.css';
+import classNames from 'classnames';
 import { LabelHTMLAttributes } from 'react';
 
 export const ButtonLabel: React.FC<
@@ -10,14 +11,13 @@ export const ButtonLabel: React.FC<
     return (
         <label
             {...props}
-            className={`
-                ${className ?? ''}
-                block
-                text-center
-                ${styles.button}
-                ${small ? styles.buttonSmall : ''}
-                ${secondary ? styles.buttonSecondary : ''}
-            `}
+            className={classNames(
+                'block text-center',
+                styles.button,
+                small && styles.buttonSmall,
+                secondary && styles.buttonSecondary,
+                className,
+            )}
         />
     );
 };

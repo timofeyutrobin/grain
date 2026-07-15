@@ -1,4 +1,5 @@
 import styles from '@/components/button/button.module.css';
+import classNames from 'classnames';
 import { ButtonHTMLAttributes } from 'react';
 
 export const Button: React.FC<
@@ -10,12 +11,12 @@ export const Button: React.FC<
     return (
         <button
             {...props}
-            className={`
-                ${className ?? ''}
-                ${styles.button}
-                ${small ? styles.buttonSmall : ''}
-                ${secondary ? styles.buttonSecondary : ''}
-            `}
+            className={classNames(
+                styles.button,
+                small && styles.buttonSmall,
+                secondary && styles.buttonSecondary,
+                className,
+            )}
         />
     );
 };

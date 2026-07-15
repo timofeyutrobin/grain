@@ -1,5 +1,6 @@
 import styles from '@/components/button/button.module.css';
 import { PropsWithClassName } from '@/lib/common';
+import classNames from 'classnames';
 import { AnchorHTMLAttributes, PropsWithChildren } from 'react';
 
 export const ButtonAnchor: React.FC<
@@ -13,12 +14,12 @@ export const ButtonAnchor: React.FC<
     return (
         <a
             {...props}
-            className={`
-                ${className ?? ''}
-                ${styles.button}
-                ${small ? styles.buttonSmall : ''}
-                ${secondary ? styles.buttonSecondary : ''}
-            `}
+            className={classNames(
+                styles.button,
+                small && styles.buttonSmall,
+                secondary && styles.buttonSecondary,
+                className,
+            )}
         />
     );
 };

@@ -14,6 +14,7 @@ import { useRenderWorker } from '@/lib/grainRenderer/useRenderWorker';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
+import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import { ChangeEventHandler, useRef, useState } from 'react';
@@ -137,18 +138,23 @@ function Editor() {
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
             <main
-                className={`
-                        flex flex-col
-                        fixed top-0 left-0 w-full h-full max-h-full
-                        md:pl-96
-                        ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '' : 'invisible'}
-                    `}
+                className={classNames(
+                    'flex flex-col fixed top-0 left-0 w-full h-full max-h-full md:pl-96',
+                    {
+                        invisible:
+                            welcomeIntroState !==
+                            WelcomeIntroState.TOUR_STATE_INTRO_SEEN,
+                    },
+                )}
             >
                 <header className="z-10 w-full flex justify-center md:hidden px-4 pt-10">
                     <Logo className="max-w-sm" />
                 </header>
                 <div
-                    className={`max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4 ${canvasVisible ? '' : 'invisible'}`}
+                    className={classNames(
+                        'max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4',
+                        { invisible: !canvasVisible },
+                    )}
                 >
                     <canvas
                         className="max-w-full max-h-[720px]"
@@ -178,13 +184,23 @@ function Editor() {
                 </footer>
             </main>
             <ControlPanel
-                className={`
-                    z-20
-                    fixed top-0 left-0
-                    md:w-96 w-full h-full
-                    transition-transform duration-500
-                    ${welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '-translate-x-full' : controlPanelOpen ? 'translate-0' : '-translate-x-full md:translate-0'}
-                `}
+                className={classNames(
+                    'z-20',
+                    'fixed',
+                    'top-0',
+                    'left-0',
+                    'md:w-96',
+                    'w-full',
+                    'h-full',
+                    'transition-transform',
+                    'duration-500',
+                    welcomeIntroState !==
+                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN
+                        ? '-translate-x-full'
+                        : controlPanelOpen
+                          ? 'translate-0'
+                          : '-translate-x-full md:translate-0',
+                )}
                 fileInputLabel={
                     <div className="w-full space-y-1">
                         {fileInputLabel}
@@ -197,7 +213,14 @@ function Editor() {
             />
             {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                 <Intro
-                    className={`absolute top-0 left-0 w-full h-full ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_GREETING_SEEN ? 'visible' : 'invisible'}`}
+                    className={classNames(
+                        'absolute top-0 left-0 w-full h-full',
+                        {
+                            invisible:
+                                welcomeIntroState !==
+                                WelcomeIntroState.TOUR_STATE_GREETING_SEEN,
+                        },
+                    )}
                 />
             )}
         </>

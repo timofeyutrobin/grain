@@ -1,5 +1,6 @@
 import styles from '@/components/button/button.module.css';
 import { PropsWithClassName } from '@/lib/common';
+import classNames from 'classnames';
 import Link, { LinkProps } from 'next/link';
 import { PropsWithChildren } from 'react';
 
@@ -13,12 +14,12 @@ export const ButtonLink: React.FC<
     return (
         <Link
             {...props}
-            className={`
-                ${className ?? ''}
-                ${styles.button}
-                ${small ? styles.buttonSmall : ''}
-                ${secondary ? styles.buttonSecondary : ''}
-            `}
+            className={classNames(
+                styles.button,
+                small && styles.buttonSmall,
+                secondary && styles.buttonSecondary,
+                className,
+            )}
         />
     );
 };
