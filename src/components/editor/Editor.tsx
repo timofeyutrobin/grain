@@ -25,10 +25,14 @@ function Editor() {
     const [controlPanelOpen, setControlPanelOpen] = useState(false);
 
     const [loading, setLoading] = useState(false);
-    const [canvasVisible, setCanvasVisible] = useState(false);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const [downloadUrl, setDownloadUrl] = useState<string>('');
+
+    const [fileName, setFileName] = useState<string | null>(null);
+    const [imageSize, setImageSize] = useState<
+        [width: number, height: number] | null
+    >(null);
 
     const renderWorker = useRenderWorker((worker) => {
         try {
@@ -45,9 +49,6 @@ function Editor() {
                 switch (event.data.type) {
                     case 'ready':
                         worker.postMessage({ type: 'getBlob' });
-                        break;
-                    case 'canvasSizeSet':
-                        setCanvasVisible(true);
                         break;
                     case 'blobReady':
                         const blob: Blob = event.data.blob;
@@ -66,41 +67,28 @@ function Editor() {
     });
 
     const handleDevelop = async (renderParameters: GrainRenderParameters) => {
-        if (!imageBitmap) {
-            return;
-        }
         setLoading(true);
         setControlPanelOpen(false);
         URL.revokeObjectURL(downloadUrl);
         setDownloadUrl('');
-        let workerImageBitmap: ImageBitmap | null = null;
-        workerImageBitmap = await createImageBitmap(imageBitmap);
-        renderWorker.postMessage(
-            {
-                type: 'render',
-                image: workerImageBitmap,
-                params: renderParameters,
-            },
-            [workerImageBitmap],
-        );
-        workerImageBitmap.close();
+        renderWorker.postMessage({
+            type: 'render',
+            params: renderParameters,
+        });
     };
-
-    const [file, setFile] = useState<File | null>(null);
-    const [imageBitmap, setImageBitmap] = useState<ImageBitmap | null>(null);
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
         e,
     ) => {
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
-            setFile(file);
-            setImageBitmap(
-                await createImageBitmap(file, {
-                    imageOrientation: 'flipY',
-                }),
-            );
-            imageBitmap?.close();
+            setFileName(file.name);
+            const image = await createImageBitmap(file, {
+                imageOrientation: 'flipY',
+            });
+            setImageSize([image.width, image.height]);
+            renderWorker.postMessage({ type: 'setImage', image }, [image]);
+            image.close();
         }
     };
 
@@ -109,11 +97,11 @@ function Editor() {
             Открыть&nbsp;изображение
         </FileInputLabel>
     );
-    const fileInfo = !!file && !!imageBitmap && (
+    const fileInfo = !!fileName && !!imageSize && (
         <FileInfo
-            fileName={file.name}
-            imageWidth={imageBitmap.width}
-            imageHeight={imageBitmap.height}
+            fileName={fileName}
+            imageWidth={imageSize[0]}
+            imageHeight={imageSize[1]}
         />
     );
     const downloadButton = downloadUrl && !loading && (
@@ -153,7 +141,6 @@ function Editor() {
                 <div
                     className={classNames(
                         'max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4',
-                        { invisible: !canvasVisible },
                     )}
                 >
                     <canvas
@@ -209,7 +196,7 @@ function Editor() {
                 }
                 onDevelop={handleDevelop}
                 onClose={() => setControlPanelOpen(false)}
-                disabled={loading || !file}
+                disabled={loading || !fileName}
             />
             {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                 <Intro

@@ -57,6 +57,8 @@ export class GrainRenderer {
 
         this.gl = gl;
         this.resultCtx = ctx;
+        this.resultCtx.imageSmoothingQuality = 'high';
+        this.resultCtx.fillStyle = '#000';
         createFullScreenQuad(gl);
 
         const vertexShader = createShader(
@@ -121,9 +123,6 @@ export class GrainRenderer {
         image: ImageBitmap,
         params: GrainRenderParameters,
     ): Promise<void> {
-        this.resultCtx.imageSmoothingQuality = 'high';
-        this.resultCtx.fillStyle = '#000';
-
         this.prepareTiles(image);
         await this.renderTiles(image, params);
         this.tiles = [];
