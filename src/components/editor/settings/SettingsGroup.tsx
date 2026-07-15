@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
 interface SettingsGroupProps {
@@ -19,7 +20,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
     return (
         <fieldset
             aria-label={ariaLabel}
-            className={`p-4 border border-stone-200 ${className ?? ''}`}
+            className={classNames('p-4 border border-stone-200', className)}
         >
             <legend className="p-1">
                 {legend}
@@ -28,7 +29,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
                         className="inline align-middle ml-2 text-xs text-stone-200 underline cursor-pointer"
                         onClick={() => setIsShowed((isShowed) => !isShowed)}
                     >
-                        {isShowed ? 'Close' : 'Learn more'}
+                        {isShowed ? 'Скрыть' : 'Подробнее'}
                     </button>
                 )}
             </legend>

@@ -1,17 +1,18 @@
 import styles from '@/components/button/button.module.css';
 import classNames from 'classnames';
-import { ButtonHTMLAttributes } from 'react';
+import { LabelHTMLAttributes } from 'react';
 
-export const Button: React.FC<
-    ButtonHTMLAttributes<HTMLButtonElement> & {
+export const ButtonLabel: React.FC<
+    LabelHTMLAttributes<HTMLLabelElement> & {
         secondary?: boolean;
         small?: boolean;
     }
 > = ({ secondary, className, small, ...props }) => {
     return (
-        <button
+        <label
             {...props}
             className={classNames(
+                'block text-center',
                 styles.button,
                 small && styles.buttonSmall,
                 secondary && styles.buttonSecondary,

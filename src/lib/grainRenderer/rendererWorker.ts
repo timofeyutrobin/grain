@@ -1,24 +1,39 @@
 import { GrainRenderer } from '@/lib/grainRenderer/GrainRenderer';
 
-let renderer: GrainRenderer;
+let renderer: GrainRenderer | null = null;
+let imageBitmap: ImageBitmap | null = null;
 
 self.addEventListener('message', async (event) => {
     switch (event.data.type) {
         case 'create':
             if (renderer) {
-                return;
+                break;
             }
             renderer = new GrainRenderer(event.data.resultCanvas);
-            postMessage({ type: 'rendererCreated' });
+            break;
+        case 'setImage':
+            if (!renderer) {
+                break;
+            }
+            if (imageBitmap) {
+                imageBitmap.close();
+            }
+            imageBitmap = event.data.image;
             break;
         case 'render':
-            renderer.setResultCanvasSize(
-                event.data.image.width,
-                event.data.image.height,
-            );
-            postMessage({ type: 'canvasSizeSet' });
-            await renderer.render(event.data.image, event.data.params);
+            if (!imageBitmap || !renderer) {
+                break;
+            }
+            renderer.setResultCanvasSize(imageBitmap.width, imageBitmap.height);
+            await renderer.render(imageBitmap, event.data.params);
             postMessage({ type: 'ready' });
+            break;
+        case 'getBlob':
+            if (!renderer) {
+                break;
+            }
+            const blob = await renderer.getImage();
+            postMessage({ type: 'blobReady', blob });
             break;
     }
 });

@@ -57,6 +57,8 @@ export class GrainRenderer {
 
         this.gl = gl;
         this.resultCtx = ctx;
+        this.resultCtx.imageSmoothingQuality = 'high';
+        this.resultCtx.fillStyle = '#000';
         createFullScreenQuad(gl);
 
         const vertexShader = createShader(
@@ -108,18 +110,19 @@ export class GrainRenderer {
         gl.clearColor(0, 0, 0, 1);
     }
 
-    setResultCanvasSize(width: number, height: number) {
+    setResultCanvasSize(width: number, height: number): void {
         this.resultCanvas.width = width;
         this.resultCanvas.height = height;
+    }
+
+    async getImage(): Promise<Blob> {
+        return this.resultCanvas.convertToBlob({ type: 'image/png' });
     }
 
     async render(
         image: ImageBitmap,
         params: GrainRenderParameters,
     ): Promise<void> {
-        this.resultCtx.imageSmoothingQuality = 'high';
-        this.resultCtx.fillStyle = '#000';
-
         this.prepareTiles(image);
         await this.renderTiles(image, params);
         this.tiles = [];
@@ -142,6 +145,11 @@ export class GrainRenderer {
                 offsetY,
                 width,
                 height,
+                {
+                    resizeWidth: width,
+                    resizeHeight: height,
+                    resizeQuality: 'high',
+                },
             );
 
             const imageTexture = createTexture(this.gl, imageBitmap);

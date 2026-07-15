@@ -1,3 +1,4 @@
+import classNames from 'classnames';
 import React, { PropsWithChildren } from 'react';
 
 interface SegmentsProps {
@@ -27,14 +28,22 @@ Segments.Segment = ({ children, onClick, isSelected, disabled }) => {
             role="radio"
             aria-checked={isSelected}
             onClick={onClick}
-            className={`
-                grow px-4 py-2
-                text-sm border transition-colors
-                focus:outline-none
-                cursor-pointer
-                ${isSelected && 'bg-stone-200 border-stone-200 hover:bg-stone-200 text-stone-800'}
-                disabled:bg-stone-500 disabled:border-stone-500 disabled:text-stone-400 disabled:cursor-not-allowed
-            `}
+            className={classNames(
+                'grow',
+                'px-4',
+                'py-2',
+                'text-sm',
+                'border',
+                'transition-colors',
+                'focus:outline-none',
+                'cursor-pointer',
+                'disabled:bg-stone-500',
+                'disabled:border-stone-500',
+                'disabled:text-stone-400',
+                'disabled:cursor-not-allowed',
+                isSelected &&
+                    'bg-stone-200 border-stone-200 hover:bg-stone-200 text-stone-800',
+            )}
             disabled={disabled}
         >
             {children}

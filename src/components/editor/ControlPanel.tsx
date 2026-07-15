@@ -1,28 +1,27 @@
 import { Button } from '@/components/button/Button';
+import { Logo } from '@/components/editor/Logo';
 import { Settings } from '@/components/editor/settings/Settings';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import { useSettings } from '@/components/editor/settings/useSettings';
 import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
-import { ChangeEventHandler, useState } from 'react';
+import classNames from 'classnames';
+import { ReactNode } from 'react';
 
 interface ControlPanelProps {
-    onDevelop: (file: File, renderParameters: GrainRenderParameters) => void;
-    loading?: boolean;
+    onDevelop: (renderParameters: GrainRenderParameters) => void;
+    onClose: () => void;
+    fileInputLabel: ReactNode;
+    disabled?: boolean;
     className?: string;
 }
 
 export const ControlPanel: React.FC<ControlPanelProps> = ({
     onDevelop,
-    loading,
+    disabled,
     className,
+    onClose,
+    fileInputLabel,
 }) => {
-    const [file, setFile] = useState<File | null>(null);
-    const handleFileChange: ChangeEventHandler<HTMLInputElement> = (e) => {
-        if (e.target.files) {
-            setFile(e.target.files[0]);
-        }
-    };
-
     const {
         mode,
         setMode,
@@ -41,25 +40,15 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
     } = useSettings();
 
     const handleDevelopClick = () => {
-        if (!file) {
-            return;
-        }
-
-        onDevelop(file, renderParameters);
+        onDevelop(renderParameters);
     };
 
     return (
-        <aside className={`flex flex-col bg-zinc-800 ${className ?? ''}`}>
-            <section className="my-4 px-4 overflow-y-scroll space-y-4">
-                <SettingsGroup legend="File">
-                    <input
-                        className="w-full
-                            file:mr-5 file:py-1 file:px-3 file:border file:text-xs file:font-medium
-                            file:bg-stone-5 hover:cursor-pointer hover:file:bg-stone-200 hover:file:cursor-pointer hover:file:text-stone-900
-                        "
-                        type="file"
-                        onChange={handleFileChange}
-                    />
+        <aside className={classNames('flex flex-col bg-zinc-800', className)}>
+            <Logo className="hidden md:block w-full px-4 pt-4 object-contain" />
+            <section className="self-center w-full max-w-96 my-4 px-4 overflow-y-scroll space-y-4">
+                <SettingsGroup className="hidden md:block" legend="Файл">
+                    {fileInputLabel}
                 </SettingsGroup>
                 <Settings
                     mode={mode}
@@ -77,13 +66,24 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     renderParameters={renderParameters}
                 />
             </section>
-            <Button
-                onClick={handleDevelopClick}
-                className="mt-auto mb-4 mx-4"
-                disabled={loading || !file}
-            >
-                Develop
-            </Button>
+            <footer className="self-center max-w-96 w-full flex gap-4 mt-auto p-4">
+                <Button
+                    secondary
+                    small
+                    className="md:hidden w-full"
+                    onClick={onClose}
+                >
+                    Закрыть
+                </Button>
+                <Button
+                    small
+                    className="w-full"
+                    onClick={handleDevelopClick}
+                    disabled={disabled}
+                >
+                    Проявить
+                </Button>
+            </footer>
         </aside>
     );
 };
