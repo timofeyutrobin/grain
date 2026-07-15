@@ -65,7 +65,7 @@ function Editor() {
     });
 
     const handleDevelop = async (renderParameters: GrainRenderParameters) => {
-        if (!canvasRef.current || !imageBitmap) {
+        if (!imageBitmap) {
             return;
         }
         setLoading(true);
@@ -136,44 +136,47 @@ function Editor() {
             />
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
-            {welcomeIntroState === WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
-                <>
-                    <main className="flex flex-col fixed top-0 left-0 w-full h-full max-h-full md:pl-96">
-                        <header className="z-10 w-full flex justify-center md:hidden px-4 pt-10">
-                            <Logo className="max-w-sm" />
-                        </header>
-                        <div
-                            className={`max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4 ${canvasVisible ? '' : 'invisible'}`}
-                        >
-                            <canvas
-                                className="max-w-full max-h-[720px]"
-                                ref={canvasRef}
-                            />
-                            <div className="mt-4">{downloadButton}</div>
+            <main
+                className={`
+                        flex flex-col
+                        fixed top-0 left-0 w-full h-full max-h-full
+                        md:pl-96
+                        ${welcomeIntroState === WelcomeIntroState.TOUR_STATE_INTRO_SEEN ? '' : 'invisible'}
+                    `}
+            >
+                <header className="z-10 w-full flex justify-center md:hidden px-4 pt-10">
+                    <Logo className="max-w-sm" />
+                </header>
+                <div
+                    className={`max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4 ${canvasVisible ? '' : 'invisible'}`}
+                >
+                    <canvas
+                        className="max-w-full max-h-[720px]"
+                        ref={canvasRef}
+                    />
+                    <div className="hidden mt-4 md:block">{downloadButton}</div>
+                </div>
+                <WatchIntroButton className="shrink-0 self-start m-4" />
+                <footer className="md:hidden w-full p-4 bg-zinc-800">
+                    {fileInfo && <div className="w-full mb-2">{fileInfo}</div>}
+                    {downloadButton && (
+                        <div className="w-full max-w-96 mb-2 mx-auto">
+                            {downloadButton}
                         </div>
-                        <WatchIntroButton className="shrink-0 self-start m-4" />
-                        <footer className="md:hidden w-full p-4 bg-zinc-800">
-                            <div className="w-full max-w-96 mb-2">
-                                {downloadButton}
-                            </div>
-                            {fileInfo && (
-                                <div className="w-full mb-2">{fileInfo}</div>
-                            )}
-                            <div className="mx-auto max-w-96 flex items-center gap-4">
-                                <Button
-                                    secondary
-                                    small
-                                    className="w-full"
-                                    onClick={() => setControlPanelOpen(true)}
-                                >
-                                    Проявка
-                                </Button>
-                                {fileInputLabel}
-                            </div>
-                        </footer>
-                    </main>
-                </>
-            )}
+                    )}
+                    <div className="mx-auto max-w-96 flex items-center gap-4">
+                        <Button
+                            secondary
+                            small
+                            className="w-full"
+                            onClick={() => setControlPanelOpen(true)}
+                        >
+                            Проявка
+                        </Button>
+                        {fileInputLabel}
+                    </div>
+                </footer>
+            </main>
             <ControlPanel
                 className={`
                     z-20

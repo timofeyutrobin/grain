@@ -146,6 +146,11 @@ export class GrainRenderer {
                 offsetY,
                 width,
                 height,
+                {
+                    resizeWidth: width,
+                    resizeHeight: height,
+                    resizeQuality: 'high',
+                },
             );
 
             const imageTexture = createTexture(this.gl, imageBitmap);

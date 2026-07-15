@@ -4,7 +4,7 @@ import { GrainLayerRGB } from '@/components/intro/entities/GrainLayerRGB';
 import { LightRays } from '@/components/intro/entities/LightRays';
 import { animate, radians } from '@/lib/common';
 import { useFrame, useLoader } from '@react-three/fiber';
-import React, { useEffect, useMemo } from 'react';
+import React, { useLayoutEffect, useMemo } from 'react';
 import {
     DodecahedronGeometry,
     MeshStandardMaterial,
@@ -92,7 +92,7 @@ export const Scene: React.FC<SceneProps> = ({ currentStep }) => {
         '/textures/grain-surface.jpg',
     );
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         surfaceTexture.wrapT = RepeatWrapping;
         surfaceTexture.wrapS = RepeatWrapping;
         surfaceTexture.repeat.set(5, 5);
