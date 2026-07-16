@@ -26,8 +26,8 @@ interface Tile {
     offsetY: number;
 }
 
-const MAX_TILE_WIDTH = 512;
-const MAX_TILE_HEIGHT = 512;
+const MAX_TILE_WIDTH = 256;
+const MAX_TILE_HEIGHT = 256;
 
 export class GrainRenderer {
     private superSamplingScale: number = 1;
@@ -120,7 +120,7 @@ export class GrainRenderer {
     }
 
     async render(
-        image: ImageBitmap,
+        image: OffscreenCanvas,
         params: GrainRenderParameters,
     ): Promise<void> {
         this.prepareTiles(image);
@@ -129,7 +129,7 @@ export class GrainRenderer {
     }
 
     private async renderTiles(
-        image: ImageBitmap,
+        image: OffscreenCanvas,
         params: GrainRenderParameters,
     ): Promise<void> {
         for (const { width, height, offsetX, offsetY } of this.tiles) {
@@ -193,7 +193,6 @@ export class GrainRenderer {
             imageBitmap.close();
             this.gl.flush();
 
-            const resultBitmap = this.renderingCanvas.transferToImageBitmap();
             this.resultCtx.fillRect(
                 offsetX,
                 this.resultCanvas.height - offsetY - height,
@@ -201,17 +200,16 @@ export class GrainRenderer {
                 height,
             );
             this.resultCtx.drawImage(
-                resultBitmap,
+                this.renderingCanvas,
                 offsetX,
                 this.resultCanvas.height - offsetY - height,
                 width,
                 height,
             );
-            resultBitmap.close();
         }
     }
 
-    private prepareTiles(image: ImageBitmap): void {
+    private prepareTiles(image: OffscreenCanvas): void {
         const imageWidth = image.width;
         const imageHeight = image.height;
         if (imageWidth <= 1024 && imageHeight <= 1024) {
