@@ -1,7 +1,6 @@
 import { Microscope } from '@/components/editor/Microscope';
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
 import { Range } from '@/components/editor/settings/Range';
-import { Segments } from '@/components/editor/settings/Segments';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import {
     ColorHSV,
@@ -35,7 +34,6 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({
     mode,
-    onModeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -50,28 +48,6 @@ export const Settings: React.FC<SettingsProps> = ({
 }) => {
     return (
         <>
-            <SettingsGroup legend="Режим">
-                <Segments name="Режим">
-                    <Segments.Segment
-                        isSelected={mode === 'grayscale'}
-                        onClick={() => onModeChange('grayscale')}
-                    >
-                        Ч/Б
-                    </Segments.Segment>
-                    <Segments.Segment
-                        isSelected={mode === 'color'}
-                        onClick={() => onModeChange('color')}
-                        disabled
-                    >
-                        Цвет
-                    </Segments.Segment>
-                </Segments>
-            </SettingsGroup>
-            <SettingsGroup legend="Характеристическая кривая">
-                <Segments name="Характеристическая кривая">
-                    <Segments.Segment isSelected>Сигмоида</Segments.Segment>
-                </Segments>
-            </SettingsGroup>
             <SettingsGroup
                 legend="Микроскоп"
                 hint={<>Показывает структуру зерна под большим увеличением</>}
