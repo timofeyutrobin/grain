@@ -120,7 +120,7 @@ export class GrainRenderer {
     }
 
     async render(
-        image: OffscreenCanvas,
+        image: OffscreenCanvas | ImageBitmap,
         params: GrainRenderParameters,
     ): Promise<void> {
         this.prepareTiles(image);
@@ -129,7 +129,7 @@ export class GrainRenderer {
     }
 
     private async renderTiles(
-        image: OffscreenCanvas,
+        image: OffscreenCanvas | ImageBitmap,
         params: GrainRenderParameters,
     ): Promise<void> {
         for (const { width, height, offsetX, offsetY } of this.tiles) {
@@ -209,7 +209,7 @@ export class GrainRenderer {
         }
     }
 
-    private prepareTiles(image: OffscreenCanvas): void {
+    private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
         const imageWidth = image.width;
         const imageHeight = image.height;
         if (imageWidth <= 1024 && imageHeight <= 1024) {
