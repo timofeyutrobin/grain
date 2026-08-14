@@ -12,6 +12,7 @@ function magnifyGrain(
     renderParameters: GrainRenderParameters,
 ): GrainRenderParameters {
     return {
+        ...renderParameters,
         layers: renderParameters.layers.map((layer) => ({
             ...layer,
             grainSize: layer.grainSize * SCALE,

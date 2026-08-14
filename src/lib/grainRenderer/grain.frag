@@ -14,6 +14,11 @@ uniform float u_sensitivity;
 uniform float u_grainSize;
 uniform float u_alpha;
 uniform uint u_seed;
+uniform vec3 u_color;
+uniform int u_channel;
+uniform vec2 u_currentTileOffset;
+uniform vec2 u_textureOverlapScale;
+uniform vec2 u_textureOverlapOffset;
 
 uniform sampler2D u_imageTexture;
 
@@ -55,20 +60,30 @@ float grainMask(float size, float dist) {
   return smoothstep(size, size * 0.7f, dist);
 }
 
-vec3 grainColor(float size, float dist) {
-  vec3 grainColor = vec3(0.8f, 0.8f, 0.8f);
-  float grainCenterDensity = smoothstep(size * 0.5f, size, dist);
-  float grainInnerNoise = vec2(pcg2d(uvec2(vUV * u_resolution))).x / float(uint(0xffffffff));
-
-  return grainColor * (0.7f + grainCenterDensity) + (grainInnerNoise * 0.2f - 0.1f);
-}
-
 float grayScale(vec4 color) {
   return dot(color.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
 }
 
-float grainExposure(vec2 textureUV) {
-  return grayScale(textureLod(u_imageTexture, textureUV, 0.0f));
+float isColorMode(int channel) {
+  // channel == 0, 1, 2
+  return step(0.0f, float(channel));
+}
+
+float isGrayscaleMode(int channel) {
+  // channel == -1
+  return step(1.0f, -float(channel));
+}
+
+float grainExposure(vec2 textureUV, int channel) {
+  vec4 image = textureLod(u_imageTexture, textureUV, 0.0f);
+  return isColorMode(channel) * image[channel] + isGrayscaleMode(channel) * grayScale(image);
+}
+
+vec3 grainColor(float size, float dist) {
+  float grainCenterDensity = smoothstep(size * 0.5f, size, dist);
+  float grainInnerNoise = vec2(pcg2d(uvec2(vUV * u_resolution))).x / float(uint(0xffffffff));
+
+  return u_color * (0.7f + grainCenterDensity) + (grainInnerNoise * 0.2f - 0.1f);
 }
 
 void main() {
@@ -78,7 +93,7 @@ void main() {
 
   vec4 finalColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-  vec2 gridUV = vUV * gridSize;
+  vec2 gridUV = (vUV + u_currentTileOffset) * gridSize;
   vec2 currentTile = floor(gridUV);
 
   for(int x = -3; x <= 3; x++) {
@@ -89,14 +104,14 @@ void main() {
       vec2 rand = vec2(pcg2d(uvec2(targetTile))) / float(uint(0xffffffff));
 
       vec2 grainCenter = targetTile + (rand.xy - 0.5f) * 2.0f;
-      vec2 textureUV = grainCenter / gridSize;
+      vec2 textureUV = (grainCenter / gridSize - u_currentTileOffset + u_textureOverlapOffset) * u_textureOverlapScale;
 
       float size = baseGrainSize * ((rand.x * 1.3f) + baseGrainSize);
       float dist = grainDistance(grainCenter, rand, gridUV, aspectRatio);
       float mask = grainMask(size, dist);
       vec3 color = grainColor(size, dist);
 
-      float exposure = grainExposure(textureUV);
+      float exposure = grainExposure(textureUV, u_channel);
 
       float exposureThreshold = (rand.x + rand.y) * 0.5f;
       float grainActivation = step(exposureThreshold, curve(exposure, u_contrast, u_sensitivity));
