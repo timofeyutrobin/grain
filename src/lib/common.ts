@@ -2,11 +2,7 @@ export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
 export type RenderMode = 'grayscale' | 'color';
 
-export interface ColorHSV {
-    h: number;
-    s: number;
-    v: number;
-}
+export type Color = { r: number; g: number; b: number };
 
 export const enum GrainSize {
     s = 1,
@@ -24,22 +20,10 @@ export type PropsWithClassName<T = {}> = { className?: string } & T;
 
 export const FILE_UPLOAD_INPUT_ID = 'upload';
 
-export const defaultColors = {
-    red: {
-        h: 0,
-        s: 25,
-        v: 50,
-    },
-    green: {
-        h: 120,
-        s: 25,
-        v: 50,
-    },
-    blue: {
-        h: 240,
-        s: 25,
-        v: 50,
-    },
+export const defaultColors: Record<string, Color> = {
+    red: { r: 255, g: 50, b: 50 },
+    green: { r: 50, g: 255, b: 50 },
+    blue: { r: 50, g: 50, b: 255 },
 };
 
 export function isError(value: unknown): value is Error {

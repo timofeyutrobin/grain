@@ -3,7 +3,6 @@ import { PropsWithChildren, ReactNode, useState } from 'react';
 
 interface SettingsGroupProps {
     legend: string;
-    ariaLabel?: string;
     hint?: ReactNode;
     className?: string;
 }
@@ -11,7 +10,6 @@ interface SettingsGroupProps {
 export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
     className,
     children,
-    ariaLabel,
     legend,
     hint,
 }) => {
@@ -19,7 +17,7 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
 
     return (
         <fieldset
-            aria-label={ariaLabel}
+            aria-label={legend}
             className={classNames('p-4 border border-stone-200', className)}
         >
             <legend className="p-1">

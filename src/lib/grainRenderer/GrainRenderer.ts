@@ -1,3 +1,4 @@
+import { Color } from '@/lib/common';
 import {
     createFullScreenQuad,
     createProgram,
@@ -15,8 +16,6 @@ export interface Layer {
     alpha: number;
 }
 
-type Color = [number, number, number];
-
 export interface ColorParameters {
     dye: Color;
 }
@@ -27,7 +26,7 @@ export interface GrainRenderParameters {
         r: ColorParameters;
         g: ColorParameters;
         b: ColorParameters;
-    };
+    } | null;
 }
 
 type Seed = number[][];
@@ -46,7 +45,7 @@ enum Channel {
     b,
 }
 
-const defaultGrayscaleValue: Color = [0.8, 0.8, 0.8];
+const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
 
 const MAX_TILE_WIDTH = 512;
 const MAX_TILE_HEIGHT = 512;
@@ -317,7 +316,7 @@ export class GrainRenderer {
     private async renderLayers(
         layers: Layer[],
         channel: Channel,
-        color: [number, number, number],
+        color: Color,
         seed: Seed,
     ): Promise<void> {
         for (let i = 0; i < layers.length; i++) {
@@ -330,7 +329,12 @@ export class GrainRenderer {
                 this.alphaUniformLocation,
                 (1 / spawnRate) * alpha,
             );
-            this.gl.uniform3f(this.colorUniformLocation, ...color);
+            this.gl.uniform3f(
+                this.colorUniformLocation,
+                color.r / 255,
+                color.g / 255,
+                color.b / 255,
+            );
             this.gl.uniform1i(this.channelUniformLocation, channel);
 
             for (let j = 0; j < spawnRate; j++) {
