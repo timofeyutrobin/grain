@@ -1,9 +1,10 @@
 import { Microscope } from '@/components/editor/Microscope';
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
 import { Range } from '@/components/editor/settings/Range';
+import { Segments } from '@/components/editor/settings/Segments';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import {
-    ColorHSV,
+    Color,
     defaultColors,
     GrainCount,
     GrainSize,
@@ -16,12 +17,12 @@ interface SettingsProps {
     mode: RenderMode;
     onModeChange: (mode: RenderMode) => void;
 
-    redDyeColor: ColorHSV;
-    onRedDyeColorChange: (color: ColorHSV) => void;
-    greenDyeColor: ColorHSV;
-    onGreenDyeColorChange: (color: ColorHSV) => void;
-    blueDyeColor: ColorHSV;
-    onBlueDyeColorChange: (color: ColorHSV) => void;
+    redDyeColor: Color;
+    onRedDyeColorChange: (color: Color) => void;
+    greenDyeColor: Color;
+    onGreenDyeColorChange: (color: Color) => void;
+    blueDyeColor: Color;
+    onBlueDyeColorChange: (color: Color) => void;
 
     grainSize: GrainSize;
     onGrainSizeChange: (grainSize: GrainSize) => void;
@@ -34,6 +35,7 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({
     mode,
+    onModeChange,
     redDyeColor,
     onRedDyeColorChange,
     greenDyeColor,
@@ -62,23 +64,21 @@ export const Settings: React.FC<SettingsProps> = ({
                     </div>
                 </div>
             </SettingsGroup>
-            <SettingsGroup legend="Размер зерна" ariaLabel="Размер зерна">
-                <Range
-                    max={GrainSize.l}
-                    min={GrainSize.s}
-                    step={1}
-                    value={grainSize}
-                    onChange={onGrainSizeChange}
-                />
-            </SettingsGroup>
-            <SettingsGroup legend="Плотность зерна" ariaLabel="Плотность зерна">
-                <Range
-                    max={GrainCount.l}
-                    min={GrainCount.s}
-                    step={1}
-                    value={grainCount}
-                    onChange={onGrainCountChange}
-                />
+            <SettingsGroup legend="Цвет">
+                <Segments name="Цвет">
+                    <Segments.Segment
+                        onClick={() => onModeChange('grayscale')}
+                        isSelected={mode === 'grayscale'}
+                    >
+                        Ч/Б
+                    </Segments.Segment>
+                    <Segments.Segment
+                        onClick={() => onModeChange('color')}
+                        isSelected={mode === 'color'}
+                    >
+                        Цвет
+                    </Segments.Segment>
+                </Segments>
             </SettingsGroup>
             {mode === 'color' && (
                 <SettingsGroup
@@ -95,7 +95,6 @@ export const Settings: React.FC<SettingsProps> = ({
                             слишком яркий и насыщенный цвет
                         </>
                     }
-                    ariaLabel="Channels dye color"
                 >
                     <ColorPicker
                         title="Красный канал"
@@ -117,6 +116,24 @@ export const Settings: React.FC<SettingsProps> = ({
                     />
                 </SettingsGroup>
             )}
+            <SettingsGroup legend="Размер зерна">
+                <Range
+                    max={GrainSize.l}
+                    min={GrainSize.s}
+                    step={1}
+                    value={grainSize}
+                    onChange={onGrainSizeChange}
+                />
+            </SettingsGroup>
+            <SettingsGroup legend="Плотность зерна">
+                <Range
+                    max={GrainCount.l}
+                    min={GrainCount.s}
+                    step={1}
+                    value={grainCount}
+                    onChange={onGrainCountChange}
+                />
+            </SettingsGroup>
         </>
     );
 };

@@ -1,11 +1,11 @@
-import { ColorHSV } from '@/lib/common';
+import { Color } from '@/lib/common';
 import { colord } from 'colord';
 
 interface ColorPickerProps {
     title: string;
-    value: ColorHSV;
-    defaultColor: ColorHSV;
-    onChange: (color: ColorHSV) => void;
+    value: Color;
+    defaultColor: Color;
+    onChange: (color: Color) => void;
 }
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({
@@ -31,7 +31,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                 type="color"
                 value={colord(value).toHex()}
                 onChange={(event) =>
-                    onChange(colord(event.target.value).toHsv())
+                    onChange(colord(event.target.value).toRgb())
                 }
                 className="mr-0 cursor-pointer"
             />

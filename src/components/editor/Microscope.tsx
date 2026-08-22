@@ -12,6 +12,7 @@ function magnifyGrain(
     renderParameters: GrainRenderParameters,
 ): GrainRenderParameters {
     return {
+        ...renderParameters,
         layers: renderParameters.layers.map((layer) => ({
             ...layer,
             grainSize: layer.grainSize * SCALE,
@@ -75,8 +76,14 @@ export const Microscope: React.FC<MicroscopeProps> = ({
             return;
         }
 
-        renderer.render(sampleImage, magnifyGrain(renderParameters));
-    }, [renderParameters, renderer, sampleImage, width, height]);
+        const timer = window.setTimeout(() => {
+            renderer.render(sampleImage, magnifyGrain(renderParameters));
+        }, 100);
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [renderParameters, renderer, sampleImage]);
 
     return <canvas width={width} height={height} ref={canvasRef} />;
 };

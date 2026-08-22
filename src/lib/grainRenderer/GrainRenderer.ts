@@ -1,3 +1,4 @@
+import { Color } from '@/lib/common';
 import {
     createFullScreenQuad,
     createProgram,
@@ -15,9 +16,20 @@ export interface Layer {
     alpha: number;
 }
 
+export interface ColorParameters {
+    dye: Color;
+}
+
 export interface GrainRenderParameters {
     layers: Layer[];
+    colorParameters?: {
+        r: ColorParameters;
+        g: ColorParameters;
+        b: ColorParameters;
+    } | null;
 }
+
+type Seed = number[][];
 
 interface Tile {
     width: number;
@@ -26,8 +38,19 @@ interface Tile {
     offsetY: number;
 }
 
-const MAX_TILE_WIDTH = 256;
-const MAX_TILE_HEIGHT = 256;
+enum Channel {
+    grayscale = -1,
+    r,
+    g,
+    b,
+}
+
+const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
+
+const MAX_TILE_WIDTH = 512;
+const MAX_TILE_HEIGHT = 512;
+
+const TEXTURE_OVERLAP = 20;
 
 export class GrainRenderer {
     private superSamplingScale: number = 1;
@@ -44,6 +67,11 @@ export class GrainRenderer {
     private grainSizeUniformLocation: WebGLUniformLocation | null;
     private alphaUniformLocation: WebGLUniformLocation | null;
     private seedUniformLocation: WebGLUniformLocation | null;
+    private colorUniformLocation: WebGLUniformLocation | null;
+    private channelUniformLocation: WebGLUniformLocation | null;
+    private currentTileOffsetUniformLocation: WebGLUniformLocation | null;
+    private textureOverlapScaleUniformLocation: WebGLUniformLocation | null;
+    private textureOverlapOffsetUniformLocation: WebGLUniformLocation | null;
 
     constructor(private resultCanvas: OffscreenCanvas) {
         const gl = this.renderingCanvas.getContext('webgl2');
@@ -94,6 +122,23 @@ export class GrainRenderer {
         );
         this.alphaUniformLocation = gl.getUniformLocation(program, 'u_alpha');
         this.seedUniformLocation = gl.getUniformLocation(program, 'u_seed');
+        this.colorUniformLocation = gl.getUniformLocation(program, 'u_color');
+        this.channelUniformLocation = gl.getUniformLocation(
+            program,
+            'u_channel',
+        );
+        this.currentTileOffsetUniformLocation = gl.getUniformLocation(
+            program,
+            'u_currentTileOffset',
+        );
+        this.textureOverlapScaleUniformLocation = gl.getUniformLocation(
+            program,
+            'u_textureOverlapScale',
+        );
+        this.textureOverlapOffsetUniformLocation = gl.getUniformLocation(
+            program,
+            'u_textureOverlapOffset',
+        );
 
         const imageTextureUniformLocation = gl.getUniformLocation(
             program,
@@ -132,22 +177,51 @@ export class GrainRenderer {
         image: OffscreenCanvas | ImageBitmap,
         params: GrainRenderParameters,
     ): Promise<void> {
+        const seed = this.getSeed(params);
         for (const { width, height, offsetX, offsetY } of this.tiles) {
+            const offsetXPixels = offsetX * width;
+            const offsetYPixels = offsetY * height;
+
             const scaledWidth = width * this.superSamplingScale;
             const scaledHeight = height * this.superSamplingScale;
+
+            const textureOverlapRight =
+                offsetXPixels + width + TEXTURE_OVERLAP > image.width
+                    ? 0
+                    : TEXTURE_OVERLAP;
+            const textureOverlapLeft =
+                offsetXPixels - TEXTURE_OVERLAP < 0 ? 0 : TEXTURE_OVERLAP;
+            const textureOverlapBottom =
+                offsetYPixels + height + TEXTURE_OVERLAP > image.height
+                    ? 0
+                    : TEXTURE_OVERLAP;
+            const textureOverlapTop =
+                offsetYPixels - TEXTURE_OVERLAP < 0 ? 0 : TEXTURE_OVERLAP;
+
+            const textureWidthOverlapped = Math.min(
+                width + textureOverlapLeft + textureOverlapRight,
+                image.width,
+            );
+            const textureHeightOverlapped = Math.min(
+                height + textureOverlapTop + textureOverlapBottom,
+                image.height,
+            );
+
+            const textureScaleX = width / textureWidthOverlapped;
+            const textureScaleY = height / textureHeightOverlapped;
 
             this.renderingCanvas.width = scaledWidth;
             this.renderingCanvas.height = scaledHeight;
 
             const imageBitmap = await createImageBitmap(
                 image,
-                offsetX,
-                offsetY,
-                width,
-                height,
+                offsetXPixels - textureOverlapLeft,
+                offsetYPixels - textureOverlapTop,
+                textureWidthOverlapped,
+                textureHeightOverlapped,
                 {
-                    resizeWidth: width,
-                    resizeHeight: height,
+                    resizeWidth: textureWidthOverlapped,
+                    resizeHeight: textureHeightOverlapped,
                     resizeQuality: 'high',
                 },
             );
@@ -158,55 +232,119 @@ export class GrainRenderer {
 
             this.gl.viewport(0, 0, scaledWidth, scaledHeight);
             this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-            for (const {
-                contrast,
-                sensitivity,
-                grainSize,
-                spawnRate,
-                alpha,
-            } of params.layers) {
-                this.gl.uniform2f(
-                    this.resolutionUniformLocation,
-                    scaledWidth,
-                    scaledHeight,
-                );
-                this.gl.uniform1f(this.contrastUniformLocation, contrast);
-                this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
-                this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
-                this.gl.uniform1f(
-                    this.alphaUniformLocation,
-                    (1 / spawnRate) * alpha,
-                );
 
-                for (let i = 0; i < spawnRate; i++) {
-                    this.gl.uniform1ui(
-                        this.seedUniformLocation,
-                        Math.floor(Math.random() * 1000),
-                    );
-
-                    this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
-                }
-            }
-            await new Promise((resolve) =>
-                requestAnimationFrame(() => resolve(null)),
+            this.gl.uniform2f(
+                this.resolutionUniformLocation,
+                scaledWidth,
+                scaledHeight,
             );
+            this.gl.uniform2f(
+                this.currentTileOffsetUniformLocation,
+                offsetX,
+                offsetY,
+            );
+            this.gl.uniform2f(
+                this.textureOverlapScaleUniformLocation,
+                textureScaleX,
+                textureScaleY,
+            );
+            this.gl.uniform2f(
+                this.textureOverlapOffsetUniformLocation,
+                textureOverlapLeft / width,
+                textureOverlapTop / height,
+            );
+
+            if (params.colorParameters) {
+                await this.renderLayers(
+                    params.layers,
+                    Channel.r,
+                    params.colorParameters.r.dye,
+                    seed,
+                );
+                await this.renderLayers(
+                    params.layers,
+                    Channel.g,
+                    params.colorParameters.g.dye,
+                    seed,
+                );
+                await this.renderLayers(
+                    params.layers,
+                    Channel.b,
+                    params.colorParameters.b.dye,
+                    seed,
+                );
+            } else {
+                await this.renderLayers(
+                    params.layers,
+                    Channel.grayscale,
+                    defaultGrayscaleValue,
+                    seed,
+                );
+            }
+
             imageBitmap.close();
             this.gl.flush();
 
             this.resultCtx.fillRect(
-                offsetX,
-                this.resultCanvas.height - offsetY - height,
+                offsetXPixels,
+                this.resultCanvas.height - offsetYPixels - height,
                 width,
                 height,
             );
             this.resultCtx.drawImage(
                 this.renderingCanvas,
-                offsetX,
-                this.resultCanvas.height - offsetY - height,
+                offsetXPixels,
+                this.resultCanvas.height - offsetYPixels - height,
                 width,
                 height,
             );
         }
+    }
+
+    private getSeed(params: GrainRenderParameters): Seed {
+        const seed = [];
+        for (const layer of params.layers) {
+            const iterations = [];
+            for (let i = 0; i <= layer.spawnRate; i++) {
+                iterations.push(Math.floor(Math.random() * 1000));
+            }
+            seed.push(iterations);
+        }
+        return seed;
+    }
+
+    private async renderLayers(
+        layers: Layer[],
+        channel: Channel,
+        color: Color,
+        seed: Seed,
+    ): Promise<void> {
+        for (let i = 0; i < layers.length; i++) {
+            const { contrast, sensitivity, grainSize, spawnRate, alpha } =
+                layers[i];
+            this.gl.uniform1f(this.contrastUniformLocation, contrast);
+            this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
+            this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
+            this.gl.uniform1f(
+                this.alphaUniformLocation,
+                (1 / spawnRate) * alpha,
+            );
+            this.gl.uniform3f(
+                this.colorUniformLocation,
+                color.r / 255,
+                color.g / 255,
+                color.b / 255,
+            );
+            this.gl.uniform1i(this.channelUniformLocation, channel);
+
+            for (let j = 0; j < spawnRate; j++) {
+                this.gl.uniform1ui(this.seedUniformLocation, seed[i][j]);
+                this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
+            }
+        }
+        await new Promise((resolve) =>
+            requestAnimationFrame(() => resolve(null)),
+        );
     }
 
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
@@ -230,8 +368,8 @@ export class GrainRenderer {
         for (let i = 0; i < widthTilesCount; i++) {
             for (let j = 0; j < heightTilesCount; j++) {
                 this.tiles.push({
-                    offsetX: i * tileWidth,
-                    offsetY: j * tileHeight,
+                    offsetX: i,
+                    offsetY: j,
                     width: tileWidth,
                     height: tileHeight,
                 });

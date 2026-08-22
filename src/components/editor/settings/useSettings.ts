@@ -1,5 +1,5 @@
 import {
-    ColorHSV,
+    Color,
     defaultColors,
     GrainCount,
     GrainSize,
@@ -14,13 +14,11 @@ export function useSettings() {
     const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
     const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.l);
 
-    const [redDyeColor, setRedDyeColor] = useState<ColorHSV>(defaultColors.red);
-    const [greenDyeColor, setGreenDyeColor] = useState<ColorHSV>(
+    const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
+    const [greenDyeColor, setGreenDyeColor] = useState<Color>(
         defaultColors.green,
     );
-    const [blueDyeColor, setBlueDyeColor] = useState<ColorHSV>(
-        defaultColors.blue,
-    );
+    const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
 
     // TODO: пресеты
     const renderParameters: GrainRenderParameters = {
@@ -47,6 +45,14 @@ export function useSettings() {
                 alpha: 0.2,
             },
         ],
+        colorParameters:
+            mode === 'color'
+                ? {
+                      r: { dye: redDyeColor },
+                      g: { dye: greenDyeColor },
+                      b: { dye: blueDyeColor },
+                  }
+                : null,
     };
 
     return {
