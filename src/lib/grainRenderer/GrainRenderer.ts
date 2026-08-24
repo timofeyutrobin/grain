@@ -47,8 +47,8 @@ enum Channel {
 
 const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
 
-const MAX_TILE_WIDTH = 512;
-const MAX_TILE_HEIGHT = 512;
+const MAX_TILE_WIDTH = 256;
+const MAX_TILE_HEIGHT = 256;
 
 const TEXTURE_OVERLAP = 20;
 
@@ -350,11 +350,12 @@ export class GrainRenderer {
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
         const imageWidth = image.width;
         const imageHeight = image.height;
-        if (imageWidth <= 1024 && imageHeight <= 1024) {
+        const imageSize = imageWidth * imageHeight;
+        if (imageSize <= 4000000) {
             this.superSamplingScale = 4;
-        } else if (imageWidth <= 2048 && imageHeight <= 2048) {
+        } else if (imageSize <= 8000000) {
             this.superSamplingScale = 2;
-        } else if (imageWidth <= 8192 && imageHeight <= 8192) {
+        } else if (imageSize <= 32000000) {
             this.superSamplingScale = 1;
         } else {
             throw new Error('Image is too big');
