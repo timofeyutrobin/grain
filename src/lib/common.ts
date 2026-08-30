@@ -16,6 +16,12 @@ export const enum GrainCount {
     l = 3,
 }
 
+export const enum Sharpness {
+    blurry = 1,
+    normal = 2,
+    sharp = 3,
+}
+
 export type PropsWithClassName<T = {}> = { className?: string } & T;
 
 export const FILE_UPLOAD_INPUT_ID = 'upload';

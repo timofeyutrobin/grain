@@ -4,15 +4,23 @@ import {
     GrainCount,
     GrainSize,
     RenderMode,
+    Sharpness,
 } from '@/lib/common';
 import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import { useState } from 'react';
+
+const sharpnessToBlurRadius: Record<Sharpness, number> = {
+    [Sharpness.blurry]: 12,
+    [Sharpness.normal]: 6,
+    [Sharpness.sharp]: 1,
+};
 
 export function useSettings() {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
     const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
     const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.l);
+    const [sharpness, setSharpness] = useState<Sharpness>(Sharpness.normal);
 
     const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
@@ -29,6 +37,7 @@ export function useSettings() {
                 grainSize: 2 * grainSize,
                 spawnRate: grainCount,
                 alpha: 0.1,
+                blurRadius: sharpnessToBlurRadius[sharpness],
             },
             {
                 contrast: 0.5,
@@ -36,6 +45,7 @@ export function useSettings() {
                 grainSize: grainSize,
                 spawnRate: 2 * grainCount,
                 alpha: 0.2,
+                blurRadius: sharpnessToBlurRadius[sharpness],
             },
             {
                 contrast: 1.6,
@@ -43,6 +53,7 @@ export function useSettings() {
                 grainSize: grainSize,
                 spawnRate: 3 * grainCount,
                 alpha: 0.2,
+                blurRadius: sharpnessToBlurRadius[sharpness],
             },
         ],
         colorParameters:
@@ -62,6 +73,8 @@ export function useSettings() {
         setGrainSize,
         grainCount,
         setGrainCount,
+        sharpness,
+        setSharpness,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,

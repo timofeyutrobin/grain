@@ -9,6 +9,7 @@ import {
     GrainCount,
     GrainSize,
     RenderMode,
+    Sharpness,
 } from '@/lib/common';
 import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
 import React from 'react';
@@ -30,6 +31,9 @@ interface SettingsProps {
     grainCount: GrainCount;
     onGrainCountChange: (grainSpreading: GrainCount) => void;
 
+    sharpness: Sharpness;
+    onSharpnessChange: (sharpness: Sharpness) => void;
+
     renderParameters: GrainRenderParameters;
 }
 
@@ -46,13 +50,15 @@ export const Settings: React.FC<SettingsProps> = ({
     onGrainSizeChange,
     grainCount,
     onGrainCountChange,
+    sharpness,
+    onSharpnessChange,
     renderParameters,
 }) => {
     return (
         <>
             <SettingsGroup
                 legend="Микроскоп"
-                hint={<>Показывает структуру зерна под большим увеличением</>}
+                hint="Показывает структуру зерна под большим увеличением"
             >
                 <div className="flex w-full h-full">
                     <div className="m-auto">
@@ -85,14 +91,19 @@ export const Settings: React.FC<SettingsProps> = ({
                     legend="Цвет красителя"
                     hint={
                         <>
-                            Выберите цвет красителя для каждого канала (R, G,
-                            B).
-                            <br />
-                            Выбранные цвета будут использоваться для окраски
-                            зерна
-                            <br />
-                            Для лучшего результата рекомендуется не выставлять
-                            слишком яркий и насыщенный цвет
+                            <p>
+                                {'Выберите цвет красителя для каждого канала.'}
+                            </p>
+                            <p>
+                                {
+                                    'Выбранные цвета будут использоваться для окраски зерна.'
+                                }
+                            </p>
+                            <p>
+                                {
+                                    'Для лучшего результата рекомендуется не выставлять слишком яркий и насыщенный цвет.'
+                                }
+                            </p>
                         </>
                     }
                 >
@@ -132,6 +143,27 @@ export const Settings: React.FC<SettingsProps> = ({
                     step={1}
                     value={grainCount}
                     onChange={onGrainCountChange}
+                />
+            </SettingsGroup>
+            <SettingsGroup
+                legend="Резкость"
+                hint={
+                    <>
+                        <p>
+                            {
+                                'Для достижения реалистичного аналогового эффекта зачастую необходимо снизить резкость картинки.'
+                            }
+                        </p>
+                        <p>{'Данный регулятор позволяет сделать это.'}</p>
+                    </>
+                }
+            >
+                <Range
+                    max={Sharpness.sharp}
+                    min={Sharpness.blurry}
+                    step={1}
+                    value={sharpness}
+                    onChange={onSharpnessChange}
                 />
             </SettingsGroup>
         </>

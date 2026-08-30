@@ -31,7 +31,11 @@ export const SettingsGroup: React.FC<PropsWithChildren<SettingsGroupProps>> = ({
                     </button>
                 )}
             </legend>
-            {isShowed && <div className="text-xs pb-2 px-2">{hint}</div>}
+            {isShowed && (
+                <article className="text-xs p-3 mb-4 *:not-first:mt-2 bg-zinc-900">
+                    {hint}
+                </article>
+            )}
             {children}
         </fieldset>
     );
