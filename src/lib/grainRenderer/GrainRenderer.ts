@@ -14,6 +14,7 @@ export interface Layer {
     grainSize: number;
     spawnRate: number;
     alpha: number;
+    blurRadius: number;
 }
 
 export interface ColorParameters {
@@ -50,7 +51,7 @@ const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
 const MAX_TILE_WIDTH = 256;
 const MAX_TILE_HEIGHT = 256;
 
-const TEXTURE_OVERLAP = 20;
+const TEXTURE_OVERLAP = 30;
 
 export class GrainRenderer {
     private superSamplingScale: number = 1;
@@ -72,6 +73,7 @@ export class GrainRenderer {
     private currentTileOffsetUniformLocation: WebGLUniformLocation | null;
     private textureOverlapScaleUniformLocation: WebGLUniformLocation | null;
     private textureOverlapOffsetUniformLocation: WebGLUniformLocation | null;
+    private blurRadiusUniformLocation: WebGLUniformLocation | null;
 
     constructor(private resultCanvas: OffscreenCanvas) {
         const gl = this.renderingCanvas.getContext('webgl2');
@@ -138,6 +140,10 @@ export class GrainRenderer {
         this.textureOverlapOffsetUniformLocation = gl.getUniformLocation(
             program,
             'u_textureOverlapOffset',
+        );
+        this.blurRadiusUniformLocation = gl.getUniformLocation(
+            program,
+            'u_blurRadius',
         );
 
         const imageTextureUniformLocation = gl.getUniformLocation(
@@ -320,8 +326,14 @@ export class GrainRenderer {
         seed: Seed,
     ): Promise<void> {
         for (let i = 0; i < layers.length; i++) {
-            const { contrast, sensitivity, grainSize, spawnRate, alpha } =
-                layers[i];
+            const {
+                contrast,
+                sensitivity,
+                grainSize,
+                spawnRate,
+                alpha,
+                blurRadius,
+            } = layers[i];
             this.gl.uniform1f(this.contrastUniformLocation, contrast);
             this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
             this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
@@ -336,6 +348,7 @@ export class GrainRenderer {
                 color.b / 255,
             );
             this.gl.uniform1i(this.channelUniformLocation, channel);
+            this.gl.uniform1f(this.blurRadiusUniformLocation, blurRadius);
 
             for (let j = 0; j < spawnRate; j++) {
                 this.gl.uniform1ui(this.seedUniformLocation, seed[i][j]);

@@ -29,6 +29,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         setGrainSize,
         grainCount,
         setGrainCount,
+        sharpness,
+        setSharpness,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,
@@ -63,6 +65,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     onGrainSizeChange={setGrainSize}
                     grainCount={grainCount}
                     onGrainCountChange={setGrainCount}
+                    sharpness={sharpness}
+                    onSharpnessChange={setSharpness}
                     renderParameters={renderParameters}
                 />
             </section>
