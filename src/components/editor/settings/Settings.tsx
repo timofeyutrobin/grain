@@ -1,3 +1,4 @@
+import { Graph } from '@/components/editor/Graph';
 import { Microscope } from '@/components/editor/Microscope';
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
 import { Range } from '@/components/editor/settings/Range';
@@ -11,7 +12,7 @@ import {
     RenderMode,
     Sharpness,
 } from '@/lib/common';
-import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
+import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import React from 'react';
 
 interface SettingsProps {
@@ -34,6 +35,9 @@ interface SettingsProps {
     sharpness: Sharpness;
     onSharpnessChange: (sharpness: Sharpness) => void;
 
+    contrast: number;
+    onContrastChange: (contrast: number) => void;
+
     renderParameters: GrainRenderParameters;
 }
 
@@ -52,24 +56,12 @@ export const Settings: React.FC<SettingsProps> = ({
     onGrainCountChange,
     sharpness,
     onSharpnessChange,
+    contrast,
+    onContrastChange,
     renderParameters,
 }) => {
     return (
         <>
-            <SettingsGroup
-                legend="Микроскоп"
-                hint="Показывает структуру зерна под большим увеличением"
-            >
-                <div className="flex w-full h-full">
-                    <div className="m-auto">
-                        <Microscope
-                            renderParameters={renderParameters}
-                            width={240}
-                            height={240}
-                        />
-                    </div>
-                </div>
-            </SettingsGroup>
             <SettingsGroup legend="Цвет">
                 <Segments name="Цвет">
                     <Segments.Segment
@@ -85,6 +77,29 @@ export const Settings: React.FC<SettingsProps> = ({
                         Цвет
                     </Segments.Segment>
                 </Segments>
+            </SettingsGroup>
+            <SettingsGroup
+                legend="Микроскоп"
+                hint="Показывает структуру зерна под большим увеличением"
+            >
+                <div className="flex w-full h-full">
+                    <Microscope
+                        className="m-auto"
+                        renderParameters={renderParameters}
+                        width={240}
+                        height={240}
+                    />
+                </div>
+            </SettingsGroup>
+            <SettingsGroup legend="Распределение вероятностей">
+                <div className="flex w-full h-full">
+                    <Graph
+                        className="m-auto border-l-2 border-b-2 border-stone-300"
+                        width={240}
+                        height={240}
+                        renderParameters={renderParameters}
+                    />
+                </div>
             </SettingsGroup>
             {mode === 'color' && (
                 <SettingsGroup
@@ -127,6 +142,15 @@ export const Settings: React.FC<SettingsProps> = ({
                     />
                 </SettingsGroup>
             )}
+            <SettingsGroup legend="Контраст">
+                <Range
+                    max={0.9}
+                    min={0.3}
+                    step={0.2}
+                    value={contrast}
+                    onChange={onContrastChange}
+                />
+            </SettingsGroup>
             <SettingsGroup legend="Размер зерна">
                 <Range
                     max={GrainSize.l}

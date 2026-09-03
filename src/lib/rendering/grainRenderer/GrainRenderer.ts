@@ -4,9 +4,9 @@ import {
     createProgram,
     createShader,
     createTexture,
-} from '@/lib/grainRenderer/common';
-import grainFragmentShader from '@/lib/grainRenderer/grain.frag';
-import grainVertexShader from '@/lib/grainRenderer/grain.vert';
+} from '@/lib/rendering/common';
+import grainFragmentShader from '@/lib/rendering/grainRenderer/grain.frag';
+import grainVertexShader from '@/lib/rendering/grainRenderer/grain.vert';
 
 export interface Layer {
     contrast: number;

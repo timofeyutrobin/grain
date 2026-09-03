@@ -3,7 +3,7 @@ import { Logo } from '@/components/editor/Logo';
 import { Settings } from '@/components/editor/settings/Settings';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import { useSettings } from '@/components/editor/settings/useSettings';
-import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
+import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import classNames from 'classnames';
 import { ReactNode } from 'react';
 
@@ -31,6 +31,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         setGrainCount,
         sharpness,
         setSharpness,
+        contrast,
+        setContrast,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,
@@ -67,6 +69,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
                     onGrainCountChange={setGrainCount}
                     sharpness={sharpness}
                     onSharpnessChange={setSharpness}
+                    contrast={contrast}
+                    onContrastChange={setContrast}
                     renderParameters={renderParameters}
                 />
             </section>

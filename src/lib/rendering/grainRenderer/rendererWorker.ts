@@ -1,4 +1,4 @@
-import { GrainRenderer } from '@/lib/grainRenderer/GrainRenderer';
+import { GrainRenderer } from '@/lib/rendering/grainRenderer/GrainRenderer';
 
 let renderer: GrainRenderer | null = null;
 let sourceCanvas: OffscreenCanvas = new OffscreenCanvas(0, 0);

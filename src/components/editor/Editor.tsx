@@ -8,11 +8,11 @@ import { Logo } from '@/components/editor/Logo';
 import { WatchIntroButton } from '@/components/editor/WatchIntroButton';
 import { Intro } from '@/components/intro/Intro';
 import { FILE_UPLOAD_INPUT_ID, isError } from '@/lib/common';
-import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
-import { useRenderWorker } from '@/lib/grainRenderer/useRenderWorker';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
+import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
+import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
