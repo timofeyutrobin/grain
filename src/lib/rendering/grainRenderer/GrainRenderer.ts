@@ -355,10 +355,11 @@ export class GrainRenderer {
                 this.gl.uniform1ui(this.seedUniformLocation, seed[i][j]);
                 this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
             }
+
+            await new Promise((resolve) =>
+                requestAnimationFrame(() => resolve(null)),
+            );
         }
-        await new Promise((resolve) =>
-            requestAnimationFrame(() => resolve(null)),
-        );
     }
 
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
