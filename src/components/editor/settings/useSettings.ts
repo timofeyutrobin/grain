@@ -1,13 +1,34 @@
 import {
     Color,
-    defaultColors,
+    DEFAULT_COLORS,
     GrainCount,
     GrainSize,
     RenderMode,
+    Setter,
     Sharpness,
 } from '@/lib/common';
 import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import { useState } from 'react';
+
+export interface SettingsParameters {
+    mode: RenderMode;
+    setMode: Setter<RenderMode>;
+    grainSize: GrainSize;
+    setGrainSize: Setter<GrainSize>;
+    grainCount: GrainCount;
+    setGrainCount: Setter<GrainCount>;
+    sharpness: Sharpness;
+    setSharpness: Setter<Sharpness>;
+    contrast: number;
+    setContrast: Setter<number>;
+    redDyeColor: Color;
+    setRedDyeColor: Setter<Color>;
+    greenDyeColor: Color;
+    setGreenDyeColor: Setter<Color>;
+    blueDyeColor: Color;
+    setBlueDyeColor: Setter<Color>;
+    renderParameters: GrainRenderParameters;
+}
 
 const sharpnessToBlurRadius: Record<Sharpness, number> = {
     [Sharpness.blurry]: 12,
@@ -15,7 +36,7 @@ const sharpnessToBlurRadius: Record<Sharpness, number> = {
     [Sharpness.sharp]: 1,
 };
 
-export function useSettings() {
+export function useSettings(): SettingsParameters {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
     const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
@@ -23,16 +44,19 @@ export function useSettings() {
     const [sharpness, setSharpness] = useState<Sharpness>(Sharpness.normal);
     const [contrast, setContrast] = useState<number>(0.5);
 
-    const [redDyeColor, setRedDyeColor] = useState<Color>(defaultColors.red);
+    const [redDyeColor, setRedDyeColor] = useState<Color>(DEFAULT_COLORS.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
-        defaultColors.green,
+        DEFAULT_COLORS.green,
     );
-    const [blueDyeColor, setBlueDyeColor] = useState<Color>(defaultColors.blue);
+    const [blueDyeColor, setBlueDyeColor] = useState<Color>(
+        DEFAULT_COLORS.blue,
+    );
 
     // TODO: пресеты
     const renderParameters: GrainRenderParameters = {
         layers: [
             {
+                id: 0,
                 contrast: contrast * 0.5,
                 sensitivity: 0.2,
                 grainSize: 2 * grainSize,
@@ -41,6 +65,7 @@ export function useSettings() {
                 blurRadius: sharpnessToBlurRadius[sharpness],
             },
             {
+                id: 1,
                 contrast,
                 sensitivity: 0.2,
                 grainSize: grainSize,
@@ -49,6 +74,7 @@ export function useSettings() {
                 blurRadius: sharpnessToBlurRadius[sharpness],
             },
             {
+                id: 2,
                 contrast: contrast * 3,
                 sensitivity: 1,
                 grainSize: grainSize,

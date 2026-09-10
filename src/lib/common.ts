@@ -22,15 +22,19 @@ export const enum Sharpness {
     sharp = 3,
 }
 
+export type Setter<T> = (value: T) => void;
+
 export type PropsWithClassName<T = {}> = { className?: string } & T;
 
 export const FILE_UPLOAD_INPUT_ID = 'upload';
 
-export const defaultColors: Record<string, Color> = {
+export const DEFAULT_COLORS: Record<string, Color> = {
     red: { r: 255, g: 50, b: 50 },
     green: { r: 50, g: 255, b: 50 },
     blue: { r: 50, g: 50, b: 255 },
 };
+
+export const PREVIEW_SIZE = 240;
 
 export function isError(value: unknown): value is Error {
     return (

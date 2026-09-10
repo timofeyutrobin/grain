@@ -19,9 +19,9 @@ export const WatchIntroButton: React.FC<
             title="Watch the intro"
             disabled={disabled}
             className={classNames(
-                'w-8',
-                'h-8',
-                'text-2xl',
+                'w-7',
+                'h-7',
+                'text-xl',
                 'text-stone-600',
                 'font-bold',
                 'leading-none',

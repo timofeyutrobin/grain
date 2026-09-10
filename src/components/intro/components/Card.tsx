@@ -9,7 +9,7 @@ export const Card: React.FC<PropsWithChildren<PropsWithClassName>> = ({
     return (
         <section
             className={classNames(
-                'px-8 py-6 bg-zinc-800 md:border md:border-zinc-300 md:bg-zinc-800/60 md:backdrop-blur-lg',
+                'px-8 py-6 bg-zinc-800 md:border md:border-zinc-200 md:bg-zinc-800/60 md:backdrop-blur-lg',
                 className,
             )}
         >

@@ -6,13 +6,7 @@ import {
 import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import graphFragmentShader from '@/lib/rendering/graphRenderer/graph.frag';
 import graphVertexShader from '@/lib/rendering/graphRenderer/graph.vert';
-
-const colorsForLayers: [number, number, number][] = [
-    [0.4196078431372549, 0.12941176470588237, 0.6588235294117647],
-    [0.023529411764705882, 0.37254901960784315, 0.27450980392156865],
-    [0.7058823529411765, 0.3254901960784314, 0.03529411764705882],
-    [0.7450980392156863, 0.07058823529411765, 0.23529411764705882],
-];
+import { getColorForLayer } from '@/lib/rendering/graphRenderer/graphColors';
 
 export class GraphRenderer {
     private gl: WebGL2RenderingContext;
@@ -68,11 +62,14 @@ export class GraphRenderer {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         params.layers.forEach((layer, index) => {
             const { contrast, sensitivity } = layer;
+            const color = getColorForLayer(index);
             this.gl.uniform1f(this.contrastUniformLocation, contrast);
             this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
             this.gl.uniform3f(
                 this.colorUniformLocation,
-                ...colorsForLayers[index % colorsForLayers.length],
+                color.r,
+                color.g,
+                color.b,
             );
             this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
         });

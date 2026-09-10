@@ -79,7 +79,7 @@ const text = [
                 <p className="md:flex md:items-center md:justify-around">
                     <Image
                         src="/images/formula.svg"
-                        alt="Probability function"
+                        alt="probability formula"
                         width={300}
                         height={55}
                     />
