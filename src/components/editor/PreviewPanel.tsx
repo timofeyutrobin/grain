@@ -67,7 +67,7 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                     </div>
                     <i className="block text-sm mt-2 mb-4 md:text-sm not-italic">
                         a — контраст
-                        <br />b — чувствительность
+                        <br />b — обратная чувствительность
                     </i>
                     <section className="flex w-full h-full">
                         <Graph

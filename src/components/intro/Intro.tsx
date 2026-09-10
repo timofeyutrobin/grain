@@ -85,7 +85,7 @@ const text = [
                     />
                     <span className="block text-sm mt-2 md:text-lg">
                         a — контраст
-                        <br />b — чувствительность
+                        <br />b — обратная чувствительность
                     </span>
                 </p>
             </>
