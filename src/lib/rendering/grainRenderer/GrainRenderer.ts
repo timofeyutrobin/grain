@@ -4,11 +4,12 @@ import {
     createProgram,
     createShader,
     createTexture,
-} from '@/lib/grainRenderer/common';
-import grainFragmentShader from '@/lib/grainRenderer/grain.frag';
-import grainVertexShader from '@/lib/grainRenderer/grain.vert';
+} from '@/lib/rendering/common';
+import grainFragmentShader from '@/lib/rendering/grainRenderer/grain.frag';
+import grainVertexShader from '@/lib/rendering/grainRenderer/grain.vert';
 
 export interface Layer {
+    id: number;
     contrast: number;
     sensitivity: number;
     grainSize: number;
@@ -354,10 +355,11 @@ export class GrainRenderer {
                 this.gl.uniform1ui(this.seedUniformLocation, seed[i][j]);
                 this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
             }
+
+            await new Promise((resolve) =>
+                requestAnimationFrame(() => resolve(null)),
+            );
         }
-        await new Promise((resolve) =>
-            requestAnimationFrame(() => resolve(null)),
-        );
     }
 
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {

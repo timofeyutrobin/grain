@@ -44,7 +44,7 @@ export const Greeting: React.FC = () => {
             }}
         >
             <div className="flex w-full h-full">
-                <article className="mt-auto w-full text-sm space-y-1.5 md:m-auto md:mt-64 md:max-w-2xl py-6 px-8 md:border md:border-zinc-300 bg-zinc-800 text-zinc-50 md:text-base">
+                <article className="mt-auto w-full text-sm space-y-1.5 md:m-auto md:mt-64 md:max-w-2xl py-6 px-8 md:border md:border-zinc-200 bg-zinc-800 text-zinc-50 md:text-base">
                     <p>Привет!</p>
                     <p>
                         Добро пожаловать в{' '}

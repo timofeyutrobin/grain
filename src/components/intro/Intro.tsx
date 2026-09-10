@@ -79,13 +79,13 @@ const text = [
                 <p className="md:flex md:items-center md:justify-around">
                     <Image
                         src="/images/formula.svg"
-                        alt="Probability function"
+                        alt="probability formula"
                         width={300}
                         height={55}
                     />
                     <span className="block text-sm mt-2 md:text-lg">
                         a — контраст
-                        <br />b — чувствительность
+                        <br />b — обратная чувствительность
                     </span>
                 </p>
             </>

@@ -5,26 +5,29 @@ import { Background } from '@/components/editor/Background';
 import { ControlPanel } from '@/components/editor/ControlPanel';
 import { Greeting } from '@/components/editor/Greeting';
 import { Logo } from '@/components/editor/Logo';
-import { WatchIntroButton } from '@/components/editor/WatchIntroButton';
+import { PreviewPanel } from '@/components/editor/PreviewPanel';
+import { useSettings } from '@/components/editor/settings/useSettings';
 import { Intro } from '@/components/intro/Intro';
-import { FILE_UPLOAD_INPUT_ID, isError } from '@/lib/common';
-import { GrainRenderParameters } from '@/lib/grainRenderer/GrainRenderer';
-import { useRenderWorker } from '@/lib/grainRenderer/useRenderWorker';
+import { FILE_UPLOAD_INPUT_ID, isError, PREVIEW_SIZE } from '@/lib/common';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
+import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
+import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
-import { ChangeEventHandler, useRef, useState } from 'react';
+import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
 
 function Editor() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
 
     const [controlPanelOpen, setControlPanelOpen] = useState(false);
+    const [previewPanelOpen, setPreviewPanelOpen] = useState(false);
+    const settings = useSettings();
 
     const [loading, setLoading] = useState(false);
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const resultCanvasRef = useRef<HTMLCanvasElement>(null);
 
     const [downloadUrl, setDownloadUrl] = useState<string>('');
 
@@ -32,11 +35,19 @@ function Editor() {
     const [imageSize, setImageSize] = useState<
         [width: number, height: number] | null
     >(null);
+    const [previewImage, setPreviewImage] = useState<ImageBitmap | null>();
+
+    useEffect(
+        () => () => {
+            previewImage?.close();
+        },
+        [previewImage],
+    );
 
     const renderWorker = useRenderWorker((worker) => {
         try {
             const resultCanvas =
-                canvasRef.current?.transferControlToOffscreen();
+                resultCanvasRef.current?.transferControlToOffscreen();
             if (!resultCanvas) {
                 return;
             }
@@ -85,8 +96,24 @@ function Editor() {
             const image = await createImageBitmap(file, {
                 imageOrientation: 'flipY',
             });
-            setImageSize([image.width, image.height]);
+            const width = image.width;
+            const height = image.height;
+            setImageSize([width, height]);
             renderWorker.postMessage({ type: 'setImage', image }, [image]);
+            setPreviewImage(
+                await createImageBitmap(
+                    file,
+                    Math.max(width / 2 - PREVIEW_SIZE / 2, 0),
+                    Math.max(height / 2 - PREVIEW_SIZE / 2, 0),
+                    Math.min(PREVIEW_SIZE, width),
+                    Math.min(PREVIEW_SIZE, height),
+                    {
+                        imageOrientation: 'flipY',
+                        resizeWidth: PREVIEW_SIZE,
+                        resizeHeight: PREVIEW_SIZE,
+                    },
+                ),
+            );
             image.close();
         }
     };
@@ -127,7 +154,7 @@ function Editor() {
             <Greeting />
             <main
                 className={classNames(
-                    'flex flex-col fixed top-0 left-0 w-full h-full max-h-full md:pl-96',
+                    'fixed top-0 left-0 w-full h-full max-h-full md:pl-96 xl:pr-96 flex flex-col items-center',
                     {
                         invisible:
                             welcomeIntroState !==
@@ -135,21 +162,15 @@ function Editor() {
                     },
                 )}
             >
-                <header className="z-10 w-full flex justify-center md:hidden px-4 pt-10">
+                <header className="md:hidden m-auto px-4 pt-10">
                     <Logo className="max-w-sm" />
                 </header>
-                <div
-                    className={classNames(
-                        'max-w-full h-full overflow-y-scroll flex flex-col items-center m-auto p-4',
-                    )}
-                >
+                <div className="w-full min-h-0 flex-1 flex p-6">
                     <canvas
-                        className="max-w-full max-h-[720px]"
-                        ref={canvasRef}
+                        className="max-w-full max-h-full m-auto"
+                        ref={resultCanvasRef}
                     />
-                    <div className="hidden mt-4 md:block">{downloadButton}</div>
                 </div>
-                <WatchIntroButton className="shrink-0 self-start m-4" />
                 <footer className="md:hidden w-full p-4 bg-zinc-800">
                     {fileInfo && <div className="w-full mb-2">{fileInfo}</div>}
                     {downloadButton && (
@@ -171,6 +192,7 @@ function Editor() {
                 </footer>
             </main>
             <ControlPanel
+                settings={settings}
                 className={classNames(
                     'z-20',
                     'fixed',
@@ -197,6 +219,30 @@ function Editor() {
                 onDevelop={handleDevelop}
                 onClose={() => setControlPanelOpen(false)}
                 disabled={loading || !fileName}
+                downloadButton={downloadButton}
+            />
+            <PreviewPanel
+                open={previewPanelOpen}
+                className={classNames(
+                    'z-20',
+                    'fixed',
+                    'top-0',
+                    'right-0',
+                    'w-full',
+                    'md:w-96',
+                    'h-full',
+                    'transition-transform',
+                    'duration-500',
+                    welcomeIntroState !==
+                        WelcomeIntroState.TOUR_STATE_INTRO_SEEN
+                        ? 'translate-x-full xl:translate-x-full'
+                        : previewPanelOpen
+                          ? 'translate-0'
+                          : 'translate-x-full xl:translate-0',
+                )}
+                renderParameters={settings.renderParameters}
+                image={previewImage}
+                toggleOpen={() => setPreviewPanelOpen((open) => !open)}
             />
             {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                 <Intro
