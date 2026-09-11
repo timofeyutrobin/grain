@@ -1,0 +1,11 @@
+{
+    "name": "Emulsion Engine",
+    "short_name": "Emulsion",
+    "description": "An interactive editor for exploring photographic film grain and emulsion.",
+    "categories": ["photo"],
+    "start_url": "/",
+    "scope": "/",
+    "display": "standalone",
+    "background_color": "oklch(27.4% 0.006 286.033)",
+    "theme_color": "oklch(27.4% 0.006 286.033)"
+}
