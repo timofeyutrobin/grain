@@ -289,6 +289,7 @@ export class GrainRenderer {
                 );
             }
 
+            this.gl.deleteTexture(imageTexture);
             imageBitmap.close();
             this.gl.flush();
 
