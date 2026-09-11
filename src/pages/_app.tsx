@@ -7,6 +7,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <>
             <Head>
                 <link rel="manifest" href="/manifest.json" />
+                <title>Emulsion Engine</title>
             </Head>
             <Component {...pageProps} />
         </>
