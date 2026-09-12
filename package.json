@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "@react-three/fiber": "9.6.1",
+        "@sentry/nextjs": "10.74.0",
         "classnames": "2.5.1",
         "colord": "2.9.3",
         "jotai": "2.20.1",
