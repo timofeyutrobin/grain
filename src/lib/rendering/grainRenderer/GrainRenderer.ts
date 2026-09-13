@@ -370,9 +370,9 @@ export class GrainRenderer {
         if (imageSize <= 4000000) {
             this.superSamplingScale = 4;
         } else if (imageSize <= 24000000) {
-            this.superSamplingScale = 3;
-        } else if (imageSize <= 32000000) {
             this.superSamplingScale = 2;
+        } else if (imageSize <= 32000000) {
+            this.superSamplingScale = 1;
         } else {
             throw new Error('Image is too big');
         }
