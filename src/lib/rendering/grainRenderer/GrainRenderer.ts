@@ -369,7 +369,7 @@ export class GrainRenderer {
         const imageSize = imageWidth * imageHeight;
         if (imageSize <= 4000000) {
             this.superSamplingScale = 4;
-        } else if (imageSize <= 24000000) {
+        } else if (imageSize <= 12000000) {
             this.superSamplingScale = 2;
         } else if (imageSize <= 32000000) {
             this.superSamplingScale = 1;
