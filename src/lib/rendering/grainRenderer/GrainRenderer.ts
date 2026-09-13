@@ -76,7 +76,7 @@ export class GrainRenderer {
     private textureOverlapOffsetUniformLocation: WebGLUniformLocation | null;
     private blurRadiusUniformLocation: WebGLUniformLocation | null;
 
-    constructor(private resultCanvas: OffscreenCanvas) {
+    constructor(private resultCanvas = new OffscreenCanvas(0, 0)) {
         const gl = this.renderingCanvas.getContext('webgl2');
         if (!gl) {
             throw new Error('WebGL2 is not available');
@@ -167,8 +167,12 @@ export class GrainRenderer {
         this.resultCanvas.height = height;
     }
 
-    async getImage(): Promise<Blob> {
+    async getImageBlob(): Promise<Blob> {
         return this.resultCanvas.convertToBlob({ type: 'image/png' });
+    }
+
+    getImageBitmap(): ImageBitmap {
+        return this.resultCanvas.transferToImageBitmap();
     }
 
     async render(
