@@ -1,4 +1,7 @@
 import { GrainRenderer } from '@/lib/rendering/grainRenderer/GrainRenderer';
+import * as Sentry from '@sentry/browser';
+
+Sentry.registerWebWorker({ self });
 
 let renderer: GrainRenderer | null = null;
 let sourceCanvas: OffscreenCanvas = new OffscreenCanvas(0, 0);
