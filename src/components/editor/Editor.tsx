@@ -8,7 +8,7 @@ import { Logo } from '@/components/editor/Logo';
 import { PreviewPanel } from '@/components/editor/PreviewPanel';
 import { useSettings } from '@/components/editor/settings/useSettings';
 import { Intro } from '@/components/intro/Intro';
-import { FILE_UPLOAD_INPUT_ID, isError, PREVIEW_SIZE } from '@/lib/common';
+import { FILE_UPLOAD_INPUT_ID, PREVIEW_SIZE } from '@/lib/common';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
@@ -45,38 +45,36 @@ function Editor() {
     );
 
     const renderWorker = useRenderWorker((worker) => {
-        try {
-            const resultCanvas =
-                resultCanvasRef.current?.transferControlToOffscreen();
-            if (!resultCanvas) {
-                return;
-            }
-            worker.postMessage(
-                { type: 'create', resultCanvas },
-                { transfer: [resultCanvas] },
-            );
-            worker.addEventListener('message', (event) => {
-                switch (event.data.type) {
-                    case 'ready':
-                        worker.postMessage({ type: 'getBlob' });
-                        break;
-                    case 'blobReady':
-                        const blob: Blob = event.data.blob;
-                        const url = URL.createObjectURL(blob);
-                        setDownloadUrl(url);
-                        setLoading(false);
-                        break;
+        worker.postMessage({ type: 'create' });
+        worker.addEventListener('message', (event) => {
+            switch (event.data.type) {
+                case 'ready': {
+                    const canvas = resultCanvasRef.current;
+                    const blob: Blob = event.data.blob;
+                    const image: ImageBitmap = event.data.imageBitmap;
+                    if (canvas) {
+                        canvas.width = image.width;
+                        canvas.height = image.height;
+                        canvas
+                            .getContext('bitmaprenderer')
+                            ?.transferFromImageBitmap(image);
+                    }
+                    image.close();
+
+                    const url = URL.createObjectURL(blob);
+                    setDownloadUrl(url);
+                    setLoading(false);
+                    break;
                 }
-            });
-        } catch (err) {
-            if (isError(err) && err.name === 'InvalidStateError') {
-                return;
             }
-            throw err;
-        }
+        });
     });
 
     const handleDevelop = async (renderParameters: GrainRenderParameters) => {
+        if (!renderWorker) {
+            return;
+        }
+
         setLoading(true);
         setControlPanelOpen(false);
         URL.revokeObjectURL(downloadUrl);
@@ -90,6 +88,10 @@ function Editor() {
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
         e,
     ) => {
+        if (!renderWorker) {
+            return;
+        }
+
         if (e.target.files?.[0]) {
             const file = e.target.files[0];
             setFileName(file.name);
@@ -114,12 +116,15 @@ function Editor() {
                     },
                 ),
             );
-            image.close();
         }
     };
 
     const fileInputLabel = (
-        <ButtonLabel className="w-full" small htmlFor={FILE_UPLOAD_INPUT_ID}>
+        <ButtonLabel
+            className={classNames('w-full', { 'pointer-events-none': loading })}
+            small
+            htmlFor={FILE_UPLOAD_INPUT_ID}
+        >
             Открыть&nbsp;изображение
         </ButtonLabel>
     );
@@ -149,6 +154,7 @@ function Editor() {
                 className="hidden"
                 type="file"
                 onChange={handleFileChange}
+                disabled={loading}
             />
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />

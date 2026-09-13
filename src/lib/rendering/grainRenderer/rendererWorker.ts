@@ -1,7 +1,9 @@
 import { GrainRenderer } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import * as Sentry from '@sentry/browser';
 
-Sentry.registerWebWorker({ self });
+if (process.env.NODE_ENV === 'production') {
+    Sentry.registerWebWorker({ self });
+}
 
 let renderer: GrainRenderer | null = null;
 let sourceCanvas: OffscreenCanvas = new OffscreenCanvas(0, 0);
@@ -13,7 +15,7 @@ self.addEventListener('message', async (event) => {
             if (renderer) {
                 break;
             }
-            renderer = new GrainRenderer(event.data.resultCanvas);
+            renderer = new GrainRenderer();
             break;
         case 'setImage':
             if (!renderer || !sourceCanvasCtx) {
@@ -32,14 +34,12 @@ self.addEventListener('message', async (event) => {
                 sourceCanvas.height,
             );
             await renderer.render(sourceCanvas, event.data.params);
-            postMessage({ type: 'ready' });
-            break;
-        case 'getBlob':
-            if (!renderer) {
-                break;
-            }
-            const blob = await renderer.getImage();
-            postMessage({ type: 'blobReady', blob });
+            const blob = await renderer.getImageBlob();
+            const imageBitmap = renderer.getImageBitmap();
+            postMessage(
+                { type: 'ready', blob, imageBitmap },
+                { transfer: [imageBitmap] },
+            );
             break;
     }
 });
