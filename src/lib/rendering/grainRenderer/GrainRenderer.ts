@@ -47,6 +47,10 @@ enum Channel {
     b,
 }
 
+export interface GrainRendererOptions {
+    enableTiles?: boolean;
+}
+
 const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
 
 const MAX_TILE_WIDTH = 256;
@@ -178,10 +182,24 @@ export class GrainRenderer {
     async render(
         image: OffscreenCanvas | ImageBitmap,
         params: GrainRenderParameters,
+        options: GrainRendererOptions = { enableTiles: true },
     ): Promise<void> {
-        this.prepareTiles(image);
-        await this.renderTiles(image, params);
+        this.superSamplingScale = 1;
         this.tiles = [];
+        this.calculateSuperSamplingScale(image);
+
+        if (options?.enableTiles) {
+            this.prepareTiles(image);
+        } else {
+            this.tiles.push({
+                offsetX: 0,
+                offsetY: 0,
+                width: image.width,
+                height: image.height,
+            });
+        }
+
+        await this.renderTiles(image, params);
     }
 
     private async renderTiles(
@@ -370,19 +388,13 @@ export class GrainRenderer {
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
         const imageWidth = image.width;
         const imageHeight = image.height;
-        const imageSize = imageWidth * imageHeight;
-        if (imageSize <= 4000000) {
-            this.superSamplingScale = 4;
-        } else if (imageSize <= 12000000) {
-            this.superSamplingScale = 2;
-        } else if (imageSize <= 32000000) {
-            this.superSamplingScale = 1;
-        } else {
-            throw new Error('Image is too big');
-        }
 
-        const widthTilesCount = Math.ceil(imageWidth / MAX_TILE_WIDTH);
-        const heightTilesCount = Math.ceil(imageHeight / MAX_TILE_HEIGHT);
+        const widthTilesCount = Math.ceil(
+            imageWidth / (MAX_TILE_WIDTH / this.superSamplingScale),
+        );
+        const heightTilesCount = Math.ceil(
+            imageHeight / (MAX_TILE_HEIGHT / this.superSamplingScale),
+        );
         const tileWidth = Math.floor(imageWidth / widthTilesCount);
         const tileHeight = Math.floor(imageHeight / heightTilesCount);
 
@@ -395,6 +407,23 @@ export class GrainRenderer {
                     height: tileHeight,
                 });
             }
+        }
+    }
+
+    private calculateSuperSamplingScale(
+        image: OffscreenCanvas | ImageBitmap,
+    ): void {
+        const imageWidth = image.width;
+        const imageHeight = image.height;
+        const imageSize = imageWidth * imageHeight;
+        if (imageSize <= 4000000) {
+            this.superSamplingScale = 4;
+        } else if (imageSize <= 12000000) {
+            this.superSamplingScale = 2;
+        } else if (imageSize <= 32000000) {
+            this.superSamplingScale = 1;
+        } else {
+            throw new Error('Image is too big');
         }
     }
 }

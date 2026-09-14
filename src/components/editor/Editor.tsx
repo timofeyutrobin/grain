@@ -4,6 +4,7 @@ import { ButtonLabel } from '@/components/button/ButtonLabel';
 import { Background } from '@/components/editor/Background';
 import { ControlPanel } from '@/components/editor/ControlPanel';
 import { Greeting } from '@/components/editor/Greeting';
+import { LoadingSpinner } from '@/components/editor/LoadingSpinner';
 import { Logo } from '@/components/editor/Logo';
 import { PreviewPanel } from '@/components/editor/PreviewPanel';
 import { useSettings } from '@/components/editor/settings/useSettings';
@@ -171,11 +172,17 @@ function Editor() {
                 <header className="md:hidden m-auto px-4 pt-10">
                     <Logo className="max-w-sm" />
                 </header>
-                <div className="w-full min-h-0 flex-1 flex p-6">
+                <div className="relative w-full min-h-0 flex-1 flex p-6">
                     <canvas
-                        className="max-w-full max-h-full m-auto"
+                        className={classNames(
+                            'max-w-full max-h-full m-auto transition-[filter]',
+                            loading && 'brightness-25 blur-sm',
+                        )}
                         ref={resultCanvasRef}
                     />
+                    {loading && (
+                        <LoadingSpinner className="absolute inset-0 m-auto" />
+                    )}
                 </div>
                 <footer className="md:hidden w-full p-4 bg-zinc-800">
                     {fileInfo && <div className="w-full mb-2">{fileInfo}</div>}
