@@ -81,8 +81,12 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
         }
 
         const timer = window.setTimeout(() => {
-            renderer.render(image ?? sampleImage, renderParameters);
-            scaledRenderer.render(scaledImage, magnifyGrain(renderParameters));
+            renderer.render(image ?? sampleImage, renderParameters, {
+                enableTiles: false,
+            });
+            scaledRenderer.render(scaledImage, magnifyGrain(renderParameters), {
+                enableTiles: false,
+            });
         }, 200);
 
         return () => {
