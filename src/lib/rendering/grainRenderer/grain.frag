@@ -87,9 +87,8 @@ float grainExposure(vec2 textureUV, int channel) {
 
 vec3 grainColor(float size, float dist) {
   float grainCenterDensity = smoothstep(size * 0.1f, size, dist);
-  float grainInnerNoise = vec2(pcg2d(uvec2(vUV * u_resolution))).x / float(uint(0xffffffff));
 
-  return u_color * (1.5f - grainCenterDensity) + (grainInnerNoise * 0.2f - 0.1f);
+  return u_color * (1.5f - grainCenterDensity);
 }
 
 void main() {

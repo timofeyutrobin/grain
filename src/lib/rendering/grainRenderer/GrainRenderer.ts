@@ -53,8 +53,8 @@ export interface GrainRendererOptions {
 
 const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };
 
-const MAX_TILE_WIDTH = 256;
-const MAX_TILE_HEIGHT = 256;
+const MAX_TILE_WIDTH = 512;
+const MAX_TILE_HEIGHT = 512;
 
 const TEXTURE_OVERLAP = 30;
 
