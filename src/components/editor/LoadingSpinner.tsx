@@ -1,111 +1,30 @@
-import { PropsWithClassName, radians } from '@/lib/common';
-import classNames from 'classnames';
-
-const goldenRatio = (1 + Math.sqrt(5)) / 2;
-const inverseGoldenRatio = 1 / goldenRatio;
-
-const vertices = [
-    ...[-1, 1].flatMap((x) =>
-        [-1, 1].flatMap((y) => [-1, 1].map((z) => ({ x, y, z }))),
-    ),
-    ...[-1, 1].flatMap((y) =>
-        [-1, 1].flatMap((z) => [
-            { x: 0, y: y * inverseGoldenRatio, z: z * goldenRatio },
-        ]),
-    ),
-    ...[-1, 1].flatMap((x) =>
-        [-1, 1].map((z) => ({
-            x: x * inverseGoldenRatio,
-            y: z * goldenRatio,
-            z: 0,
-        })),
-    ),
-    ...[-1, 1].flatMap((x) =>
-        [-1, 1].map((z) => ({
-            x: x * goldenRatio,
-            y: 0,
-            z: z * inverseGoldenRatio,
-        })),
-    ),
-];
-
-const projectVertex = ({ x, y, z }: (typeof vertices)[number]) => ({
-    x: 50 + (x - y) * 15,
-    y: 50 + (x + y) * 7 - z * 19,
-});
-
-const rotateVertex = (
-    { x, y, z }: (typeof vertices)[number],
-    angle: number,
-) => {
-    const cos = Math.cos(radians(angle));
-    const sin = Math.sin(radians(angle));
-    const rotatedX = x * cos + z * sin;
-    const rotatedZ = -x * sin + z * cos;
-
-    return projectVertex({
-        x: rotatedX,
-        y: y * cos - rotatedZ * sin,
-        z: y * sin + rotatedZ * cos,
-    });
-};
-
-const edgeLength = 2 * inverseGoldenRatio;
-const edges = vertices.flatMap((sourceVertex, sourceIndex) =>
-    vertices.slice(sourceIndex + 1).flatMap((targetVertex, targetOffset) => {
-        const distance = Math.sqrt(
-            (sourceVertex.x - targetVertex.x) ** 2 +
-                (sourceVertex.y - targetVertex.y) ** 2 +
-                (sourceVertex.z - targetVertex.z) ** 2,
-        );
-
-        return Math.abs(distance - edgeLength) < 0.001
-            ? [[sourceIndex, sourceIndex + targetOffset + 1]]
-            : [];
-    }),
-);
-const animationAngles = Array.from(
-    { length: 25 },
-    (_, index) => (index * 360) / 24,
-);
-const animationFrames = animationAngles.map((angle) =>
-    vertices.map((vertex) => rotateVertex(vertex, angle)),
-);
-const createPath = (frame: ReturnType<typeof projectVertex>[]) =>
-    edges
-        .map(([sourceIndex, targetIndex]) => {
-            const sourceVertex = frame[sourceIndex];
-            const targetVertex = frame[targetIndex];
-
-            return `M ${sourceVertex.x.toFixed(3)} ${sourceVertex.y.toFixed(3)} L ${targetVertex.x.toFixed(3)} ${targetVertex.y.toFixed(3)}`;
-        })
-        .join(' ');
-const animationPathValues = animationFrames.map(createPath).join(';');
+import { PropsWithClassName } from '@/lib/common';
 
 export const LoadingSpinner: React.FC<PropsWithClassName> = ({ className }) => {
     return (
         <svg
-            className={classNames('h-32 w-32 stroke-stone-400/30', className)}
+            className="h-32 w-32 stroke-stone-400/30 absolute inset-0 m-auto"
             fill="none"
             role="img"
             viewBox="0 0 100 115"
         >
             <path
-                d={createPath(animationFrames[0])}
+                d="M50,55L59.27,76.42 M50,55L65,34.35 M50,55L25.73,50.42 M50,17L59.27,14.93 M50,17L65,34.35 M50,17L25.73,26.93 M20,69L40.73,85.07 M20,69L16.46,57 M20,69L25.73,50.42 M20,31L40.73,23.58 M20,31L16.46,57 M20,31L25.73,26.93 M80,69L59.27,76.42 M80,69L83.54,43 M80,69L74.27,73.07 M80,31L59.27,14.93 M80,31L83.54,43 M80,31L74.27,49.58 M50,83L40.73,85.07 M50,83L35,65.65 M50,83L74.27,73.07 M50,45L40.73,23.58 M50,45L35,65.65 M50,45L74.27,49.58 M59.27,76.42L40.73,85.07 M59.27,14.93L40.73,23.58 M65,34.35L83.54,43 M16.46,57L35,65.65 M25.73,50.42L25.73,26.93 M74.27,73.07L74.27,49.58"
                 strokeLinecap="round"
                 strokeWidth="1"
             >
-                <animate
-                    attributeName="d"
-                    calcMode="linear"
+                <animateTransform
+                    attributeName="transform"
                     dur="8s"
+                    from="0 50 50"
                     repeatCount="indefinite"
-                    values={animationPathValues}
-                />
+                    to="360 50 50"
+                    type="rotate"
+                ></animateTransform>
             </path>
             <text
-                x={50}
-                y={105}
+                x="50"
+                y="105"
                 stroke="none"
                 textAnchor="middle"
                 className="text-sm fill-stone-400/50"
