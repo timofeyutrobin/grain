@@ -5,7 +5,7 @@ import {
 } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import classNames from 'classnames';
 import Image from 'next/image';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const SCALE = 10;
 function magnifyGrain(
@@ -42,6 +42,14 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
         null,
     );
 
+    const isRendering = useRef<boolean>(false);
+    const renderVersion = useRef(0);
+    const [renderSignal, setRenderSignal] = useState(0);
+
+    useEffect(() => {
+        renderVersion.current += 1;
+    }, [renderParameters, image, scaledImage]);
+
     useEffect(() => {
         if (!image) {
             return;
@@ -76,23 +84,50 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
     );
 
     useEffect(() => {
-        if (!renderer || !sampleImage || !scaledRenderer || !scaledImage) {
+        if (
+            !renderer ||
+            !sampleImage ||
+            !scaledRenderer ||
+            !scaledImage ||
+            isRendering.current
+        ) {
             return;
         }
 
-        const timer = window.setTimeout(() => {
-            renderer.render(image ?? sampleImage, renderParameters, {
-                enableTiles: false,
-            });
-            scaledRenderer.render(scaledImage, magnifyGrain(renderParameters), {
-                enableTiles: false,
-            });
-        }, 200);
+        isRendering.current = true;
 
-        return () => {
-            window.clearTimeout(timer);
-        };
-    }, [renderParameters, renderer, sampleImage, image, scaledImage]);
+        const previousRenderVersion = renderVersion.current;
+
+        const renderPromise = renderer.render(
+            image ?? sampleImage,
+            renderParameters,
+            {
+                enableTiles: false,
+            },
+        );
+        const scaledRenderPromise = scaledRenderer.render(
+            scaledImage,
+            magnifyGrain(renderParameters),
+            {
+                enableTiles: false,
+            },
+        );
+
+        Promise.all([renderPromise, scaledRenderPromise]).finally(() => {
+            isRendering.current = false;
+
+            if (renderVersion.current !== previousRenderVersion) {
+                setRenderSignal((signal) => signal + 1);
+            }
+        });
+    }, [
+        renderParameters,
+        renderer,
+        sampleImage,
+        image,
+        scaledImage,
+        renderSignal,
+    ]);
 
     return (
         <div className={classNames('relative', className)}>
