@@ -11,13 +11,14 @@ let sourceCanvasCtx = sourceCanvas.getContext('2d');
 
 self.addEventListener('message', async (event) => {
     switch (event.data.type) {
-        case 'create':
+        case 'create': {
             if (renderer) {
                 break;
             }
             renderer = new GrainRenderer();
             break;
-        case 'setImage':
+        }
+        case 'setImage': {
             if (!renderer || !sourceCanvasCtx) {
                 break;
             }
@@ -25,7 +26,8 @@ self.addEventListener('message', async (event) => {
             sourceCanvas.height = event.data.image.height;
             sourceCanvasCtx.drawImage(event.data.image, 0, 0);
             break;
-        case 'render':
+        }
+        case 'render': {
             if (!renderer) {
                 break;
             }
@@ -41,5 +43,11 @@ self.addEventListener('message', async (event) => {
                 { transfer: [imageBitmap] },
             );
             break;
+        }
+        default: {
+            throw new SyntaxError(
+                'Unknown message type passed to rendererWorker.',
+            );
+        }
     }
 });

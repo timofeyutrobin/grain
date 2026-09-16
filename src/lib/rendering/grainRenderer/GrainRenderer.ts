@@ -57,6 +57,16 @@ const MAX_TILE_WIDTH = 512;
 const MAX_TILE_HEIGHT = 512;
 
 const TEXTURE_OVERLAP = 30;
+const GPU_IDLE_DELAY_MS = 4;
+
+export class GrainRendererError extends Error {}
+
+export class GrainRendererGPUSyncError extends GrainRendererError {
+    constructor(message?: string) {
+        super(message);
+        this.name = 'GrainRendererGPUSyncError';
+    }
+}
 
 export class GrainRenderer {
     private superSamplingScale: number = 1;
@@ -155,7 +165,6 @@ export class GrainRenderer {
             program,
             'u_imageTexture',
         );
-        gl.deleteProgram(program);
 
         gl.uniform1i(imageTextureUniformLocation, 0);
 
@@ -313,7 +322,6 @@ export class GrainRenderer {
 
             this.gl.deleteTexture(imageTexture);
             imageBitmap.close();
-            this.gl.flush();
 
             this.resultCtx.fillRect(
                 offsetXPixels,
@@ -335,7 +343,7 @@ export class GrainRenderer {
         const seed = [];
         for (const layer of params.layers) {
             const iterations = [];
-            for (let i = 0; i <= layer.spawnRate; i++) {
+            for (let i = 0; i < layer.spawnRate; i++) {
                 iterations.push(Math.floor(Math.random() * 1000));
             }
             seed.push(iterations);
@@ -378,11 +386,47 @@ export class GrainRenderer {
                 this.gl.uniform1ui(this.seedUniformLocation, seed[i][j]);
                 this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
             }
-
-            await new Promise((resolve) =>
-                requestAnimationFrame(() => resolve(null)),
-            );
+            await this.waitForGpu();
+            await this.delay(GPU_IDLE_DELAY_MS);
         }
+    }
+
+    private async waitForGpu(): Promise<void> {
+        const sync = this.gl.fenceSync(this.gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!sync) {
+            await this.delay(0);
+            return;
+        }
+
+        this.gl.flush();
+
+        await new Promise<void>((resolve, reject) => {
+            const poll = () => {
+                const status = this.gl.clientWaitSync(sync, 0, 0);
+                if (
+                    status === this.gl.ALREADY_SIGNALED ||
+                    status === this.gl.CONDITION_SATISFIED
+                ) {
+                    this.gl.deleteSync(sync);
+                    resolve();
+                    return;
+                }
+
+                if (status === this.gl.WAIT_FAILED) {
+                    this.gl.deleteSync(sync);
+                    reject(new GrainRendererGPUSyncError());
+                    return;
+                }
+
+                setTimeout(poll, 1);
+            };
+
+            poll();
+        });
+    }
+
+    private delay(milliseconds: number): Promise<void> {
+        return new Promise((resolve) => setTimeout(resolve, milliseconds));
     }
 
     private prepareTiles(image: OffscreenCanvas | ImageBitmap): void {
