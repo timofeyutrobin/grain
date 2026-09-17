@@ -166,6 +166,8 @@ export class GrainRenderer {
             'u_imageTexture',
         );
 
+        gl.deleteProgram(program);
+
         gl.uniform1i(imageTextureUniformLocation, 0);
 
         gl.depthMask(false);
