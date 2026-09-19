@@ -59,6 +59,7 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                     <div className="relative w-full h-[45px]">
                         <Image
                             fill
+                            preload
                             loading="eager"
                             className="mx-auto"
                             src="/images/formula.svg"

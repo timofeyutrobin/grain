@@ -13,6 +13,7 @@ export const Logo: React.FC<PropsWithClassName> = ({ className }) => {
         >
             <div>
                 <Image
+                    preload
                     loading="eager"
                     src="/logo.webp"
                     alt="emulsion engine"

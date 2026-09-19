@@ -181,7 +181,7 @@ function Editor() {
                         ref={resultCanvasRef}
                     />
                     {loading && (
-                        <LoadingSpinner className="absolute inset-0 m-auto" />
+                        <LoadingSpinner className="absolute w-[120px] h-[120px] inset-0 m-auto opacity-40" />
                     )}
                 </div>
                 <footer className="md:hidden w-full p-4 bg-zinc-800">
