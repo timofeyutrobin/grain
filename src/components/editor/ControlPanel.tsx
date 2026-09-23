@@ -38,7 +38,7 @@ export const ControlPanel: React.FC<PropsWithClassName<ControlPanelProps>> = ({
             )}
         >
             <Logo className="hidden md:flex w-full px-4 pt-4" />
-            <section className="w-full max-w-96 my-4 px-4 overflow-y-scroll space-y-4">
+            <section className="w-full max-w-96 my-4 pl-4 pr-9 md:pr-4 overflow-y-scroll space-y-4">
                 <SettingsGroup className="hidden md:block" legend="Файл">
                     {fileInputLabel}
                 </SettingsGroup>

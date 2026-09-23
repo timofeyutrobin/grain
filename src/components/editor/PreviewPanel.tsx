@@ -17,6 +17,7 @@ interface PreviewPanelProps {
     image?: ImageBitmap | null;
     open?: boolean;
     toggleOpen: () => void;
+    isOpenButtonHidden?: boolean;
 }
 
 export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
@@ -25,6 +26,7 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
     image,
     open,
     toggleOpen,
+    isOpenButtonHidden,
 }) => {
     return (
         <aside
@@ -33,13 +35,23 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                 className,
             )}
         >
-            <Button
-                small
-                className="block xl:hidden absolute inset-y-0 h-16 my-auto left-0 -translate-x-full px-2 border-0 rounded-l-md bg-zinc-800 text-inherit text-lg font-bold"
-                onClick={toggleOpen}
-            >
-                {open ? '>' : '<'}
-            </Button>
+            {!isOpenButtonHidden && (
+                <Button
+                    small
+                    className="
+                        block xl:hidden
+                        absolute h-16 bottom-24
+                        md:my-auto md:inset-y-0
+                        left-0
+                        -translate-x-full
+                        px-2 border-l border-t border-b border-r-0 border-zinc-200 rounded-l-md
+                        bg-zinc-800 text-inherit text-lg font-bold
+                    "
+                    onClick={toggleOpen}
+                >
+                    {open ? '>' : '<'}
+                </Button>
+            )}
             <section className="self-center w-full max-w-96 my-4 px-4 overflow-y-scroll space-y-4">
                 <SettingsGroup
                     legend="Микроскоп"

@@ -256,6 +256,10 @@ function Editor() {
                 renderParameters={settings.renderParameters}
                 image={previewImage}
                 toggleOpen={() => setPreviewPanelOpen((open) => !open)}
+                isOpenButtonHidden={
+                    welcomeIntroState !==
+                    WelcomeIntroState.TOUR_STATE_INTRO_SEEN
+                }
             />
             {welcomeIntroState !== WelcomeIntroState.TOUR_STATE_INTRO_SEEN && (
                 <Intro
