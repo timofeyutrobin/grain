@@ -1,9 +1,16 @@
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
-import { Range } from '@/components/editor/settings/Range';
+import { Range } from '@/components/range/Range';
 import { Segments } from '@/components/editor/settings/Segments';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import { SettingsParameters } from '@/components/editor/settings/useSettings';
-import { DEFAULT_COLORS, GrainCount, GrainSize, Sharpness } from '@/lib/common';
+import {
+    Contrast,
+    DEFAULT_COLORS,
+    GrainCount,
+    GrainSize,
+    Sensitivity,
+    Sharpness,
+} from '@/lib/common';
 import React from 'react';
 
 interface SettingsProps {
@@ -22,6 +29,8 @@ export const Settings: React.FC<SettingsProps> = ({
         setBlueDyeColor,
         contrast,
         setContrast,
+        sensitivity,
+        setSensitivity,
         grainSize,
         setGrainSize,
         grainCount,
@@ -92,27 +101,36 @@ export const Settings: React.FC<SettingsProps> = ({
             )}
             <SettingsGroup legend="Контраст">
                 <Range
-                    max={0.9}
-                    min={0.3}
-                    step={0.2}
+                    max={Contrast.max}
+                    min={Contrast.min}
+                    step={Contrast.step}
                     value={contrast}
                     onChange={setContrast}
                 />
             </SettingsGroup>
+            <SettingsGroup legend="Светочувствительность">
+                <Range
+                    max={Sensitivity.max}
+                    min={Sensitivity.min}
+                    step={Sensitivity.step}
+                    value={sensitivity}
+                    onChange={setSensitivity}
+                />
+            </SettingsGroup>
             <SettingsGroup legend="Размер зерна">
                 <Range
-                    max={GrainSize.l}
-                    min={GrainSize.s}
-                    step={1}
+                    max={GrainSize.max}
+                    min={GrainSize.min}
+                    step={GrainSize.step}
                     value={grainSize}
                     onChange={setGrainSize}
                 />
             </SettingsGroup>
             <SettingsGroup legend="Плотность зерна">
                 <Range
-                    max={GrainCount.l}
-                    min={GrainCount.s}
-                    step={1}
+                    max={GrainCount.max}
+                    min={GrainCount.min}
+                    step={GrainCount.step}
                     value={grainCount}
                     onChange={setGrainCount}
                 />
@@ -131,9 +149,9 @@ export const Settings: React.FC<SettingsProps> = ({
                 }
             >
                 <Range
-                    max={Sharpness.sharp}
-                    min={Sharpness.blurry}
-                    step={1}
+                    max={Sharpness.max}
+                    min={Sharpness.min}
+                    step={Sharpness.step}
                     value={sharpness}
                     onChange={setSharpness}
                 />
