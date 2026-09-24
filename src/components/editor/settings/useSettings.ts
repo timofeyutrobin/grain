@@ -1,9 +1,11 @@
 import {
     Color,
+    Contrast,
     DEFAULT_COLORS,
     GrainCount,
     GrainSize,
     RenderMode,
+    Sensitivity,
     Setter,
     Sharpness,
 } from '@/lib/common';
@@ -21,6 +23,8 @@ export interface SettingsParameters {
     setSharpness: Setter<Sharpness>;
     contrast: number;
     setContrast: Setter<number>;
+    sensitivity: number;
+    setSensitivity: Setter<number>;
     redDyeColor: Color;
     setRedDyeColor: Setter<Color>;
     greenDyeColor: Color;
@@ -30,19 +34,16 @@ export interface SettingsParameters {
     renderParameters: GrainRenderParameters;
 }
 
-const sharpnessToBlurRadius: Record<Sharpness, number> = {
-    [Sharpness.blurry]: 12,
-    [Sharpness.normal]: 6,
-    [Sharpness.sharp]: 1,
-};
-
 export function useSettings(): SettingsParameters {
     const [mode, setMode] = useState<RenderMode>('grayscale');
 
-    const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.s);
-    const [grainCount, setGrainCount] = useState<GrainCount>(GrainCount.l);
-    const [sharpness, setSharpness] = useState<Sharpness>(Sharpness.normal);
-    const [contrast, setContrast] = useState<number>(0.5);
+    const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.default);
+    const [grainCount, setGrainCount] = useState<GrainCount>(
+        GrainCount.default,
+    );
+    const [sharpness, setSharpness] = useState<Sharpness>(Sharpness.default);
+    const [contrast, setContrast] = useState<number>(Contrast.default);
+    const [sensitivity, setSensitivity] = useState<number>(Sensitivity.default);
 
     const [redDyeColor, setRedDyeColor] = useState<Color>(DEFAULT_COLORS.red);
     const [greenDyeColor, setGreenDyeColor] = useState<Color>(
@@ -58,29 +59,31 @@ export function useSettings(): SettingsParameters {
             {
                 id: 0,
                 contrast: contrast * 0.5,
-                sensitivity: 0.2,
+                sensitivity:
+                    (Sensitivity.max + Sensitivity.min - sensitivity) * 0.2,
                 grainSize: 2 * grainSize,
                 spawnRate: grainCount,
                 alpha: 0.1,
-                blurRadius: sharpnessToBlurRadius[sharpness],
+                blurRadius: Sharpness.max + Sharpness.min - sharpness,
             },
             {
                 id: 1,
                 contrast,
-                sensitivity: 0.2,
+                sensitivity:
+                    (Sensitivity.max + Sensitivity.min - sensitivity) * 0.2,
                 grainSize: grainSize,
                 spawnRate: 2 * grainCount,
                 alpha: 0.2,
-                blurRadius: sharpnessToBlurRadius[sharpness],
+                blurRadius: Sharpness.max + Sharpness.min - sharpness,
             },
             {
                 id: 2,
                 contrast: contrast * 3,
-                sensitivity: 1,
+                sensitivity,
                 grainSize: grainSize,
                 spawnRate: 3 * grainCount,
                 alpha: 0.2,
-                blurRadius: sharpnessToBlurRadius[sharpness],
+                blurRadius: Sharpness.max + Sharpness.min - sharpness,
             },
         ],
         colorParameters:
@@ -104,6 +107,8 @@ export function useSettings(): SettingsParameters {
         setSharpness,
         contrast,
         setContrast,
+        sensitivity,
+        setSensitivity,
         redDyeColor,
         setRedDyeColor,
         greenDyeColor,

@@ -5,21 +5,38 @@ export type RenderMode = 'grayscale' | 'color';
 export type Color = { r: number; g: number; b: number };
 
 export const enum GrainSize {
-    s = 1,
-    m = 2,
-    l = 3,
+    min = 1,
+    max = 3,
+    step = 1,
+    default = min,
 }
 
 export const enum GrainCount {
-    s = 1,
-    m = 2,
-    l = 3,
+    min = 1,
+    max = 3,
+    step = 1,
+    default = max,
 }
 
 export const enum Sharpness {
-    blurry = 1,
-    normal = 2,
-    sharp = 3,
+    min = 1,
+    max = 16,
+    step = 5,
+    default = 11,
+}
+
+export const enum Contrast {
+    min = 0.3,
+    max = 0.9,
+    step = 0.2,
+    default = 0.5,
+}
+
+export const enum Sensitivity {
+    min = 0.5,
+    max = 1.5,
+    step = 0.5,
+    default = 1,
 }
 
 export type Setter<T> = (value: T) => void;
