@@ -53,37 +53,38 @@ export function useSettings(): SettingsParameters {
         DEFAULT_COLORS.blue,
     );
 
+    const blurRadius = Sharpness.max + Sharpness.min - sharpness;
+    const invertedSensitivity = Sensitivity.max + Sensitivity.min - sensitivity;
+
     // TODO: пресеты
     const renderParameters: GrainRenderParameters = {
         layers: [
             {
                 id: 0,
                 contrast: contrast * 0.5,
-                sensitivity:
-                    (Sensitivity.max + Sensitivity.min - sensitivity) * 0.2,
+                invertedSensitivity: invertedSensitivity * 0.2,
                 grainSize: 2 * grainSize,
                 spawnRate: grainCount,
                 alpha: 0.1,
-                blurRadius: Sharpness.max + Sharpness.min - sharpness,
+                blurRadius,
             },
             {
                 id: 1,
                 contrast,
-                sensitivity:
-                    (Sensitivity.max + Sensitivity.min - sensitivity) * 0.2,
+                invertedSensitivity: invertedSensitivity * 0.2,
                 grainSize: grainSize,
                 spawnRate: 2 * grainCount,
                 alpha: 0.2,
-                blurRadius: Sharpness.max + Sharpness.min - sharpness,
+                blurRadius,
             },
             {
                 id: 2,
                 contrast: contrast * 3,
-                sensitivity,
+                invertedSensitivity,
                 grainSize: grainSize,
                 spawnRate: 3 * grainCount,
                 alpha: 0.2,
-                blurRadius: Sharpness.max + Sharpness.min - sharpness,
+                blurRadius,
             },
         ],
         colorParameters:

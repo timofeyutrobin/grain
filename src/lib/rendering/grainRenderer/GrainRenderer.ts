@@ -11,7 +11,7 @@ import grainVertexShader from '@/lib/rendering/grainRenderer/grain.vert';
 export interface Layer {
     id: number;
     contrast: number;
-    sensitivity: number;
+    invertedSensitivity: number;
     grainSize: number;
     spawnRate: number;
     alpha: number;
@@ -362,14 +362,17 @@ export class GrainRenderer {
         for (let i = 0; i < layers.length; i++) {
             const {
                 contrast,
-                sensitivity,
+                invertedSensitivity,
                 grainSize,
                 spawnRate,
                 alpha,
                 blurRadius,
             } = layers[i];
             this.gl.uniform1f(this.contrastUniformLocation, contrast);
-            this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
+            this.gl.uniform1f(
+                this.sensitivityUniformLocation,
+                invertedSensitivity,
+            );
             this.gl.uniform1f(this.grainSizeUniformLocation, grainSize);
             this.gl.uniform1f(
                 this.alphaUniformLocation,

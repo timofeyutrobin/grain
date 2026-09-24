@@ -173,7 +173,7 @@ const LayerParameters: React.FC<LayerParametersProps> = ({ layer, color }) => (
             a = {layer.contrast.toFixed(2)}
         </i>
         <i className="not-italic text-sm font-mono">
-            b = {layer.sensitivity.toFixed(2)}
+            b = {layer.invertedSensitivity.toFixed(2)}
         </i>
         <i className="not-italic text-sm font-mono">{layer.grainSize}px</i>
     </div>

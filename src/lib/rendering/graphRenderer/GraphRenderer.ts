@@ -61,10 +61,13 @@ export class GraphRenderer {
     render(params: GrainRenderParameters): void {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         params.layers.forEach((layer, index) => {
-            const { contrast, sensitivity } = layer;
+            const { contrast, invertedSensitivity } = layer;
             const color = getColorForLayer(index);
             this.gl.uniform1f(this.contrastUniformLocation, contrast);
-            this.gl.uniform1f(this.sensitivityUniformLocation, sensitivity);
+            this.gl.uniform1f(
+                this.sensitivityUniformLocation,
+                invertedSensitivity,
+            );
             this.gl.uniform3f(
                 this.colorUniformLocation,
                 color.r,
