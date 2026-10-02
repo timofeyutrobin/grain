@@ -4,7 +4,6 @@ import {
     GrainRenderParameters,
 } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import classNames from 'classnames';
-import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 
 const SCALE = 10;
@@ -34,9 +33,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
     image,
     renderParameters,
 }) => {
-    const [sampleImage, setSampleImage] = useState<ImageBitmap | null>(null);
     const [renderer, setRenderer] = useState<GrainRenderer | null>(null);
-
     const [scaledImage, setScaledImage] = useState<ImageBitmap | null>(null);
     const [scaledRenderer, setScaledRenderer] = useState<GrainRenderer | null>(
         null,
@@ -56,8 +53,8 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
         }
         createImageBitmap(
             image,
-            width / 2,
-            height / 2,
+            width / 2 - width / SCALE / 2,
+            height / 2 - height / SCALE / 2,
             width / SCALE,
             height / SCALE,
             {
@@ -67,27 +64,17 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
         ).then((image) => {
             setScaledImage(image);
         });
-    }, [image]);
 
-    useEffect(
-        () => () => {
-            sampleImage?.close();
-        },
-        [sampleImage],
-    );
-
-    useEffect(
-        () => () => {
+        return () => {
             scaledImage?.close();
-        },
-        [scaledImage],
-    );
+        };
+    }, [image]);
 
     useEffect(() => {
         if (
             !renderer ||
-            !sampleImage ||
             !scaledRenderer ||
+            !image ||
             !scaledImage ||
             isRendering.current
         ) {
@@ -98,13 +85,9 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
 
         const previousRenderVersion = renderVersion.current;
 
-        const renderPromise = renderer.render(
-            image ?? sampleImage,
-            renderParameters,
-            {
-                enableTiles: false,
-            },
-        );
+        const renderPromise = renderer.render(image, renderParameters, {
+            enableTiles: false,
+        });
         const scaledRenderPromise = scaledRenderer.render(
             scaledImage,
             magnifyGrain(renderParameters),
@@ -120,14 +103,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
                 setRenderSignal((signal) => signal + 1);
             }
         });
-    }, [
-        renderParameters,
-        renderer,
-        sampleImage,
-        image,
-        scaledImage,
-        renderSignal,
-    ]);
+    }, [renderParameters, renderer, image, scaledImage, renderSignal]);
 
     return (
         <div className={classNames('relative', className)}>
@@ -183,35 +159,6 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
                         }
                         throw error;
                     }
-                }}
-            />
-            <Image
-                preload
-                className="hidden"
-                src="/images/sunflowers.jpeg"
-                alt="sunflowers"
-                width={width}
-                height={height}
-                onLoad={(e) => {
-                    createImageBitmap(e.currentTarget, {
-                        imageOrientation: 'flipY',
-                    }).then((image) => {
-                        setSampleImage(image);
-                    });
-                    createImageBitmap(
-                        e.currentTarget,
-                        width / 2 - width / SCALE / 2,
-                        height / 2 - height / SCALE / 2,
-                        width / SCALE,
-                        height / SCALE,
-                        {
-                            imageOrientation: 'flipY',
-                            resizeWidth: width / 2,
-                            resizeHeight: width / 2,
-                        },
-                    ).then((image) => {
-                        setScaledImage(image);
-                    });
                 }}
             />
         </div>

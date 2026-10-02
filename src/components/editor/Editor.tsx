@@ -10,6 +10,7 @@ import { PreviewPanel } from '@/components/editor/PreviewPanel';
 import { useSettings } from '@/components/editor/settings/useSettings';
 import { Intro } from '@/components/intro/Intro';
 import { FILE_UPLOAD_INPUT_ID, PREVIEW_SIZE } from '@/lib/common';
+import { useDB } from '@/lib/editor/useDB';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
@@ -19,9 +20,12 @@ import classNames from 'classnames';
 import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
+import { SampleImage } from './SampleImage';
 
 function Editor() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
+
+    const database = useDB();
 
     const [controlPanelOpen, setControlPanelOpen] = useState(false);
     const [previewPanelOpen, setPreviewPanelOpen] = useState(false);
@@ -30,46 +34,150 @@ function Editor() {
     const [loading, setLoading] = useState(false);
     const resultCanvasRef = useRef<HTMLCanvasElement>(null);
 
-    const [downloadUrl, setDownloadUrl] = useState<string>('');
+    const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
 
+    const [fileLoading, setFileLoading] = useState(false);
     const [fileName, setFileName] = useState<string | null>(null);
     const [imageSize, setImageSize] = useState<
         [width: number, height: number] | null
     >(null);
-    const [previewImage, setPreviewImage] = useState<ImageBitmap | null>();
+    const [previewImage, setPreviewImage] = useState<ImageBitmap | null>(null);
+    const [sampleImage, setSampleImage] = useState<ImageBitmap | null>(null);
 
     useEffect(
         () => () => {
-            previewImage?.close();
+            sampleImage?.close();
         },
-        [previewImage],
+        [sampleImage],
     );
+
+    const setResultImage = (image: ImageBitmap, blob: Blob) => {
+        const canvas = resultCanvasRef.current;
+        if (canvas) {
+            canvas.width = image.width;
+            canvas.height = image.height;
+            canvas.getContext('bitmaprenderer')?.transferFromImageBitmap(image);
+        }
+        image.close();
+
+        const url = URL.createObjectURL(blob);
+        setDownloadUrl(url);
+        setLoading(false);
+    };
 
     const renderWorker = useRenderWorker((worker) => {
         worker.postMessage({ type: 'create' });
-        worker.addEventListener('message', (event) => {
+    });
+
+    useEffect(() => {
+        if (!renderWorker || !database) {
+            return;
+        }
+
+        const onMessage = (event: MessageEvent) => {
             switch (event.data.type) {
                 case 'ready': {
-                    const canvas = resultCanvasRef.current;
                     const blob: Blob = event.data.blob;
                     const image: ImageBitmap = event.data.imageBitmap;
-                    if (canvas) {
-                        canvas.width = image.width;
-                        canvas.height = image.height;
-                        canvas
-                            .getContext('bitmaprenderer')
-                            ?.transferFromImageBitmap(image);
-                    }
-                    image.close();
 
-                    const url = URL.createObjectURL(blob);
-                    setDownloadUrl(url);
-                    setLoading(false);
+                    database.persistResultImage(blob);
+                    setResultImage(image, blob);
+
                     break;
                 }
             }
+        };
+
+        renderWorker.addEventListener('message', onMessage);
+        return () => {
+            renderWorker.removeEventListener('message', onMessage);
+        };
+    }, [renderWorker, database]);
+
+    const setFile = async (renderWorker: Worker, file: File) => {
+        const image = await createImageBitmap(file, {
+            imageOrientation: 'flipY',
         });
-    });
+
+        const width = image.width;
+        const height = image.height;
+
+        const previewImageBitmap = await createImageBitmap(
+            file,
+            Math.max(width / 2 - PREVIEW_SIZE / 2, 0),
+            Math.max(height / 2 - PREVIEW_SIZE / 2, 0),
+            Math.min(PREVIEW_SIZE, width),
+            Math.min(PREVIEW_SIZE, height),
+            {
+                imageOrientation: 'flipY',
+                resizeWidth: PREVIEW_SIZE,
+                resizeHeight: PREVIEW_SIZE,
+            },
+        );
+
+        setPreviewImage(previewImageBitmap);
+        setFileName(file.name);
+        setImageSize([width, height]);
+        renderWorker.postMessage({ type: 'setImage', image }, [image]);
+    };
+
+    const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
+        e,
+    ) => {
+        if (previewImage !== sampleImage) {
+            previewImage?.close();
+        }
+
+        const file = e.target.files?.[0];
+        if (!file || !renderWorker) {
+            return;
+        }
+
+        try {
+            await setFile(renderWorker, file);
+            database?.persistOriginalFile(file);
+        } catch (error) {
+            if (error instanceof Error && error.name === 'InvalidStateError') {
+                // TODO: поменять на нормальный UI
+                alert('Тип изображения не поддерживается');
+            }
+        }
+    };
+
+    useEffect(() => {
+        if (!renderWorker || !sampleImage || !database) {
+            return;
+        }
+
+        if (previewImage) {
+            return;
+        }
+
+        (async () => {
+            const originalFile = await database.loadOriginalFile();
+            if (!originalFile) {
+                setPreviewImage(sampleImage);
+            } else {
+                try {
+                    await setFile(renderWorker, originalFile);
+                } catch (error) {
+                    if (
+                        error instanceof Error &&
+                        error.name === 'InvalidStateError'
+                    ) {
+                        setPreviewImage(sampleImage);
+                    }
+                }
+            }
+
+            const resultBlob = await database.loadResultImage();
+            if (!resultBlob) {
+                return;
+            }
+            const resultImageBitmap = await createImageBitmap(resultBlob);
+            setResultImage(resultImageBitmap, resultBlob);
+        })();
+    }, [renderWorker, sampleImage, database]);
 
     const handleDevelop = async (renderParameters: GrainRenderParameters) => {
         if (!renderWorker) {
@@ -78,58 +186,50 @@ function Editor() {
 
         setLoading(true);
         setControlPanelOpen(false);
-        URL.revokeObjectURL(downloadUrl);
-        setDownloadUrl('');
+        downloadUrl && URL.revokeObjectURL(downloadUrl);
+        setDownloadUrl(null);
         renderWorker.postMessage({
             type: 'render',
             params: renderParameters,
         });
     };
 
-    const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
-        e,
-    ) => {
-        if (!renderWorker) {
-            return;
-        }
-
-        if (e.target.files?.[0]) {
-            const file = e.target.files[0];
-            setFileName(file.name);
-            const image = await createImageBitmap(file, {
-                imageOrientation: 'flipY',
-            });
-            const width = image.width;
-            const height = image.height;
-            setImageSize([width, height]);
-            renderWorker.postMessage({ type: 'setImage', image }, [image]);
-            setPreviewImage(
-                await createImageBitmap(
-                    file,
-                    Math.max(width / 2 - PREVIEW_SIZE / 2, 0),
-                    Math.max(height / 2 - PREVIEW_SIZE / 2, 0),
-                    Math.min(PREVIEW_SIZE, width),
-                    Math.min(PREVIEW_SIZE, height),
-                    {
-                        imageOrientation: 'flipY',
-                        resizeWidth: PREVIEW_SIZE,
-                        resizeHeight: PREVIEW_SIZE,
-                    },
-                ),
-            );
-        }
-    };
+    const isFileReady = !!fileName && !!imageSize;
+    const isResultReady = !!downloadUrl && !loading;
 
     const fileInputLabel = (
-        <ButtonLabel
-            className={classNames('w-full', { 'pointer-events-none': loading })}
-            small
-            htmlFor={FILE_UPLOAD_INPUT_ID}
-        >
-            Открыть&nbsp;изображение
-        </ButtonLabel>
+        <div className="flex gap-2">
+            <ButtonLabel
+                className={classNames('w-full', {
+                    'pointer-events-none': loading,
+                })}
+                small
+                htmlFor={FILE_UPLOAD_INPUT_ID}
+                title="Upload Image"
+            >
+                Открыть&nbsp;изображение
+            </ButtonLabel>
+            {isFileReady && (
+                <Button
+                    className={classNames({
+                        'pointer-events-none': loading,
+                    })}
+                    small
+                    secondary
+                    title="Close"
+                    onClick={() => {
+                        database?.deleteOriginalFile();
+                        setFileName(null);
+                        setImageSize(null);
+                        setPreviewImage(sampleImage);
+                    }}
+                >
+                    &#x2715;
+                </Button>
+            )}
+        </div>
     );
-    const fileInfo = !!fileName && !!imageSize && (
+    const fileInfo = isFileReady && (
         <div className="flex justify-between text-xs font-light text-zinc-200">
             <span>{fileName}</span>
             <span>
@@ -137,7 +237,7 @@ function Editor() {
             </span>
         </div>
     );
-    const downloadButton = downloadUrl && !loading && (
+    const downloadButton = isResultReady && (
         <ButtonAnchor
             small
             download="result.png"
@@ -150,6 +250,17 @@ function Editor() {
 
     return (
         <>
+            <SampleImage
+                width={PREVIEW_SIZE}
+                height={PREVIEW_SIZE}
+                onLoad={async (e) => {
+                    setSampleImage(
+                        await createImageBitmap(e.currentTarget, {
+                            imageOrientation: 'flipY',
+                        }),
+                    );
+                }}
+            />
             <input
                 id={FILE_UPLOAD_INPUT_ID}
                 className="hidden"
@@ -172,7 +283,24 @@ function Editor() {
                 <header className="md:hidden m-auto px-4 pt-10">
                     <Logo className="max-w-sm" />
                 </header>
-                <div className="relative w-full min-h-0 flex-1 flex p-6">
+                <div className="relative w-full min-h-0 flex-1 flex flex-col p-6">
+                    {isResultReady && (
+                        <Button
+                            tiny
+                            secondary
+                            className="absolute top-6 right-6"
+                            onClick={() => {
+                                resultCanvasRef.current
+                                    ?.getContext('bitmaprenderer')
+                                    ?.transferFromImageBitmap(null);
+                                URL.revokeObjectURL(downloadUrl);
+                                setDownloadUrl(null);
+                                database?.deleteResultImage();
+                            }}
+                        >
+                            Удалить
+                        </Button>
+                    )}
                     <canvas
                         className={classNames(
                             'max-w-full max-h-full m-auto transition-[filter]',
@@ -231,7 +359,7 @@ function Editor() {
                 }
                 onDevelop={handleDevelop}
                 onClose={() => setControlPanelOpen(false)}
-                disabled={loading || !fileName}
+                disabled={loading || !isFileReady}
                 downloadButton={downloadButton}
             />
             <PreviewPanel
