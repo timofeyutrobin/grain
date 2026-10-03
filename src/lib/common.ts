@@ -43,8 +43,6 @@ export type Setter<T> = (value: T) => void;
 
 export type PropsWithClassName<T = {}> = { className?: string } & T;
 
-export const FILE_UPLOAD_INPUT_ID = 'upload';
-
 export const DEFAULT_COLORS: Record<string, Color> = {
     red: { r: 255, g: 50, b: 50 },
     green: { r: 50, g: 255, b: 50 },

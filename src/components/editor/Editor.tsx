@@ -9,7 +9,7 @@ import { Logo } from '@/components/editor/Logo';
 import { PreviewPanel } from '@/components/editor/PreviewPanel';
 import { useSettings } from '@/components/editor/settings/useSettings';
 import { Intro } from '@/components/intro/Intro';
-import { FILE_UPLOAD_INPUT_ID, PREVIEW_SIZE } from '@/lib/common';
+import { PREVIEW_SIZE } from '@/lib/common';
 import { useDB } from '@/lib/editor/useDB';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
@@ -21,6 +21,8 @@ import { useAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import { SampleImage } from './SampleImage';
+
+const FILE_UPLOAD_INPUT_ID = 'upload';
 
 function Editor() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
@@ -134,6 +136,7 @@ function Editor() {
         }
 
         try {
+            setFileLoading(true);
             await setFile(renderWorker, file);
             database?.persistOriginalFile(file);
         } catch (error) {
@@ -141,6 +144,8 @@ function Editor() {
                 // TODO: поменять на нормальный UI
                 alert('Тип изображения не поддерживается');
             }
+        } finally {
+            setFileLoading(false);
         }
     };
 
@@ -154,20 +159,23 @@ function Editor() {
         }
 
         (async () => {
-            const originalFile = await database.loadOriginalFile();
-            if (!originalFile) {
-                setPreviewImage(sampleImage);
-            } else {
-                try {
+            try {
+                setFileLoading(true);
+                const originalFile = await database.loadOriginalFile();
+                if (!originalFile) {
+                    setPreviewImage(sampleImage);
+                } else {
                     await setFile(renderWorker, originalFile);
-                } catch (error) {
-                    if (
-                        error instanceof Error &&
-                        error.name === 'InvalidStateError'
-                    ) {
-                        setPreviewImage(sampleImage);
-                    }
                 }
+            } catch (error) {
+                if (
+                    error instanceof Error &&
+                    error.name === 'InvalidStateError'
+                ) {
+                    setPreviewImage(sampleImage);
+                }
+            } finally {
+                setFileLoading(false);
             }
 
             const resultBlob = await database.loadResultImage();
@@ -196,12 +204,14 @@ function Editor() {
 
     const isFileReady = !!fileName && !!imageSize;
     const isResultReady = !!downloadUrl && !loading;
+    const isFileInputDisabled = loading || fileLoading;
 
     const fileInputLabel = (
         <div className="flex gap-2">
             <ButtonLabel
                 className={classNames('w-full', {
-                    'pointer-events-none': loading,
+                    'pointer-events-none bg-stone-500 border-stone-500 text-stone-400 cursor-not-allowed':
+                        isFileInputDisabled,
                 })}
                 small
                 htmlFor={FILE_UPLOAD_INPUT_ID}
@@ -223,6 +233,7 @@ function Editor() {
                         setImageSize(null);
                         setPreviewImage(sampleImage);
                     }}
+                    disabled={isFileInputDisabled}
                 >
                     &#x2715;
                 </Button>
@@ -266,7 +277,7 @@ function Editor() {
                 className="hidden"
                 type="file"
                 onChange={handleFileChange}
-                disabled={loading}
+                disabled={isFileInputDisabled}
             />
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
@@ -359,7 +370,7 @@ function Editor() {
                 }
                 onDevelop={handleDevelop}
                 onClose={() => setControlPanelOpen(false)}
-                disabled={loading || !isFileReady}
+                disabled={isFileInputDisabled || !isFileReady}
                 downloadButton={downloadButton}
             />
             <PreviewPanel
