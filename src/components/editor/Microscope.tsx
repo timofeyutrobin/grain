@@ -23,7 +23,7 @@ interface MicroscopeProps {
     width: number;
     height: number;
     image?: ImageBitmap | null;
-    renderParameters: GrainRenderParameters;
+    renderParameters: GrainRenderParameters | null;
 }
 
 export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
@@ -76,7 +76,8 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
             !scaledRenderer ||
             !image ||
             !scaledImage ||
-            isRendering.current
+            isRendering.current ||
+            !renderParameters
         ) {
             return;
         }

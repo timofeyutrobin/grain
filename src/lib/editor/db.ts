@@ -1,13 +1,15 @@
+import { SettingsParameters } from '@/components/editor/settings/useSettings';
 import * as Sentry from '@sentry/browser';
+import { NonNullableObject } from '../common';
 const DATABASE_NAME = 'emulsion-engine';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'image';
 
-type Key = 'result' | 'original';
+type Key = 'result' | 'original' | 'settings';
 
 type ExcludeFirst<T extends any[]> = T extends [any, ...infer Rest] ? Rest : [];
 
-function save(database: IDBDatabase | null, key: Key, blob: Blob): void {
+function save(database: IDBDatabase | null, key: Key, blob: unknown): void {
     if (!database) {
         Sentry.logger.error(
             'IndexedDB "save" call has been ignored. This could happen because the method was called before the database was created or the database was closed.',
@@ -27,7 +29,7 @@ function save(database: IDBDatabase | null, key: Key, blob: Blob): void {
     };
 }
 
-async function load<T extends Blob>(
+async function load<T>(
     database: IDBDatabase | null,
     key: Key,
 ): Promise<T | null> {
@@ -123,6 +125,13 @@ export function persistResultImage(
     save(database, 'result', image);
 }
 
+export function persistSettings(
+    database: IDBDatabase | null,
+    settings: NonNullableObject<SettingsParameters>,
+): void {
+    save(database, 'settings', settings);
+}
+
 export async function loadOriginalFile(
     database: IDBDatabase | null,
 ): Promise<File | null> {
@@ -135,12 +144,22 @@ export async function loadResultImage(
     return load(database, 'result');
 }
 
+export async function loadSettings(
+    database: IDBDatabase | null,
+): Promise<NonNullableObject<SettingsParameters> | null> {
+    return load(database, 'settings');
+}
+
 export function deleteOriginalFile(database: IDBDatabase | null): void {
     deleteEntry(database, 'original');
 }
 
 export function deleteResultImage(database: IDBDatabase | null): void {
     deleteEntry(database, 'result');
+}
+
+export function deleteSettings(database: IDBDatabase | null): void {
+    deleteEntry(database, 'settings');
 }
 
 export function databaseWrapper(database: IDBDatabase | null) {

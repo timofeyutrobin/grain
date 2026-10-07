@@ -3,11 +3,14 @@ import {
     databaseWrapper,
     deleteOriginalFile,
     deleteResultImage,
+    deleteSettings,
     loadOriginalFile,
     loadResultImage,
+    loadSettings,
     openDatabase,
     persistOriginalFile,
     persistResultImage,
+    persistSettings,
 } from './db';
 
 export function useDB() {
@@ -34,10 +37,13 @@ export function useDB() {
               isFailed: !!error,
               persistOriginalFile: withDatabase(persistOriginalFile),
               persistResultImage: withDatabase(persistResultImage),
+              persistSettings: withDatabase(persistSettings),
               loadOriginalFile: withDatabase(loadOriginalFile),
               loadResultImage: withDatabase(loadResultImage),
+              loadSettings: withDatabase(loadSettings),
               deleteOriginalFile: withDatabase(deleteOriginalFile),
               deleteResultImage: withDatabase(deleteResultImage),
+              deleteSettings: withDatabase(deleteSettings),
           }
         : null;
 }

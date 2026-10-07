@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 interface GraphProps {
     width: number;
     height: number;
-    renderParameters: GrainRenderParameters;
+    renderParameters: GrainRenderParameters | null;
 }
 
 export const Graph: React.FC<PropsWithClassName<GraphProps>> = ({
@@ -19,7 +19,7 @@ export const Graph: React.FC<PropsWithClassName<GraphProps>> = ({
     const [renderer, setRenderer] = useState<GraphRenderer | null>(null);
 
     useEffect(() => {
-        if (!renderer) {
+        if (!renderer || !renderParameters) {
             return;
         }
         renderer.render(renderParameters);

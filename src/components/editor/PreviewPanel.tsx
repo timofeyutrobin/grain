@@ -13,7 +13,7 @@ import Image from 'next/image';
 import React from 'react';
 
 interface PreviewPanelProps {
-    renderParameters: GrainRenderParameters;
+    renderParameters: GrainRenderParameters | null;
     image?: ImageBitmap | null;
     open?: boolean;
     toggleOpen: () => void;
@@ -90,16 +90,58 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                             renderParameters={renderParameters}
                         />
                     </section>
-                    <section className="mt-8 mb-2">
-                        <header className="flex justify-between items-baseline mb-2 pb-2 border-b-1 border-zinc-500">
-                            <h2 className="font-semibold">Слои эмульсии</h2>
-                            <i className="text-sm text-zinc-300 not-italic">
-                                Размер зерна
-                            </i>
-                        </header>
-                        {renderParameters.colorParameters ? (
-                            <>
-                                <div className="p-4 bg-red-700/20">
+                    {renderParameters && (
+                        <section className="mt-8 mb-2">
+                            <header className="flex justify-between items-baseline mb-2 pb-2 border-b-1 border-zinc-500">
+                                <h2 className="font-semibold">Слои эмульсии</h2>
+                                <i className="text-sm text-zinc-300 not-italic">
+                                    Размер зерна
+                                </i>
+                            </header>
+                            {renderParameters.colorParameters ? (
+                                <>
+                                    <div className="p-4 bg-red-700/20">
+                                        {renderParameters.layers.map(
+                                            (layer, index) => (
+                                                <LayerParameters
+                                                    key={layer.id}
+                                                    layer={layer}
+                                                    color={getColorForLayer(
+                                                        index,
+                                                    )}
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                    <div className="mt-4 p-4 bg-green-700/20">
+                                        {renderParameters.layers.map(
+                                            (layer, index) => (
+                                                <LayerParameters
+                                                    key={layer.id}
+                                                    layer={layer}
+                                                    color={getColorForLayer(
+                                                        index,
+                                                    )}
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                    <div className="mt-4 p-4 bg-blue-700/20">
+                                        {renderParameters.layers.map(
+                                            (layer, index) => (
+                                                <LayerParameters
+                                                    key={layer.id}
+                                                    layer={layer}
+                                                    color={getColorForLayer(
+                                                        index,
+                                                    )}
+                                                />
+                                            ),
+                                        )}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="p-4 bg-zinc-900">
                                     {renderParameters.layers.map(
                                         (layer, index) => (
                                             <LayerParameters
@@ -110,41 +152,9 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                                         ),
                                     )}
                                 </div>
-                                <div className="mt-4 p-4 bg-green-700/20">
-                                    {renderParameters.layers.map(
-                                        (layer, index) => (
-                                            <LayerParameters
-                                                key={layer.id}
-                                                layer={layer}
-                                                color={getColorForLayer(index)}
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                                <div className="mt-4 p-4 bg-blue-700/20">
-                                    {renderParameters.layers.map(
-                                        (layer, index) => (
-                                            <LayerParameters
-                                                key={layer.id}
-                                                layer={layer}
-                                                color={getColorForLayer(index)}
-                                            />
-                                        ),
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <div className="p-4 bg-zinc-900">
-                                {renderParameters.layers.map((layer, index) => (
-                                    <LayerParameters
-                                        key={layer.id}
-                                        layer={layer}
-                                        color={getColorForLayer(index)}
-                                    />
-                                ))}
-                            </div>
-                        )}
-                    </section>
+                            )}
+                        </section>
+                    )}
                 </SettingsGroup>
             </section>
             <footer className="md:hidden max-w-96 w-full mt-auto p-4">

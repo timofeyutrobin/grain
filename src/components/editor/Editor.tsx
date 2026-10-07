@@ -14,7 +14,6 @@ import { useDB } from '@/lib/editor/useDB';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
-import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
 import classNames from 'classnames';
 import { useAtom } from 'jotai';
@@ -28,10 +27,10 @@ function Editor() {
     const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
 
     const database = useDB();
+    const settings = useSettings();
 
     const [controlPanelOpen, setControlPanelOpen] = useState(false);
     const [previewPanelOpen, setPreviewPanelOpen] = useState(false);
-    const settings = useSettings();
 
     const [loading, setLoading] = useState(false);
     const resultCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -82,8 +81,8 @@ function Editor() {
                     const blob: Blob = event.data.blob;
                     const image: ImageBitmap = event.data.imageBitmap;
 
-                    database.persistResultImage(blob);
                     setResultImage(image, blob);
+                    database.persistResultImage(blob);
 
                     break;
                 }
@@ -178,6 +177,13 @@ function Editor() {
                 setFileLoading(false);
             }
 
+            const initialSettings = await database.loadSettings();
+            if (initialSettings) {
+                settings.set(initialSettings);
+            } else {
+                settings.setDefaults();
+            }
+
             const resultBlob = await database.loadResultImage();
             if (!resultBlob) {
                 return;
@@ -187,7 +193,7 @@ function Editor() {
         })();
     }, [renderWorker, sampleImage, database]);
 
-    const handleDevelop = async (renderParameters: GrainRenderParameters) => {
+    const handleDevelop = async () => {
         if (!renderWorker) {
             return;
         }
@@ -196,9 +202,24 @@ function Editor() {
         setControlPanelOpen(false);
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
+
+        if (settings.hasAllSettingsParameters(settings)) {
+            database?.persistSettings({
+                mode: settings.mode,
+                contrast: settings.contrast,
+                sensitivity: settings.sensitivity,
+                grainSize: settings.grainSize,
+                grainCount: settings.grainCount,
+                sharpness: settings.sharpness,
+                redDyeColor: settings.redDyeColor,
+                greenDyeColor: settings.greenDyeColor,
+                blueDyeColor: settings.blueDyeColor,
+            });
+        }
+
         renderWorker.postMessage({
             type: 'render',
-            params: renderParameters,
+            params: settings.renderParameters,
         });
     };
 
