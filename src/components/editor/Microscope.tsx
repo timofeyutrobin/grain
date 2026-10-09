@@ -3,6 +3,7 @@ import {
     GrainRenderer,
     GrainRenderParameters,
 } from '@/lib/rendering/grainRenderer/GrainRenderer';
+import * as Sentry from '@sentry/browser';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
 
@@ -97,13 +98,17 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
             },
         );
 
-        Promise.all([renderPromise, scaledRenderPromise]).finally(() => {
-            isRendering.current = false;
+        Promise.all([renderPromise, scaledRenderPromise])
+            .catch((error) => {
+                Sentry.captureException(error);
+            })
+            .finally(() => {
+                isRendering.current = false;
 
-            if (renderVersion.current !== previousRenderVersion) {
-                setRenderSignal((signal) => signal + 1);
-            }
-        });
+                if (renderVersion.current !== previousRenderVersion) {
+                    setRenderSignal((signal) => signal + 1);
+                }
+            });
     }, [renderParameters, renderer, image, scaledImage, renderSignal]);
 
     return (

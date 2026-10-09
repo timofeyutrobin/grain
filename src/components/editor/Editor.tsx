@@ -9,14 +9,20 @@ import { Logo } from '@/components/editor/Logo';
 import { PreviewPanel } from '@/components/editor/PreviewPanel';
 import { useSettings } from '@/components/editor/settings/useSettings';
 import { Intro } from '@/components/intro/Intro';
-import { PREVIEW_SIZE } from '@/lib/common';
+import { Toaster } from '@/components/toast/Toaster';
+import { addToastAtom } from '@/components/toast/toasterAtom';
+import { isError, PREVIEW_SIZE } from '@/lib/common';
 import { useDB } from '@/lib/editor/useDB';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
+import {
+    RenderWorkerResponse,
+    type RendererWorker,
+} from '@/lib/rendering/grainRenderer/rendererWorker';
 import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
 import classNames from 'classnames';
-import { useAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
 import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
 import { SampleImage } from './SampleImage';
@@ -24,7 +30,8 @@ import { SampleImage } from './SampleImage';
 const FILE_UPLOAD_INPUT_ID = 'upload';
 
 function Editor() {
-    const [welcomeIntroState] = useAtom(welcomeIntroStateAtom);
+    const welcomeIntroState = useAtomValue(welcomeIntroStateAtom);
+    const addToast = useSetAtom(addToastAtom);
 
     const database = useDB();
     const settings = useSettings();
@@ -75,15 +82,25 @@ function Editor() {
             return;
         }
 
-        const onMessage = (event: MessageEvent) => {
+        const onMessage = (event: MessageEvent<RenderWorkerResponse>) => {
             switch (event.data.type) {
                 case 'ready': {
-                    const blob: Blob = event.data.blob;
-                    const image: ImageBitmap = event.data.imageBitmap;
+                    const blob = event.data.blob;
+                    const image = event.data.imageBitmap;
 
                     setResultImage(image, blob);
                     database.persistResultImage(blob);
 
+                    break;
+                }
+                case 'error': {
+                    const error = event.data.error;
+                    if (isError(error)) {
+                        addToast({ text: error.message });
+                    } else {
+                        addToast({ text: 'Непредвиденная ошибка' });
+                    }
+                    setLoading(false);
                     break;
                 }
             }
@@ -95,7 +112,7 @@ function Editor() {
         };
     }, [renderWorker, database]);
 
-    const setFile = async (renderWorker: Worker, file: File) => {
+    const setFile = async (renderWorker: RendererWorker, file: File) => {
         const image = await createImageBitmap(file, {
             imageOrientation: 'flipY',
         });
@@ -140,8 +157,7 @@ function Editor() {
             database?.persistOriginalFile(file);
         } catch (error) {
             if (error instanceof Error && error.name === 'InvalidStateError') {
-                // TODO: поменять на нормальный UI
-                alert('Тип изображения не поддерживается');
+                addToast({ text: 'Тип изображения не поддерживается' });
             }
         } finally {
             setFileLoading(false);
@@ -194,7 +210,11 @@ function Editor() {
     }, [renderWorker, sampleImage, database]);
 
     const handleDevelop = async () => {
-        if (!renderWorker) {
+        if (
+            !renderWorker ||
+            !settings.hasAllSettingsParameters(settings) ||
+            !settings.renderParameters
+        ) {
             return;
         }
 
@@ -203,19 +223,17 @@ function Editor() {
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
 
-        if (settings.hasAllSettingsParameters(settings)) {
-            database?.persistSettings({
-                mode: settings.mode,
-                contrast: settings.contrast,
-                sensitivity: settings.sensitivity,
-                grainSize: settings.grainSize,
-                grainCount: settings.grainCount,
-                sharpness: settings.sharpness,
-                redDyeColor: settings.redDyeColor,
-                greenDyeColor: settings.greenDyeColor,
-                blueDyeColor: settings.blueDyeColor,
-            });
-        }
+        database?.persistSettings({
+            mode: settings.mode,
+            contrast: settings.contrast,
+            sensitivity: settings.sensitivity,
+            grainSize: settings.grainSize,
+            grainCount: settings.grainCount,
+            sharpness: settings.sharpness,
+            redDyeColor: settings.redDyeColor,
+            greenDyeColor: settings.greenDyeColor,
+            blueDyeColor: settings.blueDyeColor,
+        });
 
         renderWorker.postMessage({
             type: 'render',
@@ -300,6 +318,7 @@ function Editor() {
                 onChange={handleFileChange}
                 disabled={isFileInputDisabled}
             />
+            <Toaster />
             <Background className="fixed top-0 left-0 w-full h-full bg-zinc-900 -z-10" />
             <Greeting />
             <main
@@ -328,6 +347,7 @@ function Editor() {
                                 URL.revokeObjectURL(downloadUrl);
                                 setDownloadUrl(null);
                                 database?.deleteResultImage();
+                                database?.deleteSettings();
                             }}
                         >
                             Удалить
