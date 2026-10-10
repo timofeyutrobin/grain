@@ -1,8 +1,11 @@
+import { type RendererWorker } from '@/lib/rendering/grainRenderer/rendererWorker';
 import * as Sentry from '@sentry/nextjs';
 import { useEffect, useState } from 'react';
 
-export function useRenderWorker(onCreate: (worker: Worker) => void) {
-    const [renderWorker, setRenderWorker] = useState<Worker | null>(null);
+export function useRenderWorker(onCreate: (worker: RendererWorker) => void) {
+    const [renderWorker, setRenderWorker] = useState<RendererWorker | null>(
+        null,
+    );
 
     useEffect(() => {
         const worker = new Worker(

@@ -2,15 +2,14 @@ import { Button } from '@/components/button/Button';
 import { Logo } from '@/components/editor/Logo';
 import { Settings } from '@/components/editor/settings/Settings';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
-import { SettingsParameters } from '@/components/editor/settings/useSettings';
+import { SettingsData } from '@/components/editor/settings/useSettings';
 import { PropsWithClassName } from '@/lib/common';
-import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import classNames from 'classnames';
 import { ReactNode } from 'react';
 
 interface ControlPanelProps {
-    settings: SettingsParameters;
-    onDevelop: (renderParameters: GrainRenderParameters) => void;
+    settings: SettingsData;
+    onDevelop: () => void;
     onClose: () => void;
     fileInputLabel: ReactNode;
     downloadButton: ReactNode;
@@ -26,10 +25,6 @@ export const ControlPanel: React.FC<PropsWithClassName<ControlPanelProps>> = ({
     fileInputLabel,
     downloadButton,
 }) => {
-    const handleDevelopClick = () => {
-        onDevelop(settings.renderParameters);
-    };
-
     return (
         <aside
             className={classNames(
@@ -60,7 +55,7 @@ export const ControlPanel: React.FC<PropsWithClassName<ControlPanelProps>> = ({
                     <Button
                         small
                         className="w-full"
-                        onClick={handleDevelopClick}
+                        onClick={onDevelop}
                         disabled={disabled}
                     >
                         Проявить

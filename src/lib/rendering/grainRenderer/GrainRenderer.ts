@@ -472,7 +472,9 @@ export class GrainRenderer {
         } else if (imageSize <= 32000000) {
             this.superSamplingScale = 1;
         } else {
-            throw new Error('Image is too big');
+            throw new GrainRendererError(
+                'Загруженное изображение слишком большое. Максимальный размер фото — 32MP.',
+            );
         }
     }
 }

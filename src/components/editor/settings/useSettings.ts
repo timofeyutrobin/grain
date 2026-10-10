@@ -4,6 +4,7 @@ import {
     DEFAULT_COLORS,
     GrainCount,
     GrainSize,
+    NonNullableObject,
     RenderMode,
     Sensitivity,
     Setter,
@@ -13,110 +14,172 @@ import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRender
 import { useState } from 'react';
 
 export interface SettingsParameters {
-    mode: RenderMode;
-    setMode: Setter<RenderMode>;
-    grainSize: GrainSize;
-    setGrainSize: Setter<GrainSize>;
-    grainCount: GrainCount;
-    setGrainCount: Setter<GrainCount>;
-    sharpness: Sharpness;
-    setSharpness: Setter<Sharpness>;
-    contrast: number;
-    setContrast: Setter<number>;
-    sensitivity: number;
-    setSensitivity: Setter<number>;
-    redDyeColor: Color;
-    setRedDyeColor: Setter<Color>;
-    greenDyeColor: Color;
-    setGreenDyeColor: Setter<Color>;
-    blueDyeColor: Color;
-    setBlueDyeColor: Setter<Color>;
-    renderParameters: GrainRenderParameters;
+    mode: RenderMode | null;
+    grainSize: GrainSize | null;
+    grainCount: GrainCount | null;
+    sharpness: Sharpness | null;
+    contrast: number | null;
+    sensitivity: number | null;
+    redDyeColor: Color | null;
+    greenDyeColor: Color | null;
+    blueDyeColor: Color | null;
 }
 
-export function useSettings(): SettingsParameters {
-    const [mode, setMode] = useState<RenderMode>('grayscale');
-
-    const [grainSize, setGrainSize] = useState<GrainSize>(GrainSize.default);
-    const [grainCount, setGrainCount] = useState<GrainCount>(
-        GrainCount.default,
+function hasAllSettingsParameters(
+    settings: SettingsParameters,
+): settings is NonNullableObject<SettingsParameters> {
+    return (
+        settings.mode !== null &&
+        settings.grainSize !== null &&
+        settings.grainCount !== null &&
+        settings.sharpness !== null &&
+        settings.contrast !== null &&
+        settings.sensitivity !== null &&
+        settings.redDyeColor !== null &&
+        settings.greenDyeColor !== null &&
+        settings.blueDyeColor !== null
     );
-    const [sharpness, setSharpness] = useState<Sharpness>(Sharpness.default);
-    const [contrast, setContrast] = useState<number>(Contrast.default);
-    const [sensitivity, setSensitivity] = useState<number>(Sensitivity.default);
+}
 
-    const [redDyeColor, setRedDyeColor] = useState<Color>(DEFAULT_COLORS.red);
-    const [greenDyeColor, setGreenDyeColor] = useState<Color>(
-        DEFAULT_COLORS.green,
-    );
-    const [blueDyeColor, setBlueDyeColor] = useState<Color>(
-        DEFAULT_COLORS.blue,
-    );
+export interface SettingsParametersSetters {
+    setMode: Setter<RenderMode>;
+    setGrainSize: Setter<GrainSize>;
+    setGrainCount: Setter<GrainCount>;
+    setSharpness: Setter<Sharpness>;
+    setContrast: Setter<number>;
+    setSensitivity: Setter<number>;
+    setRedDyeColor: Setter<Color>;
+    setGreenDyeColor: Setter<Color>;
+    setBlueDyeColor: Setter<Color>;
+}
 
-    const blurRadius = Sharpness.max + Sharpness.min - sharpness;
-    const invertedSensitivity = Sensitivity.max + Sensitivity.min - sensitivity;
+export interface SettingsRenderParameters {
+    renderParameters: GrainRenderParameters | null;
+    hasAllSettingsParameters: typeof hasAllSettingsParameters;
+    set: (settings: SettingsParameters) => void;
+    setDefaults: () => void;
+}
 
-    // TODO: пресеты
-    const renderParameters: GrainRenderParameters = {
-        layers: [
-            {
-                id: 0,
-                contrast: contrast * 0.5,
-                invertedSensitivity: invertedSensitivity * 0.2,
-                grainSize: 2 * grainSize,
-                spawnRate: grainCount,
-                alpha: 0.1,
-                blurRadius,
-            },
-            {
-                id: 1,
-                contrast,
-                invertedSensitivity: invertedSensitivity * 0.2,
-                grainSize: grainSize,
-                spawnRate: 2 * grainCount,
-                alpha: 0.2,
-                blurRadius,
-            },
-            {
-                id: 2,
-                contrast: contrast * 3,
-                invertedSensitivity,
-                grainSize: grainSize,
-                spawnRate: 3 * grainCount,
-                alpha: 0.2,
-                blurRadius,
-            },
-        ],
-        colorParameters:
-            mode === 'color'
-                ? {
-                      r: { dye: redDyeColor },
-                      g: { dye: greenDyeColor },
-                      b: { dye: blueDyeColor },
-                  }
-                : null,
+export type SettingsData = SettingsParameters &
+    SettingsParametersSetters &
+    SettingsRenderParameters;
+
+export function useSettings(): SettingsData {
+    const [mode, setMode] = useState<RenderMode | null>(null);
+
+    const [grainSize, setGrainSize] = useState<GrainSize | null>(null);
+    const [grainCount, setGrainCount] = useState<GrainCount | null>(null);
+    const [sharpness, setSharpness] = useState<Sharpness | null>(null);
+    const [contrast, setContrast] = useState<number | null>(null);
+    const [sensitivity, setSensitivity] = useState<number | null>(null);
+
+    const [redDyeColor, setRedDyeColor] = useState<Color | null>(null);
+    const [greenDyeColor, setGreenDyeColor] = useState<Color | null>(null);
+    const [blueDyeColor, setBlueDyeColor] = useState<Color | null>(null);
+
+    const set = (settings: SettingsParameters) => {
+        setMode(settings.mode);
+        setContrast(settings.contrast);
+        setSensitivity(settings.sensitivity);
+        setGrainSize(settings.grainSize);
+        setGrainCount(settings.grainCount);
+        setSharpness(settings.sharpness);
+        setRedDyeColor(settings.redDyeColor);
+        setGreenDyeColor(settings.greenDyeColor);
+        setBlueDyeColor(settings.blueDyeColor);
+    };
+    const setDefaults = () => {
+        setMode('grayscale');
+        setContrast(Contrast.default);
+        setSensitivity(Sensitivity.default);
+        setGrainSize(GrainSize.default);
+        setGrainCount(GrainCount.default);
+        setSharpness(Sharpness.default);
+        setRedDyeColor(DEFAULT_COLORS.red);
+        setGreenDyeColor(DEFAULT_COLORS.green);
+        setBlueDyeColor(DEFAULT_COLORS.blue);
     };
 
+    const settings: SettingsParameters | NonNullableObject<SettingsParameters> =
+        {
+            mode,
+            grainSize,
+            grainCount,
+            sharpness,
+            contrast,
+            sensitivity,
+            redDyeColor,
+            greenDyeColor,
+            blueDyeColor,
+        };
+
+    const isSettingsPresent = hasAllSettingsParameters(settings);
+
+    const blurRadius = isSettingsPresent
+        ? Sharpness.max + Sharpness.min - settings.sharpness
+        : 0;
+    const invertedSensitivity = isSettingsPresent
+        ? Sensitivity.max + Sensitivity.min - settings.sensitivity
+        : 0;
+
+    // TODO: пресеты
+    const renderParameters: GrainRenderParameters | null = isSettingsPresent
+        ? {
+              layers: [
+                  {
+                      id: 0,
+                      contrast: settings.contrast * 0.5,
+                      invertedSensitivity: invertedSensitivity * 0.2,
+                      grainSize: 2 * settings.grainSize,
+                      spawnRate: settings.grainCount,
+                      alpha: 0.1,
+                      blurRadius,
+                  },
+                  {
+                      id: 1,
+                      contrast: settings.contrast,
+                      invertedSensitivity: invertedSensitivity * 0.2,
+                      grainSize: settings.grainSize,
+                      spawnRate: 2 * settings.grainCount,
+                      alpha: 0.2,
+                      blurRadius,
+                  },
+                  {
+                      id: 2,
+                      contrast: settings.contrast * 3,
+                      invertedSensitivity,
+                      grainSize: settings.grainSize,
+                      spawnRate: 3 * settings.grainCount,
+                      alpha: 0.2,
+                      blurRadius,
+                  },
+              ],
+              colorParameters:
+                  settings.mode === 'color'
+                      ? {
+                            r: { dye: settings.redDyeColor },
+                            g: { dye: settings.greenDyeColor },
+                            b: { dye: settings.blueDyeColor },
+                        }
+                      : null,
+          }
+        : null;
+
     return {
-        mode,
+        ...settings,
         setMode,
-        grainSize,
         setGrainSize,
-        grainCount,
         setGrainCount,
-        sharpness,
         setSharpness,
-        contrast,
         setContrast,
-        sensitivity,
         setSensitivity,
-        redDyeColor,
         setRedDyeColor,
-        greenDyeColor,
         setGreenDyeColor,
-        blueDyeColor,
         setBlueDyeColor,
 
         renderParameters,
+        hasAllSettingsParameters,
+        set,
+        setDefaults,
     };
 }
