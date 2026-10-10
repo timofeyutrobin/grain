@@ -64,7 +64,6 @@ export type SettingsData = SettingsParameters &
     SettingsParametersSetters &
     SettingsRenderParameters;
 
-// Дефолтные настройки либо из БД, либо дефолт, если БД не загрузилась
 export function useSettings(): SettingsData {
     const [mode, setMode] = useState<RenderMode | null>(null);
 
