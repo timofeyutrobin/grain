@@ -89,7 +89,7 @@ function Editor() {
                     const image = event.data.imageBitmap;
 
                     setResultImage(image, blob);
-                    database.persistResultImage(blob);
+                    database.persist('result', blob);
 
                     break;
                 }
@@ -154,7 +154,7 @@ function Editor() {
         try {
             setFileLoading(true);
             await setFile(renderWorker, file);
-            database?.persistOriginalFile(file);
+            database?.persist('original', file);
         } catch (error) {
             if (error instanceof Error && error.name === 'InvalidStateError') {
                 addToast({ text: 'Тип изображения не поддерживается' });
@@ -176,7 +176,7 @@ function Editor() {
         (async () => {
             try {
                 setFileLoading(true);
-                const originalFile = await database.loadOriginalFile();
+                const originalFile = await database.load('original');
                 if (!originalFile) {
                     setPreviewImage(sampleImage);
                 } else {
@@ -193,14 +193,14 @@ function Editor() {
                 setFileLoading(false);
             }
 
-            const initialSettings = await database.loadSettings();
+            const initialSettings = await database.load('settings');
             if (initialSettings) {
                 settings.set(initialSettings);
             } else {
                 settings.setDefaults();
             }
 
-            const resultBlob = await database.loadResultImage();
+            const resultBlob = await database.load('result');
             if (!resultBlob) {
                 return;
             }
@@ -223,7 +223,7 @@ function Editor() {
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
 
-        database?.persistSettings({
+        database?.persist('settings', {
             mode: settings.mode,
             contrast: settings.contrast,
             sensitivity: settings.sensitivity,
@@ -267,7 +267,7 @@ function Editor() {
                     secondary
                     title="Close"
                     onClick={() => {
-                        database?.deleteOriginalFile();
+                        database?.delete('original');
                         setFileName(null);
                         setImageSize(null);
                         setPreviewImage(sampleImage);
@@ -346,8 +346,8 @@ function Editor() {
                                     ?.transferFromImageBitmap(null);
                                 URL.revokeObjectURL(downloadUrl);
                                 setDownloadUrl(null);
-                                database?.deleteResultImage();
-                                database?.deleteSettings();
+                                database?.delete('result');
+                                database?.delete('settings');
                             }}
                         >
                             Удалить
