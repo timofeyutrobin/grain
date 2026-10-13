@@ -106,7 +106,7 @@ void main() {
       vec2 tileOffset = vec2(float(x), float(y));
       vec2 targetTile = currentTile + tileOffset;
 
-      uvec2 rand = pcg2d(uvec2(targetTile));
+      uvec2 rand = pcg2d(uvec2(ivec2((targetTile))));
       uvec2 rand2 = pcg2d(rand);
       vec2 randNormalized = vec2(rand) / 4294967295.0f;
       vec2 rand2Normalized = vec2(rand2) / 4294967295.0f;
