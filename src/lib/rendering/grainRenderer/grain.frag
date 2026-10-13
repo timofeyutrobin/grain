@@ -4,6 +4,7 @@
 #define GRAIN_SPREAD 3.0
 
 precision highp float;
+precision highp int;
 precision highp sampler2D;
 
 in vec2 vUV;
