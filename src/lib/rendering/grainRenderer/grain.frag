@@ -28,6 +28,25 @@ uniform float u_blurRadius;
 
 uniform sampler2D u_imageTexture;
 
+uvec2 pcg2d(uvec2 v) {
+  v.x ^= u_seed;
+  v.y += u_seed;
+
+  v = v * 1664525u + 1013904223u;
+
+  v.x += v.y * 1664525u;
+  v.y += v.x * 1664525u;
+
+  v = v ^ (v >> 16u);
+
+  v.x += v.y * 1664525u;
+  v.y += v.x * 1664525u;
+
+  v = v ^ (v >> 16u);
+
+  return v;
+}
+
 float curve(float x, float contrast, float sensitivity) {
   return pow(x, contrast) /
     (pow(x, contrast) + pow(1.0f - x, contrast)) *
@@ -87,17 +106,22 @@ void main() {
       vec2 tileOffset = vec2(float(x), float(y));
       vec2 targetTile = currentTile + tileOffset;
 
-      vec2 grainCenter = targetTile + (0.0f - 0.5f) * GRAIN_SPREAD;
-      vec2 textureUV = ((grainCenter + (0.0f - 0.5f) * u_blurRadius) / gridSize - u_currentTileOffset + u_textureOverlapOffset) * u_textureOverlapScale;
+      uvec2 rand = pcg2d(uvec2(targetTile));
+      uvec2 rand2 = pcg2d(rand);
+      vec2 randNormalized = vec2(rand) / 4294967295.0f;
+      vec2 rand2Normalized = vec2(rand2) / 4294967295.0f;
 
-      float size = baseGrainSize;
-      float dist = grainDistance(grainCenter, vec2(0, 0), gridUV, aspectRatio);
+      vec2 grainCenter = targetTile + (randNormalized.xy - 0.5f) * GRAIN_SPREAD;
+      vec2 textureUV = ((grainCenter + (rand2Normalized - 0.5f) * u_blurRadius) / gridSize - u_currentTileOffset + u_textureOverlapOffset) * u_textureOverlapScale;
+
+      float size = baseGrainSize * ((randNormalized.x * 1.3f) + baseGrainSize);
+      float dist = grainDistance(grainCenter, randNormalized, gridUV, aspectRatio);
       float mask = grainMask(size, dist);
       vec3 color = grainColor(size, dist);
 
       float exposure = grainExposure(textureUV, u_channel);
 
-      float exposureThreshold = 0.5f;
+      float exposureThreshold = (randNormalized.x + randNormalized.y) * 0.5f;
       float grainActivation = step(exposureThreshold, curve(exposure, u_contrast, u_sensitivity));
 
       finalColor = vec4(mix(finalColor.rgb, color, grainActivation * mask * u_alpha), grainActivation * mask * u_alpha);
