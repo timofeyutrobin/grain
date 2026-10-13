@@ -109,8 +109,8 @@ void main() {
 
       uvec2 rand = pcg2d(uvec2(ivec2((targetTile))));
       uvec2 rand2 = pcg2d(rand);
-      vec2 randNormalized = vec2(rand) / 4294967295.0f;
-      vec2 rand2Normalized = vec2(rand2) / 4294967295.0f;
+      vec2 randNormalized = vec2(rand) / float(uint(0xffffffff));
+      vec2 rand2Normalized = vec2(rand2) / float(uint(0xffffffff));
 
       vec2 grainCenter = targetTile + (randNormalized.xy - 0.5f) * GRAIN_SPREAD;
       vec2 textureUV = ((grainCenter + (rand2Normalized - 0.5f) * u_blurRadius) / gridSize - u_currentTileOffset + u_textureOverlapOffset) * u_textureOverlapScale;
