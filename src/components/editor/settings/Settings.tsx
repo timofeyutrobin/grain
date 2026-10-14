@@ -1,3 +1,4 @@
+import { Button } from '@/components/button/Button';
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
 import { Segments } from '@/components/editor/settings/Segments';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
@@ -21,6 +22,25 @@ export const Settings: React.FC<SettingsProps> = ({ settings }) => {
     if (settings.hasAllSettingsParameters(settings)) {
         return (
             <>
+                <SettingsGroup legend="Пресеты">
+                    <Button smaller className="w-full">
+                        Сохранить текущие настройки
+                    </Button>
+                    <label
+                        className="text-sm font-semibold"
+                        htmlFor="preset-selector"
+                    >
+                        Выбрать:
+                    </label>
+                    <select
+                        id="preset-selector"
+                        name="preset"
+                        className="mt-3 ml-2 text-sm"
+                    >
+                        <option value="">Классический Ч/Б</option>
+                        {/* список опций из бд */}
+                    </select>
+                </SettingsGroup>
                 <SettingsGroup legend="Цвет">
                     <Segments name="Цвет">
                         <Segments.Segment
