@@ -6,7 +6,15 @@ import {
 import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import graphFragmentShader from '@/lib/rendering/graphRenderer/graph.frag';
 import graphVertexShader from '@/lib/rendering/graphRenderer/graph.vert';
-import { getColorForLayer } from '@/lib/rendering/graphRenderer/graphColors';
+import {
+    averageGraphColor,
+    getColorForLayer,
+} from '@/lib/rendering/graphRenderer/graphColors';
+
+export type GraphRenderParameters = GrainRenderParameters & {
+    avgContrast: number;
+    avgInvertedSensitivity: number;
+};
 
 export class GraphRenderer {
     private gl: WebGL2RenderingContext;
@@ -58,7 +66,7 @@ export class GraphRenderer {
         gl.clearColor(0, 0, 0, 0);
     }
 
-    render(params: GrainRenderParameters): void {
+    render(params: GraphRenderParameters): void {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT);
         params.layers.forEach((layer, index) => {
             const { contrast, invertedSensitivity } = layer;
@@ -76,5 +84,18 @@ export class GraphRenderer {
             );
             this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
         });
+
+        this.gl.uniform1f(this.contrastUniformLocation, params.avgContrast);
+        this.gl.uniform1f(
+            this.sensitivityUniformLocation,
+            params.avgInvertedSensitivity,
+        );
+        this.gl.uniform3f(
+            this.colorUniformLocation,
+            averageGraphColor.r,
+            averageGraphColor.g,
+            averageGraphColor.b,
+        );
+        this.gl.drawArrays(this.gl.TRIANGLES, 0, 6);
     }
 }
