@@ -48,9 +48,9 @@ export type Setter<T> = (value: T) => void;
 export type PropsWithClassName<T = {}> = { className?: string } & T;
 
 export const DEFAULT_COLORS = {
-    red: { r: 200, g: 30, b: 30 },
-    green: { r: 30, g: 200, b: 30 },
-    blue: { r: 30, g: 30, b: 200 },
+    red: { r: 255, g: 0, b: 0 },
+    green: { r: 0, g: 255, b: 0 },
+    blue: { r: 0, g: 0, b: 255 },
 } as const;
 
 export const PREVIEW_SIZE = 240;

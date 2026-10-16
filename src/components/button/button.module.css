@@ -15,6 +15,9 @@
     .buttonSecondary {
         @apply bg-stone-800 text-stone-50 hover:bg-stone-700;
     }
+    .buttonSmaller {
+        @apply text-sm;
+    }
     .buttonTiny {
         @apply py-1 px-2 text-xs;
     }
