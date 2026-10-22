@@ -1,17 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import {
-    databaseWrapper,
-    deleteOriginalFile,
-    deleteResultImage,
-    deleteSettings,
-    loadOriginalFile,
-    loadResultImage,
-    loadSettings,
-    openDatabase,
-    persistOriginalFile,
-    persistResultImage,
-    persistSettings,
-} from './db';
+import { databaseWrapper, openDatabase } from './db';
 
 export function useDB() {
     const [error, setError] = useState<DOMException | null>(null);
@@ -35,15 +23,7 @@ export function useDB() {
         ? {
               isLoaded: !!database,
               isFailed: !!error,
-              persistOriginalFile: withDatabase(persistOriginalFile),
-              persistResultImage: withDatabase(persistResultImage),
-              persistSettings: withDatabase(persistSettings),
-              loadOriginalFile: withDatabase(loadOriginalFile),
-              loadResultImage: withDatabase(loadResultImage),
-              loadSettings: withDatabase(loadSettings),
-              deleteOriginalFile: withDatabase(deleteOriginalFile),
-              deleteResultImage: withDatabase(deleteResultImage),
-              deleteSettings: withDatabase(deleteSettings),
+              ...withDatabase,
           }
         : null;
 }

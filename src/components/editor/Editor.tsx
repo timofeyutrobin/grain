@@ -24,7 +24,13 @@ import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
 import classNames from 'classnames';
 import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
-import { ChangeEventHandler, useEffect, useRef, useState } from 'react';
+import {
+    ChangeEventHandler,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 import { SampleImage } from './SampleImage';
 
 const FILE_UPLOAD_INPUT_ID = 'upload';
@@ -59,7 +65,7 @@ function Editor() {
         [sampleImage],
     );
 
-    const setResultImage = (image: ImageBitmap, blob: Blob) => {
+    const setResultImage = useCallback((image: ImageBitmap, blob: Blob) => {
         const canvas = resultCanvasRef.current;
         if (canvas) {
             canvas.width = image.width;
@@ -71,7 +77,7 @@ function Editor() {
         const url = URL.createObjectURL(blob);
         setDownloadUrl(url);
         setLoading(false);
-    };
+    }, []);
 
     const renderWorker = useRenderWorker((worker) => {
         worker.postMessage({ type: 'create' });
@@ -89,7 +95,7 @@ function Editor() {
                     const image = event.data.imageBitmap;
 
                     setResultImage(image, blob);
-                    database.persistResultImage(blob);
+                    database.persist('result', blob);
 
                     break;
                 }
@@ -151,17 +157,18 @@ function Editor() {
             return;
         }
 
+        setFileLoading(true);
         try {
-            setFileLoading(true);
             await setFile(renderWorker, file);
-            database?.persistOriginalFile(file);
+            if (database) {
+                database.persist('original', file);
+            }
         } catch (error) {
             if (error instanceof Error && error.name === 'InvalidStateError') {
                 addToast({ text: 'Тип изображения не поддерживается' });
             }
-        } finally {
-            setFileLoading(false);
         }
+        setFileLoading(false);
     };
 
     useEffect(() => {
@@ -174,9 +181,9 @@ function Editor() {
         }
 
         (async () => {
+            setFileLoading(true);
             try {
-                setFileLoading(true);
-                const originalFile = await database.loadOriginalFile();
+                const originalFile = await database.load('original');
                 if (!originalFile) {
                     setPreviewImage(sampleImage);
                 } else {
@@ -189,18 +196,17 @@ function Editor() {
                 ) {
                     setPreviewImage(sampleImage);
                 }
-            } finally {
-                setFileLoading(false);
             }
+            setFileLoading(false);
 
-            const initialSettings = await database.loadSettings();
+            const initialSettings = await database.load('settings');
             if (initialSettings) {
                 settings.set(initialSettings);
             } else {
                 settings.setDefaults();
             }
 
-            const resultBlob = await database.loadResultImage();
+            const resultBlob = await database.load('result');
             if (!resultBlob) {
                 return;
             }
@@ -223,7 +229,7 @@ function Editor() {
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
 
-        database?.persistSettings({
+        database?.persist('settings', {
             mode: settings.mode,
             contrast: settings.contrast,
             sensitivity: settings.sensitivity,
@@ -267,7 +273,7 @@ function Editor() {
                     secondary
                     title="Close"
                     onClick={() => {
-                        database?.deleteOriginalFile();
+                        database?.delete('original');
                         setFileName(null);
                         setImageSize(null);
                         setPreviewImage(sampleImage);
@@ -346,8 +352,8 @@ function Editor() {
                                     ?.transferFromImageBitmap(null);
                                 URL.revokeObjectURL(downloadUrl);
                                 setDownloadUrl(null);
-                                database?.deleteResultImage();
-                                database?.deleteSettings();
+                                database?.delete('result');
+                                database?.delete('settings');
                             }}
                         >
                             Удалить
