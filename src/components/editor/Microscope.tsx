@@ -100,6 +100,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
 
         Promise.all([renderPromise, scaledRenderPromise])
             .catch((error) => {
+                console.error(error);
                 Sentry.captureException(error);
             })
             .finally(() => {

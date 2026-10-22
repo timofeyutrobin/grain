@@ -11,7 +11,7 @@ type ExcludeFirst<T extends any[]> = T extends [any, ...infer Rest] ? Rest : [];
 
 function save(database: IDBDatabase | null, key: Key, blob: unknown): void {
     if (!database) {
-        Sentry.logger.error(
+        console.error(
             'IndexedDB "save" call has been ignored. This could happen because the method was called before the database was created or the database was closed.',
         );
         return;
@@ -21,10 +21,12 @@ function save(database: IDBDatabase | null, key: Key, blob: unknown): void {
     transaction.objectStore(STORE_NAME).put(blob, key);
 
     transaction.onerror = () => {
+        console.error(transaction.error);
         Sentry.captureException(transaction.error);
     };
 
     transaction.onabort = () => {
+        console.error('Saving image to DB has been aborted.');
         Sentry.captureMessage('Saving image to DB has been aborted.');
     };
 }
@@ -34,7 +36,7 @@ async function load<T>(
     key: Key,
 ): Promise<T | null> {
     if (!database) {
-        Sentry.logger.error(
+        console.error(
             'IndexedDB "load" call has been ignored. This could happen because the method was called before the database was created or the database was closed.',
         );
         return Promise.resolve(null);
@@ -49,10 +51,12 @@ async function load<T>(
         };
 
         transaction.onerror = () => {
+            console.error(transaction.error);
             Sentry.captureException(transaction.error);
             resolve(null);
         };
         transaction.onabort = () => {
+            console.error('Loading image from DB has been aborted.');
             Sentry.captureMessage('Loading image from DB has been aborted.');
             resolve(null);
         };
@@ -61,7 +65,7 @@ async function load<T>(
 
 function deleteEntry(database: IDBDatabase | null, key: Key): void {
     if (!database) {
-        Sentry.logger.error(
+        console.error(
             'IndexedDB "deleteEntry" call has been ignored. This could happen because the method was called before the database was created or the database was closed.',
         );
         return;
@@ -71,10 +75,12 @@ function deleteEntry(database: IDBDatabase | null, key: Key): void {
     transaction.objectStore(STORE_NAME).delete(key);
 
     transaction.onerror = () => {
+        console.error(transaction.error);
         Sentry.captureException(transaction.error);
     };
     transaction.onabort = () => {
-        Sentry.captureMessage('Deleting image to DB has been aborted.');
+        Sentry.captureMessage('Deleting image from DB has been aborted.');
+        Sentry.captureMessage('Deleting image from DB has been aborted.');
     };
 }
 
@@ -83,7 +89,7 @@ export function openDatabase(
     onError: (error: DOMException | null) => void,
 ): void {
     if (typeof indexedDB === 'undefined') {
-        Sentry.logger.error('IndexedDB is not supported.');
+        console.error('IndexedDB is not supported.');
         onError(null);
         return;
     }
@@ -106,6 +112,7 @@ export function openDatabase(
     };
 
     request.onerror = () => {
+        console.error(request.error);
         Sentry.captureException(request.error);
         onError(request.error);
     };
