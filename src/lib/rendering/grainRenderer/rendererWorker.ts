@@ -2,7 +2,6 @@ import {
     GrainRenderer,
     GrainRenderParameters,
 } from '@/lib/rendering/grainRenderer/GrainRenderer';
-import * as Sentry from '@sentry/browser';
 
 export type RenderWorkerRequest =
     | {
@@ -46,10 +45,6 @@ export interface RendererWorker extends Omit<
         listener: (this: RendererWorker, ev: MessageEvent<T>) => any,
         options?: boolean | EventListenerOptions,
     ): void;
-}
-
-if (process.env.NODE_ENV === 'production') {
-    Sentry.registerWebWorker({ self });
 }
 
 const ctx = self as unknown as RendererWorker;
