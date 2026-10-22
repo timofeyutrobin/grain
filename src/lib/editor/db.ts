@@ -1,5 +1,4 @@
 import { SettingsParameters } from '@/components/editor/settings/useSettings';
-import * as Sentry from '@sentry/browser';
 const DATABASE_NAME = 'emulsion-engine';
 const DATABASE_VERSION = 1;
 const STORE_NAME = 'image';
@@ -32,12 +31,10 @@ function persist(
 
     transaction.onerror = () => {
         console.error(transaction.error);
-        Sentry.captureException(transaction.error);
     };
 
     transaction.onabort = () => {
-        console.error('Saving image to DB has been aborted.');
-        Sentry.captureMessage('Saving image to DB has been aborted.');
+        console.log('Saving image to DB has been aborted.');
     };
 }
 
@@ -62,12 +59,10 @@ async function load<K extends Key>(
 
         transaction.onerror = () => {
             console.error(transaction.error);
-            Sentry.captureException(transaction.error);
             resolve(null);
         };
         transaction.onabort = () => {
-            console.error('Loading image from DB has been aborted.');
-            Sentry.captureMessage('Loading image from DB has been aborted.');
+            console.log('Loading image from DB has been aborted.');
             resolve(null);
         };
     });
@@ -86,11 +81,9 @@ function deleteEntry(database: IDBDatabase | null, key: Key): void {
 
     transaction.onerror = () => {
         console.error(transaction.error);
-        Sentry.captureException(transaction.error);
     };
     transaction.onabort = () => {
-        Sentry.captureMessage('Deleting image from DB has been aborted.');
-        Sentry.captureMessage('Deleting image from DB has been aborted.');
+        console.log('Deleting image from DB has been aborted.');
     };
 }
 
@@ -123,7 +116,6 @@ export function openDatabase(
 
     request.onerror = () => {
         console.error(request.error);
-        Sentry.captureException(request.error);
         onError(request.error);
     };
 }
