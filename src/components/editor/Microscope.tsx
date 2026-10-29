@@ -1,21 +1,24 @@
 import { isError, PropsWithClassName } from '@/lib/common';
+import { getLut } from '@/lib/lutService';
 import {
-    GrainRenderer,
-    GrainRenderParameters,
-} from '@/lib/rendering/grainRenderer/GrainRenderer';
+    RenderParameters,
+    RenderPipeline,
+} from '@/lib/rendering/RenderPipeline';
+import { useDB } from '@/lib/storage/useDB';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
 
 const SCALE = 10;
-function magnifyGrain(
-    renderParameters: GrainRenderParameters,
-): GrainRenderParameters {
+function magnifyGrain(renderParameters: RenderParameters): RenderParameters {
     return {
         ...renderParameters,
-        layers: renderParameters.layers.map((layer) => ({
-            ...layer,
-            grainSize: layer.grainSize * SCALE,
-        })),
+        grain: {
+            ...renderParameters.grain,
+            layers: renderParameters.grain.layers.map((layer) => ({
+                ...layer,
+                grainSize: layer.grainSize * SCALE,
+            })),
+        },
     };
 }
 
@@ -23,7 +26,7 @@ interface MicroscopeProps {
     width: number;
     height: number;
     image?: ImageBitmap | null;
-    renderParameters: GrainRenderParameters | null;
+    renderParameters: RenderParameters | null;
 }
 
 export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
@@ -33,19 +36,38 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
     image,
     renderParameters,
 }) => {
-    const [renderer, setRenderer] = useState<GrainRenderer | null>(null);
+    const database = useDB();
+    const [renderer, setRenderer] = useState<RenderPipeline | null>(null);
     const [scaledImage, setScaledImage] = useState<ImageBitmap | null>(null);
-    const [scaledRenderer, setScaledRenderer] = useState<GrainRenderer | null>(
+    const [scaledRenderer, setScaledRenderer] = useState<RenderPipeline | null>(
         null,
     );
 
     const isRendering = useRef<boolean>(false);
     const renderVersion = useRef(0);
     const [renderSignal, setRenderSignal] = useState(0);
+    const [lut, setLut] = useState<ImageBitmap | null>(null);
+
+    useEffect(() => {
+        if (!renderParameters) {
+            return;
+        }
+
+        getLut(
+            database.state === 'ready' ? database : null,
+            renderParameters.color.lutUrl,
+        )
+            .then((lutImage) => setLut(lutImage))
+            .catch((error) => console.error(error));
+
+        return () => {
+            lut?.close();
+        };
+    }, [renderParameters, database]);
 
     useEffect(() => {
         renderVersion.current += 1;
-    }, [renderParameters, image, scaledImage]);
+    }, [renderParameters, lut, image, scaledImage]);
 
     useEffect(() => {
         if (!image) {
@@ -77,7 +99,8 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
             !image ||
             !scaledImage ||
             isRendering.current ||
-            !renderParameters
+            !renderParameters ||
+            !lut
         ) {
             return;
         }
@@ -86,15 +109,11 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
 
         const previousRenderVersion = renderVersion.current;
 
-        const renderPromise = renderer.render(image, renderParameters, {
-            enableTiles: false,
-        });
+        const renderPromise = renderer.render(image, lut, renderParameters);
         const scaledRenderPromise = scaledRenderer.render(
             scaledImage,
+            lut,
             magnifyGrain(renderParameters),
-            {
-                enableTiles: false,
-            },
         );
 
         Promise.all([renderPromise, scaledRenderPromise])
@@ -108,7 +127,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
                     setRenderSignal((signal) => signal + 1);
                 }
             });
-    }, [renderParameters, renderer, image, scaledImage, renderSignal]);
+    }, [renderParameters, lut, renderer, image, scaledImage, renderSignal]);
 
     return (
         <div className={classNames('relative', className)}>
@@ -127,7 +146,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
                     }
                     try {
                         setScaledRenderer(
-                            new GrainRenderer(
+                            new RenderPipeline(
                                 canvas.transferControlToOffscreen(),
                             ),
                         );
@@ -151,7 +170,7 @@ export const Microscope: React.FC<PropsWithClassName<MicroscopeProps>> = ({
                     }
                     try {
                         setRenderer(
-                            new GrainRenderer(
+                            new RenderPipeline(
                                 canvas.transferControlToOffscreen(),
                             ),
                         );

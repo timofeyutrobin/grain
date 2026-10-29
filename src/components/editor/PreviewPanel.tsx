@@ -3,21 +3,19 @@ import { Graph } from '@/components/editor/Graph';
 import { Microscope } from '@/components/editor/Microscope';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import { Channel, Color, PREVIEW_SIZE, PropsWithClassName } from '@/lib/common';
-import {
-    GrainRenderParameters,
-    Layer,
-} from '@/lib/rendering/grainRenderer/GrainRenderer';
+import { Layer } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import {
     averageGraphColor,
     getColorForLayer,
 } from '@/lib/rendering/graphRenderer/graphColors';
 import { GraphRenderParameters } from '@/lib/rendering/graphRenderer/GraphRenderer';
+import { RenderParameters } from '@/lib/rendering/RenderPipeline';
 import classNames from 'classnames';
 import Image from 'next/image';
 import React from 'react';
 
 interface PreviewPanelProps {
-    renderParameters: GrainRenderParameters | null;
+    renderParameters: RenderParameters | null;
     image?: ImageBitmap | null;
     open?: boolean;
     toggleOpen: () => void;
@@ -36,7 +34,7 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
 
     if (renderParameters) {
         const { sumContrast, sumInvertedSensitivity } =
-            renderParameters.layers.reduce(
+            renderParameters.grain.layers.reduce(
                 (sums, layer) => {
                     sums.sumContrast += layer.contrast;
                     sums.sumInvertedSensitivity += layer.invertedSensitivity;
@@ -45,10 +43,10 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                 { sumContrast: 0, sumInvertedSensitivity: 0 },
             );
         graphRenderParameters = {
-            ...renderParameters,
-            avgContrast: sumContrast / renderParameters.layers.length,
+            ...renderParameters.grain,
+            avgContrast: sumContrast / renderParameters.grain.layers.length,
             avgInvertedSensitivity:
-                sumInvertedSensitivity / renderParameters.layers.length,
+                sumInvertedSensitivity / renderParameters.grain.layers.length,
         };
     }
 
@@ -122,15 +120,17 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                                     Размер зерна
                                 </i>
                             </header>
-                            {renderParameters.colorParameters ? (
+                            {renderParameters.grain.colorParameters ? (
                                 <div className="space-y-4">
                                     {Object.keys(
-                                        renderParameters.colorParameters,
+                                        renderParameters.grain.colorParameters,
                                     ).map((channel) => (
                                         <Layers
                                             key={channel}
                                             channel={channel as Channel}
-                                            layers={renderParameters.layers}
+                                            layers={
+                                                renderParameters.grain.layers
+                                            }
                                             avgContrast={
                                                 graphRenderParameters.avgContrast
                                             }
@@ -143,7 +143,7 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                             ) : (
                                 <Layers
                                     channel="grayscale"
-                                    layers={renderParameters.layers}
+                                    layers={renderParameters.grain.layers}
                                     avgContrast={
                                         graphRenderParameters.avgContrast
                                     }

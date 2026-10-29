@@ -1,18 +1,29 @@
-import { Button } from '@/components/button/Button';
 import { ColorPicker } from '@/components/editor/settings/ColorPicker';
 import { Segments } from '@/components/editor/settings/Segments';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
-import { SettingsData } from '@/components/editor/settings/useSettings';
-import { Range } from '@/components/range/Range';
 import {
     Contrast,
     DEFAULT_COLORS,
     GrainCount,
     GrainSize,
     Sensitivity,
+    SettingsData,
     Sharpness,
-} from '@/lib/common';
+    Temperature,
+    Tint,
+} from '@/components/editor/settings/useSettings';
+import { Range } from '@/components/range/Range';
+import { Color } from '@/lib/common';
+import { lutNameToUrl } from '@/lib/lutService';
+import { colord } from 'colord';
 import React from 'react';
+
+function withSaturation(color: Color, saturation: number): Color {
+    const { h, l } = colord(color).toHsl();
+    const { r, g, b } = colord({ h, s: saturation, l }).toRgb();
+
+    return { r, g, b };
+}
 
 interface SettingsProps {
     settings: SettingsData;
@@ -20,27 +31,19 @@ interface SettingsProps {
 
 export const Settings: React.FC<SettingsProps> = ({ settings }) => {
     if (settings.hasAllSettingsParameters(settings)) {
+        const dyeColors = [
+            settings.redDyeColor,
+            settings.greenDyeColor,
+            settings.blueDyeColor,
+        ];
+        const saturation =
+            dyeColors.reduce(
+                (total, color) => total + colord(color).toHsl().s,
+                0,
+            ) / dyeColors.length;
+
         return (
             <>
-                <SettingsGroup legend="Пресеты">
-                    <Button smaller className="w-full">
-                        Сохранить текущие настройки
-                    </Button>
-                    <label
-                        className="text-sm font-semibold"
-                        htmlFor="preset-selector"
-                    >
-                        Выбрать:
-                    </label>
-                    <select
-                        id="preset-selector"
-                        name="preset"
-                        className="mt-3 ml-2 text-sm"
-                    >
-                        <option value="">Классический Ч/Б</option>
-                        {/* список опций из бд */}
-                    </select>
-                </SettingsGroup>
                 <SettingsGroup legend="Цвет">
                     <Segments name="Цвет">
                         <Segments.Segment
@@ -58,43 +61,141 @@ export const Settings: React.FC<SettingsProps> = ({ settings }) => {
                     </Segments>
                 </SettingsGroup>
                 {settings.mode === 'color' && (
-                    <SettingsGroup
-                        legend="Цвет красителя"
-                        hint={
-                            <>
-                                <p>
-                                    {
-                                        'Выберите цвет красителя для каждого канала.'
-                                    }
-                                </p>
-                                <p>
-                                    {
-                                        'Выбранные цвета будут использоваться для окраски зерна.'
-                                    }
-                                </p>
-                            </>
-                        }
-                    >
-                        <ColorPicker
-                            title="Красный канал"
-                            value={settings.redDyeColor}
-                            onChange={settings.setRedDyeColor}
-                            defaultColor={DEFAULT_COLORS.red}
-                        />
-                        <ColorPicker
-                            title="Зеленый канал"
-                            value={settings.greenDyeColor}
-                            onChange={settings.setGreenDyeColor}
-                            defaultColor={DEFAULT_COLORS.green}
-                        />
+                    <>
+                        <SettingsGroup legend="Баланс белого">
+                            <Range
+                                id="temperature"
+                                label="Temperature"
+                                max={Temperature.max}
+                                min={Temperature.min}
+                                step={Temperature.step}
+                                value={settings.temperature}
+                                onChange={settings.setTemperature}
+                            />
+                            <Range
+                                className="mt-4"
+                                id="tint"
+                                label="Tint"
+                                max={Tint.max}
+                                min={Tint.min}
+                                step={Tint.step}
+                                value={settings.tint}
+                                onChange={settings.setTint}
+                            />
+                        </SettingsGroup>
+                        <SettingsGroup legend="LUT">
+                            <label
+                                className="text-sm font-semibold"
+                                htmlFor="lut-selector"
+                            >
+                                Выбрать:
+                            </label>
+                            <select
+                                id="lut-selector"
+                                name="lut"
+                                className="mt-3 ml-2 text-sm"
+                                onChange={(e) =>
+                                    settings.setLutUrl(e.target.value)
+                                }
+                                value={settings.lutUrl}
+                            >
+                                {Object.entries(lutNameToUrl).map(
+                                    ([name, url]) => (
+                                        <option key={name} value={url}>
+                                            {name}
+                                        </option>
+                                    ),
+                                )}
+                            </select>
+                            <Range
+                                id="lut-factor"
+                                label="%"
+                                className="mt-2"
+                                min={0}
+                                max={1}
+                                step={0.05}
+                                value={settings.lutFactor}
+                                onChange={settings.setLutFactor}
+                            />
+                            <p className="mt-8 text-xs text-zinc-400">
+                                LUT credit:{' '}
+                                <a
+                                    href="https://gmic.eu/color_presets/negative_new_sample_6.html"
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="underline hover:text-zinc-200"
+                                >
+                                    Films: Negative [New] by Pat David
+                                </a>
+                            </p>
+                        </SettingsGroup>
+                        <SettingsGroup
+                            legend="Цвет красителя"
+                            hint={
+                                <>
+                                    <p>
+                                        {
+                                            'Выберите цвет красителя для каждого канала.'
+                                        }
+                                    </p>
+                                    <p>
+                                        {
+                                            'Выбранные цвета будут использоваться для окраски зерна.'
+                                        }
+                                    </p>
+                                </>
+                            }
+                        >
+                            <ColorPicker
+                                title="Красный канал"
+                                value={settings.redDyeColor}
+                                onChange={settings.setRedDyeColor}
+                                defaultColor={DEFAULT_COLORS.red}
+                            />
+                            <ColorPicker
+                                title="Зеленый канал"
+                                value={settings.greenDyeColor}
+                                onChange={settings.setGreenDyeColor}
+                                defaultColor={DEFAULT_COLORS.green}
+                            />
 
-                        <ColorPicker
-                            title="Синий канал"
-                            value={settings.blueDyeColor}
-                            onChange={settings.setBlueDyeColor}
-                            defaultColor={DEFAULT_COLORS.blue}
-                        />
-                    </SettingsGroup>
+                            <ColorPicker
+                                title="Синий канал"
+                                value={settings.blueDyeColor}
+                                onChange={settings.setBlueDyeColor}
+                                defaultColor={DEFAULT_COLORS.blue}
+                            />
+                            <Range
+                                className="mt-4"
+                                id="saturation"
+                                label="Насыщенность"
+                                min={0}
+                                max={100}
+                                step={5}
+                                value={saturation}
+                                onChange={(value) => {
+                                    settings.setRedDyeColor(
+                                        withSaturation(
+                                            settings.redDyeColor,
+                                            value,
+                                        ),
+                                    );
+                                    settings.setGreenDyeColor(
+                                        withSaturation(
+                                            settings.greenDyeColor,
+                                            value,
+                                        ),
+                                    );
+                                    settings.setBlueDyeColor(
+                                        withSaturation(
+                                            settings.blueDyeColor,
+                                            value,
+                                        ),
+                                    );
+                                }}
+                            />
+                        </SettingsGroup>
+                    </>
                 )}
                 <SettingsGroup legend="Контраст">
                     <Range
@@ -132,19 +233,7 @@ export const Settings: React.FC<SettingsProps> = ({ settings }) => {
                         onChange={settings.setGrainCount}
                     />
                 </SettingsGroup>
-                <SettingsGroup
-                    legend="Резкость"
-                    hint={
-                        <>
-                            <p>
-                                {
-                                    'Для достижения реалистичного аналогового эффекта зачастую необходимо снизить резкость картинки.'
-                                }
-                            </p>
-                            <p>{'Данный регулятор позволяет сделать это.'}</p>
-                        </>
-                    }
-                >
+                <SettingsGroup legend="Резкость">
                     <Range
                         max={Sharpness.max}
                         min={Sharpness.min}
