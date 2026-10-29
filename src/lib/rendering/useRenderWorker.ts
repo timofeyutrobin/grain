@@ -1,7 +1,7 @@
-import { type RendererWorker } from '@/lib/rendering/grainRenderer/rendererWorker';
+import { type RendererWorker } from '@/lib/rendering/rendererWorker';
 import { useEffect, useState } from 'react';
 
-export function useRenderWorker(onCreate: (worker: RendererWorker) => void) {
+export function useRenderWorker() {
     const [renderWorker, setRenderWorker] = useState<RendererWorker | null>(
         null,
     );
@@ -12,7 +12,7 @@ export function useRenderWorker(onCreate: (worker: RendererWorker) => void) {
         );
 
         setRenderWorker(worker);
-        onCreate(worker);
+        worker.postMessage({ type: 'create' });
 
         return () => {
             worker.terminate();
