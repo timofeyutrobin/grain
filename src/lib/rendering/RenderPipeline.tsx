@@ -1,19 +1,7 @@
-import { RenderMode } from '@/lib/common';
-import {
-    ColorRenderer,
-    ColorRenderParameters,
-} from '@/lib/rendering/colorRenderer/ColorRenderer';
+import { ColorRenderer } from '@/lib/rendering/colorRenderer/ColorRenderer';
 import { createFullScreenQuad } from '@/lib/rendering/common';
-import {
-    GrainRenderer,
-    GrainRenderParameters,
-} from '@/lib/rendering/grainRenderer/GrainRenderer';
-
-export interface RenderParameters {
-    mode: RenderMode;
-    grain: GrainRenderParameters;
-    color: ColorRenderParameters;
-}
+import { GrainRenderer } from '@/lib/rendering/grainRenderer/GrainRenderer';
+import { RenderParameters } from '@/lib/rendering/types';
 
 export class RenderPipeline {
     private superSamplingScale: number = 1;

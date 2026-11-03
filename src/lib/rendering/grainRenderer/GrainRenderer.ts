@@ -6,29 +6,7 @@ import {
 } from '@/lib/rendering/common';
 import grainFragmentShader from '@/lib/rendering/grainRenderer/grain.frag';
 import grainVertexShader from '@/lib/rendering/grainRenderer/grain.vert';
-
-export interface Layer {
-    id: number;
-    contrast: number;
-    invertedSensitivity: number;
-    grainSize: number;
-    spawnRate: number;
-    alpha: number;
-    blurRadius: number;
-}
-
-export interface ColorParameters {
-    dye: Color;
-}
-
-export interface GrainRenderParameters {
-    layers: Layer[];
-    colorParameters?: {
-        r: ColorParameters;
-        g: ColorParameters;
-        b: ColorParameters;
-    } | null;
-}
+import { GrainRenderParameters, Layer } from '@/lib/rendering/types';
 
 type Seed = number[][];
 
@@ -37,10 +15,6 @@ enum Channel {
     r,
     g,
     b,
-}
-
-export interface GrainRendererOptions {
-    enableTiles?: boolean;
 }
 
 const defaultGrayscaleValue: Color = { r: 220, g: 220, b: 220 };

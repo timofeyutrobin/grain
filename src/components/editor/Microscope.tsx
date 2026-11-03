@@ -1,9 +1,7 @@
 import { isError, PropsWithClassName } from '@/lib/common';
 import { getLut } from '@/lib/lutService';
-import {
-    RenderParameters,
-    RenderPipeline,
-} from '@/lib/rendering/RenderPipeline';
+import { RenderPipeline } from '@/lib/rendering/RenderPipeline';
+import { RenderParameters } from '@/lib/rendering/types';
 import { useDB } from '@/lib/storage/useDB';
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';

@@ -15,10 +15,7 @@ import { isError, PREVIEW_SIZE } from '@/lib/common';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
-import {
-    RenderWorkerResponse,
-    type RendererWorker,
-} from '@/lib/rendering/rendererWorker';
+import { RenderWorkerResponse } from '@/lib/rendering/rendererWorker';
 import { useRenderWorker } from '@/lib/rendering/useRenderWorker';
 import { useDB } from '@/lib/storage/useDB';
 import classNames from 'classnames';
@@ -78,10 +75,6 @@ function Editor() {
     };
 
     useEffect(() => {
-        if (!renderWorker) {
-            return;
-        }
-
         const onMessage = (event: MessageEvent<RenderWorkerResponse>) => {
             switch (event.data.type) {
                 case 'ready': {
@@ -113,7 +106,6 @@ function Editor() {
     }, [renderWorker, database]);
 
     const setFile = async (
-        renderWorker: RendererWorker,
         file: File,
         onCreateImageBitmapError: () => void,
     ) => {
@@ -158,7 +150,7 @@ function Editor() {
         }
 
         setFileLoading(true);
-        await setFile(renderWorker, file, () =>
+        await setFile(file, () =>
             addToast({ text: 'Тип изображения не поддерживается' }),
         );
 
@@ -167,7 +159,7 @@ function Editor() {
     };
 
     useEffect(() => {
-        if (!renderWorker || !sampleImage || previewImage) {
+        if (!sampleImage || previewImage) {
             return;
         }
 
@@ -177,18 +169,9 @@ function Editor() {
             if (!originalFile) {
                 setPreviewImage(sampleImage);
             } else {
-                await setFile(renderWorker, originalFile, () =>
-                    setPreviewImage(sampleImage),
-                );
+                await setFile(originalFile, () => setPreviewImage(sampleImage));
             }
             setFileLoading(false);
-
-            const initialSettings = await database?.load('settings', 'latest');
-            if (initialSettings) {
-                settings.set(initialSettings);
-            } else {
-                settings.set();
-            }
 
             const resultBlob = await database?.load('image', 'result');
             if (!resultBlob) {
@@ -200,32 +183,12 @@ function Editor() {
     }, [renderWorker, sampleImage, database]);
 
     const handleDevelop = async () => {
-        if (
-            !renderWorker ||
-            !settings.hasAllSettingsParameters(settings) ||
-            !settings.renderParameters
-        ) {
-            return;
-        }
-
         setLoading(true);
         setControlPanelOpen(false);
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
 
-        database?.persist('settings', 'latest', {
-            mode: settings.mode,
-            contrast: settings.contrast,
-            sensitivity: settings.sensitivity,
-            grainSize: settings.grainSize,
-            grainCount: settings.grainCount,
-            sharpness: settings.sharpness,
-            redDyeColor: settings.redDyeColor,
-            greenDyeColor: settings.greenDyeColor,
-            blueDyeColor: settings.blueDyeColor,
-            temperature: settings.temperature,
-            tint: settings.tint,
-        });
+        database?.persist('settings', 'latest', settings.settingsParameters);
 
         renderWorker.postMessage({
             type: 'render',

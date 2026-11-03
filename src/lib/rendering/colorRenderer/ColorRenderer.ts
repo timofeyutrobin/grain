@@ -6,13 +6,7 @@ import {
     createShader,
     createTexture,
 } from '@/lib/rendering/common';
-
-export interface ColorRenderParameters {
-    temperature?: number;
-    tint?: number;
-    lutUrl: string;
-    lutFactor?: number;
-}
+import { ColorRenderParameters } from '@/lib/rendering/types';
 
 export class ColorRenderer {
     private program: WebGLProgram;

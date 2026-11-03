@@ -17,7 +17,7 @@ type Value<S extends Store, K extends Key<S>> = S extends 'image'
           : never
     : S extends 'settings'
       ? K extends 'latest'
-          ? Partial<SettingsParameters>
+          ? SettingsParameters
           : never
       : S extends 'lut'
         ? ImageBitmap
@@ -100,9 +100,11 @@ export function openDatabase(
         if (!request.result.objectStoreNames.contains('lut')) {
             request.result.createObjectStore('lut');
         }
-        if (!request.result.objectStoreNames.contains('settings')) {
-            request.result.createObjectStore('settings');
+
+        if (request.result.objectStoreNames.contains('settings')) {
+            request.result.deleteObjectStore('settings');
         }
+        request.result.createObjectStore('settings');
     };
 
     request.onsuccess = () => {

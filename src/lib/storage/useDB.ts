@@ -1,12 +1,16 @@
 import { use } from 'react';
 import { DatabaseWrapper, databaseWrapper, openDatabase } from './db';
 
-const serverDatabasePromise = Promise.resolve<UseDBResult>({ state: 'error' });
-let databasePromise: Promise<UseDBResult> | null = null;
+const serverDatabasePromise = Promise.resolve<DatabaseConnectionResult>({
+    state: 'error',
+});
+let databasePromise: Promise<DatabaseConnectionResult> | null = null;
 
-type UseDBResult = ({ state: 'ready' } & DatabaseWrapper) | { state: 'error' };
+export type DatabaseConnectionResult =
+    | ({ state: 'ready' } & DatabaseWrapper)
+    | { state: 'error' };
 
-function getDatabasePromise(): Promise<UseDBResult> {
+function getDatabasePromise(): Promise<DatabaseConnectionResult> {
     if (typeof window === 'undefined') {
         return serverDatabasePromise;
     }
@@ -27,6 +31,6 @@ function getDatabasePromise(): Promise<UseDBResult> {
     return databasePromise;
 }
 
-export function useDB(): UseDBResult {
+export function useDB(): DatabaseConnectionResult {
     return use(getDatabasePromise());
 }

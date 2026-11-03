@@ -4,10 +4,6 @@ export type Channel = 'r' | 'g' | 'b' | 'grayscale';
 
 export type Color = { r: number; g: number; b: number };
 
-export type NonNullableObject<T extends object> = {
-    [K in keyof T]: NonNullable<T[K]>;
-};
-
 export type Setter<T> = (value: T) => void;
 
 export type PropsWithClassName<T = {}> = { className?: string } & T;

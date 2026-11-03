@@ -3,13 +3,12 @@ import { Graph } from '@/components/editor/Graph';
 import { Microscope } from '@/components/editor/Microscope';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
 import { Channel, Color, PREVIEW_SIZE, PropsWithClassName } from '@/lib/common';
-import { Layer } from '@/lib/rendering/grainRenderer/GrainRenderer';
 import {
     averageGraphColor,
     getColorForLayer,
 } from '@/lib/rendering/graphRenderer/graphColors';
 import { GraphRenderParameters } from '@/lib/rendering/graphRenderer/GraphRenderer';
-import { RenderParameters } from '@/lib/rendering/RenderPipeline';
+import { Layer, RenderParameters } from '@/lib/rendering/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import React from 'react';
