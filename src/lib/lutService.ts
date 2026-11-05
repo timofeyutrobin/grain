@@ -5,23 +5,22 @@ export const lutNameToUrl: Record<string, string> = JSON.parse(
 );
 export const DEFAULT_LUT_NAME = 'kodak_portra_400_+';
 
-export async function getLut(
-    database: DatabaseWrapper | null,
-    url: string,
-): Promise<ImageBitmap> {
-    let lutImage = await database?.load('lut', url);
-    if (!lutImage) {
-        lutImage = await loadLutFromServer(url);
-        database?.persist('lut', url, lutImage);
-    }
-    return lutImage;
-}
-
-async function loadLutFromServer(url: string): Promise<ImageBitmap> {
+async function loadLutFromServer(url: string): Promise<Blob> {
     const res = await fetch(url);
     if (!res.ok) {
         throw new Error("Can't load LUT from server");
     }
-    const blob = await res.blob();
-    return createImageBitmap(blob);
+    return res.blob();
+}
+
+export async function getLut(
+    database: DatabaseWrapper | null,
+    url: string,
+): Promise<ImageBitmap> {
+    let lutImageBlob = await database?.load('lut', url);
+    if (!lutImageBlob) {
+        lutImageBlob = await loadLutFromServer(url);
+        database?.persist('lut', url, lutImageBlob);
+    }
+    return createImageBitmap(lutImageBlob);
 }

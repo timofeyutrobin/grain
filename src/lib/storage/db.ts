@@ -20,7 +20,7 @@ type Value<S extends Store, K extends Key<S>> = S extends 'image'
           ? SettingsParameters
           : never
       : S extends 'lut'
-        ? ImageBitmap
+        ? Blob
         : never;
 
 function persist<S extends Store, K extends Key<S>>(

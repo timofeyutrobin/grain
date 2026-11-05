@@ -43,6 +43,7 @@ export class GrainRenderer {
     private colorUniformLocation: WebGLUniformLocation | null;
     private channelUniformLocation: WebGLUniformLocation | null;
     private blurRadiusUniformLocation: WebGLUniformLocation | null;
+    private saturationUniformLocation: WebGLUniformLocation | null;
 
     constructor(private canvas: OffscreenCanvas) {
         const gl = canvas.getContext('webgl2');
@@ -93,6 +94,10 @@ export class GrainRenderer {
             program,
             'u_blurRadius',
         );
+        this.saturationUniformLocation = gl.getUniformLocation(
+            program,
+            'u_saturation',
+        );
 
         this.imageTextureUniformLocation = gl.getUniformLocation(
             program,
@@ -120,23 +125,28 @@ export class GrainRenderer {
             this.canvas.height,
         );
 
+        this.gl.uniform1f(
+            this.saturationUniformLocation,
+            params.colorParameters?.saturation ?? 0,
+        );
+
         if (params.colorParameters) {
             await this.renderLayers(
                 params.layers,
                 Channel.r,
-                params.colorParameters.r.dye,
+                params.colorParameters.dye.r,
                 seed,
             );
             await this.renderLayers(
                 params.layers,
                 Channel.g,
-                params.colorParameters.g.dye,
+                params.colorParameters.dye.g,
                 seed,
             );
             await this.renderLayers(
                 params.layers,
                 Channel.b,
-                params.colorParameters.b.dye,
+                params.colorParameters.dye.b,
                 seed,
             );
         } else {

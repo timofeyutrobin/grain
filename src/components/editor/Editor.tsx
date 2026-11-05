@@ -59,6 +59,12 @@ function Editor() {
         },
         [sampleImage],
     );
+    useEffect(
+        () => () => {
+            previewImage?.close();
+        },
+        [previewImage],
+    );
 
     const setResultImage = (image: ImageBitmap, blob: Blob) => {
         const canvas = resultCanvasRef.current;

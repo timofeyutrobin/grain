@@ -122,7 +122,8 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                             {renderParameters.grain.colorParameters ? (
                                 <div className="space-y-4">
                                     {Object.keys(
-                                        renderParameters.grain.colorParameters,
+                                        renderParameters.grain.colorParameters
+                                            .dye,
                                     ).map((channel) => (
                                         <Layers
                                             key={channel}
@@ -210,13 +211,13 @@ const Layers: React.FC<LayersProps> = ({
     channel,
 }) => {
     const style = {
-        r: 'border-2 border-red-700/50',
-        g: 'border-2 border-green-700/50',
-        b: 'border-2 border-blue-700/50',
-        grayscale: '',
+        r: 'border-red-700/50',
+        g: 'border-green-700/50',
+        b: 'border-blue-700/50',
+        grayscale: 'border-zinc-900',
     }[channel];
     return (
-        <div className={classNames('p-4 bg-zinc-900', style)}>
+        <div className={classNames('p-4 bg-zinc-900 border-2', style)}>
             {layers.map((layer, index) => (
                 <LayerParameters
                     key={layer.id}

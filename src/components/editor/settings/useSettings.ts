@@ -53,6 +53,13 @@ export const enum Tint {
     default = 0,
 }
 
+export const enum Saturation {
+    min = 0,
+    max = 1,
+    step = 0.05,
+    default = 0.8,
+}
+
 export const DEFAULT_COLORS = {
     red: { r: 255, g: 0, b: 0 },
     green: { r: 0, g: 255, b: 0 },
@@ -71,6 +78,7 @@ export interface SettingsParameters {
     blueDyeColor: Color;
     temperature: Temperature;
     tint: Tint;
+    saturation: Saturation;
     lutUrl: string;
     lutFactor: number;
 }
@@ -93,6 +101,7 @@ const DEFAULT_SETTINGS: SettingsParameters = {
     blueDyeColor: DEFAULT_COLORS.blue,
     temperature: Temperature.default,
     tint: Tint.default,
+    saturation: Saturation.default,
     lutUrl: lutNameToUrl[DEFAULT_LUT_NAME],
     lutFactor: 0.5,
 };
@@ -139,9 +148,12 @@ function createRenderParameters(
             colorParameters:
                 settings.mode === 'color'
                     ? {
-                          r: { dye: settings.redDyeColor },
-                          g: { dye: settings.greenDyeColor },
-                          b: { dye: settings.blueDyeColor },
+                          dye: {
+                              r: settings.redDyeColor,
+                              g: settings.greenDyeColor,
+                              b: settings.blueDyeColor,
+                          },
+                          saturation: settings.saturation,
                       }
                     : null,
         },

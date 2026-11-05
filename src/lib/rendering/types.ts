@@ -10,16 +10,15 @@ export interface Layer {
     blurRadius: number;
 }
 
-export interface ColorParameters {
-    dye: Color;
-}
-
 export interface GrainRenderParameters {
     layers: Layer[];
     colorParameters?: {
-        r: ColorParameters;
-        g: ColorParameters;
-        b: ColorParameters;
+        dye: {
+            r: Color;
+            g: Color;
+            b: Color;
+        };
+        saturation: number;
     } | null;
 }
 

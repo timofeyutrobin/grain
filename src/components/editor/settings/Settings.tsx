@@ -6,6 +6,7 @@ import {
     DEFAULT_COLORS,
     GrainCount,
     GrainSize,
+    Saturation,
     Sensitivity,
     SettingsData,
     Sharpness,
@@ -145,6 +146,18 @@ export const Settings: React.FC<SettingsProps> = ({
                                 update({ blueDyeColor })
                             }
                             defaultColor={DEFAULT_COLORS.blue}
+                        />
+                        <Range
+                            className="mt-4"
+                            id="saturation"
+                            label="Насыщенность"
+                            min={Saturation.min}
+                            max={Saturation.max}
+                            step={Saturation.step}
+                            value={settingsParameters.saturation}
+                            onChange={(saturation) => {
+                                update({ saturation });
+                            }}
                         />
                     </SettingsGroup>
                 </>
