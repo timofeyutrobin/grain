@@ -12,15 +12,12 @@ import { Intro } from '@/components/intro/Intro';
 import { Toaster } from '@/components/toast/Toaster';
 import { addToastAtom } from '@/components/toast/toasterAtom';
 import { isError, PREVIEW_SIZE } from '@/lib/common';
-import { useDB } from '@/lib/editor/useDB';
 import welcomeIntroStateAtom, {
     WelcomeIntroState,
 } from '@/lib/intro/storage/welcomeIntroStateAtom';
-import {
-    RenderWorkerResponse,
-    type RendererWorker,
-} from '@/lib/rendering/grainRenderer/rendererWorker';
-import { useRenderWorker } from '@/lib/rendering/grainRenderer/useRenderWorker';
+import { RenderWorkerResponse } from '@/lib/rendering/rendererWorker';
+import { useRenderWorker } from '@/lib/rendering/useRenderWorker';
+import { useDB } from '@/lib/storage/useDB';
 import classNames from 'classnames';
 import { useAtomValue, useSetAtom } from 'jotai';
 import dynamic from 'next/dynamic';
@@ -30,11 +27,15 @@ import { SampleImage } from './SampleImage';
 const FILE_UPLOAD_INPUT_ID = 'upload';
 
 function Editor() {
+    const databaseConnectionResult = useDB();
+    const database =
+        databaseConnectionResult.state === 'ready'
+            ? databaseConnectionResult
+            : null;
     const welcomeIntroState = useAtomValue(welcomeIntroStateAtom);
     const addToast = useSetAtom(addToastAtom);
-
-    const database = useDB();
     const settings = useSettings();
+    const renderWorker = useRenderWorker();
 
     const [controlPanelOpen, setControlPanelOpen] = useState(false);
     const [previewPanelOpen, setPreviewPanelOpen] = useState(false);
@@ -58,6 +59,12 @@ function Editor() {
         },
         [sampleImage],
     );
+    useEffect(
+        () => () => {
+            previewImage?.close();
+        },
+        [previewImage],
+    );
 
     const setResultImage = (image: ImageBitmap, blob: Blob) => {
         const canvas = resultCanvasRef.current;
@@ -73,15 +80,7 @@ function Editor() {
         setLoading(false);
     };
 
-    const renderWorker = useRenderWorker((worker) => {
-        worker.postMessage({ type: 'create' });
-    });
-
     useEffect(() => {
-        if (!renderWorker || !database) {
-            return;
-        }
-
         const onMessage = (event: MessageEvent<RenderWorkerResponse>) => {
             switch (event.data.type) {
                 case 'ready': {
@@ -89,7 +88,7 @@ function Editor() {
                     const image = event.data.imageBitmap;
 
                     setResultImage(image, blob);
-                    database.persistResultImage(blob);
+                    database?.persist('image', 'result', blob);
 
                     break;
                 }
@@ -112,31 +111,36 @@ function Editor() {
         };
     }, [renderWorker, database]);
 
-    const setFile = async (renderWorker: RendererWorker, file: File) => {
-        const image = await createImageBitmap(file, {
-            imageOrientation: 'flipY',
-        });
+    const setFile = async (
+        file: File,
+        onCreateImageBitmapError: () => void,
+    ) => {
+        try {
+            const image = await createImageBitmap(file);
 
-        const width = image.width;
-        const height = image.height;
+            const width = image.width;
+            const height = image.height;
 
-        const previewImageBitmap = await createImageBitmap(
-            file,
-            Math.max(width / 2 - PREVIEW_SIZE / 2, 0),
-            Math.max(height / 2 - PREVIEW_SIZE / 2, 0),
-            Math.min(PREVIEW_SIZE, width),
-            Math.min(PREVIEW_SIZE, height),
-            {
-                imageOrientation: 'flipY',
-                resizeWidth: PREVIEW_SIZE,
-                resizeHeight: PREVIEW_SIZE,
-            },
-        );
-
-        setPreviewImage(previewImageBitmap);
-        setFileName(file.name);
-        setImageSize([width, height]);
-        renderWorker.postMessage({ type: 'setImage', image }, [image]);
+            const previewImageBitmap = await createImageBitmap(
+                file,
+                Math.max(width / 2 - PREVIEW_SIZE / 2, 0),
+                Math.max(height / 2 - PREVIEW_SIZE / 2, 0),
+                Math.min(PREVIEW_SIZE, width),
+                Math.min(PREVIEW_SIZE, height),
+                {
+                    resizeWidth: PREVIEW_SIZE,
+                    resizeHeight: PREVIEW_SIZE,
+                },
+            );
+            setPreviewImage(previewImageBitmap);
+            setFileName(file.name);
+            setImageSize([width, height]);
+            renderWorker.postMessage({ type: 'setImage', image }, [image]);
+        } catch (error) {
+            if (error instanceof Error && error.name === 'InvalidStateError') {
+                onCreateImageBitmapError();
+            }
+        }
     };
 
     const handleFileChange: ChangeEventHandler<HTMLInputElement> = async (
@@ -151,56 +155,31 @@ function Editor() {
             return;
         }
 
-        try {
-            setFileLoading(true);
-            await setFile(renderWorker, file);
-            database?.persistOriginalFile(file);
-        } catch (error) {
-            if (error instanceof Error && error.name === 'InvalidStateError') {
-                addToast({ text: 'Тип изображения не поддерживается' });
-            }
-        } finally {
-            setFileLoading(false);
-        }
+        setFileLoading(true);
+        await setFile(file, () =>
+            addToast({ text: 'Тип изображения не поддерживается' }),
+        );
+
+        database?.persist('image', 'original', file);
+        setFileLoading(false);
     };
 
     useEffect(() => {
-        if (!renderWorker || !sampleImage || !database) {
-            return;
-        }
-
-        if (previewImage) {
+        if (!sampleImage || previewImage) {
             return;
         }
 
         (async () => {
-            try {
-                setFileLoading(true);
-                const originalFile = await database.loadOriginalFile();
-                if (!originalFile) {
-                    setPreviewImage(sampleImage);
-                } else {
-                    await setFile(renderWorker, originalFile);
-                }
-            } catch (error) {
-                if (
-                    error instanceof Error &&
-                    error.name === 'InvalidStateError'
-                ) {
-                    setPreviewImage(sampleImage);
-                }
-            } finally {
-                setFileLoading(false);
-            }
-
-            const initialSettings = await database.loadSettings();
-            if (initialSettings) {
-                settings.set(initialSettings);
+            setFileLoading(true);
+            const originalFile = await database?.load('image', 'original');
+            if (!originalFile) {
+                setPreviewImage(sampleImage);
             } else {
-                settings.setDefaults();
+                await setFile(originalFile, () => setPreviewImage(sampleImage));
             }
+            setFileLoading(false);
 
-            const resultBlob = await database.loadResultImage();
+            const resultBlob = await database?.load('image', 'result');
             if (!resultBlob) {
                 return;
             }
@@ -210,30 +189,12 @@ function Editor() {
     }, [renderWorker, sampleImage, database]);
 
     const handleDevelop = async () => {
-        if (
-            !renderWorker ||
-            !settings.hasAllSettingsParameters(settings) ||
-            !settings.renderParameters
-        ) {
-            return;
-        }
-
         setLoading(true);
         setControlPanelOpen(false);
         downloadUrl && URL.revokeObjectURL(downloadUrl);
         setDownloadUrl(null);
 
-        database?.persistSettings({
-            mode: settings.mode,
-            contrast: settings.contrast,
-            sensitivity: settings.sensitivity,
-            grainSize: settings.grainSize,
-            grainCount: settings.grainCount,
-            sharpness: settings.sharpness,
-            redDyeColor: settings.redDyeColor,
-            greenDyeColor: settings.greenDyeColor,
-            blueDyeColor: settings.blueDyeColor,
-        });
+        database?.persist('settings', 'latest', settings.settingsParameters);
 
         renderWorker.postMessage({
             type: 'render',
@@ -267,7 +228,7 @@ function Editor() {
                     secondary
                     title="Close"
                     onClick={() => {
-                        database?.deleteOriginalFile();
+                        database?.delete('image', 'original');
                         setFileName(null);
                         setImageSize(null);
                         setPreviewImage(sampleImage);
@@ -304,11 +265,7 @@ function Editor() {
                 width={PREVIEW_SIZE}
                 height={PREVIEW_SIZE}
                 onLoad={async (e) => {
-                    setSampleImage(
-                        await createImageBitmap(e.currentTarget, {
-                            imageOrientation: 'flipY',
-                        }),
-                    );
+                    setSampleImage(await createImageBitmap(e.currentTarget));
                 }}
             />
             <input
@@ -346,8 +303,8 @@ function Editor() {
                                     ?.transferFromImageBitmap(null);
                                 URL.revokeObjectURL(downloadUrl);
                                 setDownloadUrl(null);
-                                database?.deleteResultImage();
-                                database?.deleteSettings();
+                                database?.delete('image', 'result');
+                                database?.delete('settings', 'latest');
                             }}
                         >
                             Удалить

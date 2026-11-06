@@ -11,7 +11,7 @@ export const Logo: React.FC<PropsWithClassName> = ({ className }) => {
                 className,
             )}
         >
-            <div>
+            <div className="relative">
                 <Image
                     preload
                     loading="eager"
@@ -21,6 +21,9 @@ export const Logo: React.FC<PropsWithClassName> = ({ className }) => {
                     height={93}
                     unoptimized
                 />
+                <i className="absolute -bottom-4 -right-3 p-1 bg-green-600/80 text-sm text-zinc-300 not-italic uppercase">
+                    Beta
+                </i>
             </div>
             <WatchIntroButton className="ml-4 shrink-0" />
         </div>

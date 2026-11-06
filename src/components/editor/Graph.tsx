@@ -1,13 +1,15 @@
 import { PropsWithClassName } from '@/lib/common';
-import { GrainRenderParameters } from '@/lib/rendering/grainRenderer/GrainRenderer';
-import { GraphRenderer } from '@/lib/rendering/graphRenderer/GraphRenderer';
+import {
+    GraphRenderer,
+    GraphRenderParameters,
+} from '@/lib/rendering/graphRenderer/GraphRenderer';
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 
 interface GraphProps {
     width: number;
     height: number;
-    renderParameters: GrainRenderParameters | null;
+    renderParameters: GraphRenderParameters | null;
 }
 
 export const Graph: React.FC<PropsWithClassName<GraphProps>> = ({

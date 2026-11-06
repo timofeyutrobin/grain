@@ -1,57 +1,12 @@
-export type Channel = 'r' | 'g' | 'b' | 'grayscale';
-
 export type RenderMode = 'grayscale' | 'color';
 
+export type Channel = 'r' | 'g' | 'b' | 'grayscale';
+
 export type Color = { r: number; g: number; b: number };
-
-export type NonNullableObject<T extends object> = {
-    [K in keyof T]: NonNullable<T[K]>;
-};
-
-export const enum GrainSize {
-    min = 1,
-    max = 3,
-    step = 1,
-    default = min,
-}
-
-export const enum GrainCount {
-    min = 1,
-    max = 3,
-    step = 1,
-    default = max,
-}
-
-export const enum Sharpness {
-    min = 1,
-    max = 16,
-    step = 5,
-    default = 11,
-}
-
-export const enum Contrast {
-    min = 0.3,
-    max = 0.9,
-    step = 0.2,
-    default = 0.5,
-}
-
-export const enum Sensitivity {
-    min = 0.5,
-    max = 1.5,
-    step = 0.5,
-    default = 1,
-}
 
 export type Setter<T> = (value: T) => void;
 
 export type PropsWithClassName<T = {}> = { className?: string } & T;
-
-export const DEFAULT_COLORS = {
-    red: { r: 200, g: 30, b: 30 },
-    green: { r: 30, g: 200, b: 30 },
-    blue: { r: 30, g: 30, b: 200 },
-} as const;
 
 export const PREVIEW_SIZE = 240;
 

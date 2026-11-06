@@ -1,7 +1,11 @@
+import { getLut } from '@/lib/lutService';
+import { RenderPipeline } from '@/lib/rendering/RenderPipeline';
+import { RenderParameters } from '@/lib/rendering/types';
 import {
-    GrainRenderer,
-    GrainRenderParameters,
-} from '@/lib/rendering/grainRenderer/GrainRenderer';
+    databaseWrapper,
+    DatabaseWrapper,
+    openDatabase,
+} from '@/lib/storage/db';
 
 export type RenderWorkerRequest =
     | {
@@ -13,7 +17,7 @@ export type RenderWorkerRequest =
       }
     | {
           type: 'render';
-          params: GrainRenderParameters;
+          params: RenderParameters;
       };
 
 export type RenderWorkerResponse =
@@ -49,9 +53,9 @@ export interface RendererWorker extends Omit<
 
 const ctx = self as unknown as RendererWorker;
 
-let renderer: GrainRenderer | null = null;
-let sourceCanvas: OffscreenCanvas = new OffscreenCanvas(0, 0);
-let sourceCanvasCtx = sourceCanvas.getContext('2d');
+let renderer: RenderPipeline | null = null;
+let sourceImage: ImageBitmap | null = null;
+let database: DatabaseWrapper | null = null;
 
 ctx.addEventListener<RenderWorkerRequest>('message', async (event) => {
     switch (event.data.type) {
@@ -59,29 +63,29 @@ ctx.addEventListener<RenderWorkerRequest>('message', async (event) => {
             if (renderer) {
                 break;
             }
-            renderer = new GrainRenderer();
+            openDatabase((db) => {
+                database = databaseWrapper(db);
+                renderer = new RenderPipeline();
+            });
             break;
         }
         case 'setImage': {
-            if (!renderer || !sourceCanvasCtx) {
-                break;
-            }
-            sourceCanvas.width = event.data.image.width;
-            sourceCanvas.height = event.data.image.height;
-            sourceCanvasCtx.drawImage(event.data.image, 0, 0);
-            break;
-        }
-        case 'render': {
             if (!renderer) {
                 break;
             }
-            renderer.setResultCanvasSize(
-                sourceCanvas.width,
-                sourceCanvas.height,
-            );
+            sourceImage?.close();
+            sourceImage = event.data.image;
+            break;
+        }
+        case 'render': {
+            if (!renderer || !sourceImage) {
+                break;
+            }
             let imageBitmap: ImageBitmap | null = null;
+            let lut: ImageBitmap | null = null;
             try {
-                await renderer.render(sourceCanvas, event.data.params);
+                lut = await getLut(database, event.data.params.color.lutUrl);
+                await renderer.render(sourceImage, lut, event.data.params);
                 const blob = await renderer.getImageBlob();
                 imageBitmap = renderer.getImageBitmap();
                 postMessage(
@@ -91,6 +95,8 @@ ctx.addEventListener<RenderWorkerRequest>('message', async (event) => {
             } catch (error) {
                 imageBitmap?.close();
                 postMessage({ type: 'error', error });
+            } finally {
+                lut?.close();
             }
 
             break;

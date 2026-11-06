@@ -2,18 +2,19 @@ import { Button } from '@/components/button/Button';
 import { Graph } from '@/components/editor/Graph';
 import { Microscope } from '@/components/editor/Microscope';
 import { SettingsGroup } from '@/components/editor/settings/SettingsGroup';
-import { Color, PREVIEW_SIZE, PropsWithClassName } from '@/lib/common';
+import { Channel, Color, PREVIEW_SIZE, PropsWithClassName } from '@/lib/common';
 import {
-    GrainRenderParameters,
-    Layer,
-} from '@/lib/rendering/grainRenderer/GrainRenderer';
-import { getColorForLayer } from '@/lib/rendering/graphRenderer/graphColors';
+    averageGraphColor,
+    getColorForLayer,
+} from '@/lib/rendering/graphRenderer/graphColors';
+import { GraphRenderParameters } from '@/lib/rendering/graphRenderer/GraphRenderer';
+import { Layer, RenderParameters } from '@/lib/rendering/types';
 import classNames from 'classnames';
 import Image from 'next/image';
 import React from 'react';
 
 interface PreviewPanelProps {
-    renderParameters: GrainRenderParameters | null;
+    renderParameters: RenderParameters | null;
     image?: ImageBitmap | null;
     open?: boolean;
     toggleOpen: () => void;
@@ -28,6 +29,26 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
     toggleOpen,
     isOpenButtonHidden,
 }) => {
+    let graphRenderParameters: GraphRenderParameters | null = null;
+
+    if (renderParameters) {
+        const { sumContrast, sumInvertedSensitivity } =
+            renderParameters.grain.layers.reduce(
+                (sums, layer) => {
+                    sums.sumContrast += layer.contrast;
+                    sums.sumInvertedSensitivity += layer.invertedSensitivity;
+                    return sums;
+                },
+                { sumContrast: 0, sumInvertedSensitivity: 0 },
+            );
+        graphRenderParameters = {
+            ...renderParameters.grain,
+            avgContrast: sumContrast / renderParameters.grain.layers.length,
+            avgInvertedSensitivity:
+                sumInvertedSensitivity / renderParameters.grain.layers.length,
+        };
+    }
+
     return (
         <aside
             className={classNames(
@@ -87,10 +108,10 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                             className="m-auto border-l-2 border-b-2 border-stone-200"
                             width={240}
                             height={240}
-                            renderParameters={renderParameters}
+                            renderParameters={graphRenderParameters}
                         />
                     </section>
-                    {renderParameters && (
+                    {renderParameters && graphRenderParameters && (
                         <section className="mt-8 mb-2">
                             <header className="flex justify-between items-baseline mb-2 pb-2 border-b-1 border-zinc-500">
                                 <h2 className="font-semibold">Слои эмульсии</h2>
@@ -98,60 +119,38 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
                                     Размер зерна
                                 </i>
                             </header>
-                            {renderParameters.colorParameters ? (
-                                <>
-                                    <div className="p-4 bg-red-700/20">
-                                        {renderParameters.layers.map(
-                                            (layer, index) => (
-                                                <LayerParameters
-                                                    key={layer.id}
-                                                    layer={layer}
-                                                    color={getColorForLayer(
-                                                        index,
-                                                    )}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
-                                    <div className="mt-4 p-4 bg-green-700/20">
-                                        {renderParameters.layers.map(
-                                            (layer, index) => (
-                                                <LayerParameters
-                                                    key={layer.id}
-                                                    layer={layer}
-                                                    color={getColorForLayer(
-                                                        index,
-                                                    )}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
-                                    <div className="mt-4 p-4 bg-blue-700/20">
-                                        {renderParameters.layers.map(
-                                            (layer, index) => (
-                                                <LayerParameters
-                                                    key={layer.id}
-                                                    layer={layer}
-                                                    color={getColorForLayer(
-                                                        index,
-                                                    )}
-                                                />
-                                            ),
-                                        )}
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="p-4 bg-zinc-900">
-                                    {renderParameters.layers.map(
-                                        (layer, index) => (
-                                            <LayerParameters
-                                                key={layer.id}
-                                                layer={layer}
-                                                color={getColorForLayer(index)}
-                                            />
-                                        ),
-                                    )}
+                            {renderParameters.grain.colorParameters ? (
+                                <div className="space-y-4">
+                                    {Object.keys(
+                                        renderParameters.grain.colorParameters
+                                            .dye,
+                                    ).map((channel) => (
+                                        <Layers
+                                            key={channel}
+                                            channel={channel as Channel}
+                                            layers={
+                                                renderParameters.grain.layers
+                                            }
+                                            avgContrast={
+                                                graphRenderParameters.avgContrast
+                                            }
+                                            avgInvertedSensitivity={
+                                                graphRenderParameters.avgInvertedSensitivity
+                                            }
+                                        />
+                                    ))}
                                 </div>
+                            ) : (
+                                <Layers
+                                    channel="grayscale"
+                                    layers={renderParameters.grain.layers}
+                                    avgContrast={
+                                        graphRenderParameters.avgContrast
+                                    }
+                                    avgInvertedSensitivity={
+                                        graphRenderParameters.avgInvertedSensitivity
+                                    }
+                                />
                             )}
                         </section>
                     )}
@@ -167,24 +166,73 @@ export const PreviewPanel: React.FC<PropsWithClassName<PreviewPanelProps>> = ({
 };
 
 interface LayerParametersProps {
-    layer: Layer;
+    contrast: number;
+    invertedSensitivity: number;
     color: Color;
+    grainSize?: number;
 }
 
-const LayerParameters: React.FC<LayerParametersProps> = ({ layer, color }) => (
-    <div className="flex justify-between items-center">
+const LayerParameters: React.FC<LayerParametersProps> = ({
+    contrast,
+    invertedSensitivity,
+    color,
+    grainSize,
+}) => (
+    <div className="flex items-center gap-2">
         <span
-            className="inline-block w-1/4 h-[4px]"
+            className="shrink-0 w-1/4 h-[4px]"
             style={{
                 backgroundColor: `rgb(${color.r * 255},${color.g * 255},${color.b * 255})`,
             }}
         />
-        <i className="not-italic text-sm font-mono">
-            a = {layer.contrast.toFixed(2)}
+        <i className="flex-2 not-italic text-sm font-mono text-center">
+            a = {contrast.toFixed(2)}
         </i>
-        <i className="not-italic text-sm font-mono">
-            b = {layer.invertedSensitivity.toFixed(2)}
+        <i className="flex-2 not-italic text-sm font-mono text-center">
+            b = {invertedSensitivity.toFixed(2)}
         </i>
-        <i className="not-italic text-sm font-mono">{layer.grainSize}px</i>
+        <i className="flex-1 not-italic text-sm font-mono text-end">
+            {grainSize ? `${grainSize}px` : ''}
+        </i>
     </div>
 );
+
+interface LayersProps {
+    channel: Channel;
+    layers: Layer[];
+    avgContrast: number;
+    avgInvertedSensitivity: number;
+}
+
+const Layers: React.FC<LayersProps> = ({
+    layers,
+    avgContrast,
+    avgInvertedSensitivity,
+    channel,
+}) => {
+    const style = {
+        r: 'border-red-700/50',
+        g: 'border-green-700/50',
+        b: 'border-blue-700/50',
+        grayscale: 'border-zinc-900',
+    }[channel];
+    return (
+        <div className={classNames('p-4 bg-zinc-900 border-2', style)}>
+            {layers.map((layer, index) => (
+                <LayerParameters
+                    key={layer.id}
+                    contrast={layer.contrast}
+                    invertedSensitivity={layer.invertedSensitivity}
+                    grainSize={layer.grainSize}
+                    color={getColorForLayer(index)}
+                />
+            ))}
+            <p className="mt-2 text-sm text-zinc-300">Среднее:</p>
+            <LayerParameters
+                contrast={avgContrast}
+                invertedSensitivity={avgInvertedSensitivity}
+                color={averageGraphColor}
+            />
+        </div>
+    );
+};

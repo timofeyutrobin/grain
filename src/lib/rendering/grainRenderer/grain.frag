@@ -20,10 +20,7 @@ uniform uint u_seed;
 
 uniform vec3 u_color;
 uniform int u_channel;
-
-uniform vec2 u_currentTileOffset;
-uniform vec2 u_textureOverlapScale;
-uniform vec2 u_textureOverlapOffset;
+uniform float u_saturation;
 
 uniform float u_blurRadius;
 
@@ -67,7 +64,7 @@ float grainMask(float size, float dist) {
   return 1.0f - smoothstep(size * 0.7f, size, dist);
 }
 
-float grayScale(vec4 color) {
+float grayScale(vec3 color) {
   return dot(color.rgb, vec3(0.2126f, 0.7152f, 0.0722f));
 }
 
@@ -83,13 +80,14 @@ float isGrayscaleMode(int channel) {
 
 float grainExposure(vec2 textureUV, int channel) {
   vec4 image = textureLod(u_imageTexture, textureUV, 0.0f);
-  return isColorMode(channel) * image[channel] + isGrayscaleMode(channel) * grayScale(image);
+  return isColorMode(channel) * image[channel] + isGrayscaleMode(channel) * grayScale(image.rgb);
 }
 
 vec3 grainColor(float size, float dist) {
   float grainCenterDensity = smoothstep(size * 0.1f, size, dist);
+  vec3 colorWithSaturation = mix(vec3(grayScale(u_color)), u_color, u_saturation);
 
-  return u_color * (1.5f - grainCenterDensity);
+  return colorWithSaturation * (1.5f - grainCenterDensity);
 }
 
 void main() {
@@ -99,7 +97,7 @@ void main() {
 
   vec4 finalColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-  vec2 gridUV = (vUV + u_currentTileOffset) * gridSize;
+  vec2 gridUV = vUV * gridSize;
   vec2 currentTile = floor(gridUV);
 
   for(int x = -4; x <= 4; x++) {
@@ -112,8 +110,8 @@ void main() {
       vec2 randNormalized = vec2(rand) / float(uint(0xffffffff));
       vec2 rand2Normalized = vec2(rand2) / float(uint(0xffffffff));
 
-      vec2 grainCenter = targetTile + (randNormalized.xy - 0.5f) * GRAIN_SPREAD;
-      vec2 textureUV = ((grainCenter + (rand2Normalized - 0.5f) * u_blurRadius) / gridSize - u_currentTileOffset + u_textureOverlapOffset) * u_textureOverlapScale;
+      vec2 grainCenter = targetTile + (randNormalized - 0.5f) * GRAIN_SPREAD;
+      vec2 textureUV = (grainCenter + (rand2Normalized - 0.5f) * u_blurRadius) / gridSize;
 
       float size = baseGrainSize * ((randNormalized.x * 1.3f) + baseGrainSize);
       float dist = grainDistance(grainCenter, randNormalized, gridUV, aspectRatio);
